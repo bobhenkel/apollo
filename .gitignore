@@ -4,3 +4,8 @@
 .idea/modules.xml
 .idea/vcs.xml
 .idea/workspace.xml
+*.pyc
+*/*.pyc
+*/*/*.pyc
+apollo/apollo/*.pyc
+*.sqlite3

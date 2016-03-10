@@ -63,18 +63,18 @@ class DeploymentSerializer(serializers.ModelSerializer):
 class EnvironmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Environment
-        fields = ('name', 'geo_region', 'availability')
+        fields = ('name', 'geo_region', 'availability', 'marathon_master')
 
 
-class UserGroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserGroup
-        fields = ('name')
+        model = Group
+        fields = 'name'
 
 
 class PermissionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Permissions
+        model = Permission
         fields = ('service', 'user_group', 'can_deploy')
 
 
