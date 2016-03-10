@@ -1,5 +1,5 @@
 # apollo
-Apollo - The logz.io continiouse deployement solution over mesos
+Apollo - The logz.io continuous deployement solution over mesos
 
 ## Hacking prerequisites:
 ```
