@@ -23,7 +23,7 @@ class Service(models.Model):
     port_mappings = models.ManyToManyField(PortMappings, null=True)
     volumes = models.ManyToManyField(Volumes, null=True)
     environment_variable = models.ManyToManyField(EnvironmentVariable, null=True)
-    constraints = models.ManyToManyField(Constaints, null=True)
+    constraints = models.ManyToManyField(Constraints, null=True)
     labels = models.ManyToManyField(Labels, null=True)
     health_checks = models.ManyToManyField(HealthChecks, null=True)
 
@@ -57,7 +57,7 @@ class Labels(models.Model):
     value = models.CharField(max_length=300)
 
 
-class Constaints(models.Model):
+class Constraints(models.Model):
     attribute = models.CharField(max_length=200)
     operator = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
