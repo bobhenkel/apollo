@@ -18,7 +18,22 @@ from django.contrib import admin
 from rest_framework import routers
 from restapi import views
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
+router.register(r'user', views.UserViewSet)
+router.register(r'service', views.ServiceViewSet)
+router.register(r'health-check', views.HealthCheckViewSet)
+router.register(r'label', views.LabelViewSet)
+router.register(r'constraints', views.ConstraintViewSet)
+router.register(r'environment-variable', views.EnvironmentVariableViewSet)
+router.register(r'volume', views.VolumeViewSet)
+router.register(r'port-mapping', views.PortMappingViewSet)
+router.register(r'deployment', views.DeploymentViewSet)
+router.register(r'environment', views.EnvironmentViewSet)
+router.register(r'group', views.GroupViewSet)
+router.register(r'permission', views.PermissionViewSet)
+router.register(r'blocker', views.BlockerViewSet)
+router.register(r'notification', views.NotificationViewSet)
+router.register(r'watcher', views.WatcherViewSet)
+
 
 urlpatterns = [
     url(r'^', include(router.urls)),

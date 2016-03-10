@@ -21,12 +21,12 @@ class HealthChecks(models.Model):
     command = models.CharField(max_length=3000, null=True)
 
 
-class Labels(models.Model):
+class Label(models.Model):
     name = models.CharField(max_length=300)
     value = models.CharField(max_length=300)
 
 
-class Constraints(models.Model):
+class Constraint(models.Model):
     attribute = models.CharField(max_length=200)
     operator = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
@@ -37,7 +37,7 @@ class EnvironmentVariable(models.Model):
     value = models.CharField(max_length=300)
 
 
-class Volumes(models.Model):
+class Volume(models.Model):
     MODES = (
         ('ro', 'RO'),
         ('rw', 'RW')
@@ -48,7 +48,7 @@ class Volumes(models.Model):
     mode = models.CharField(max_length=2, choices=MODES)
 
 
-class PortMappings(models.Model):
+class PortMapping(models.Model):
     container_port = models.PositiveIntegerField(null=True)
     host_port = models.PositiveIntegerField(null=True)
     service_port = models.PositiveIntegerField(null=True)
@@ -110,11 +110,11 @@ class Service(models.Model):
 
     # Marathon related optional
     command = models.CharField(max_length=100, null=True)
-    port_mappings = models.ManyToManyField(PortMappings)
-    volumes = models.ManyToManyField(Volumes)
+    port_mappings = models.ManyToManyField(PortMapping)
+    volumes = models.ManyToManyField(Volume)
     environment_variable = models.ManyToManyField(EnvironmentVariable)
-    constraints = models.ManyToManyField(Constraints)
-    labels = models.ManyToManyField(Labels)
+    constraints = models.ManyToManyField(Constraint)
+    labels = models.ManyToManyField(Label)
     health_checks = models.ManyToManyField(HealthChecks)
 
     # Marathon related with defaults
@@ -129,7 +129,7 @@ class Deployment(models.Model):
     deployed_service = models.ForeignKey(Service)
     target_version = models.CharField(max_length=100)
     source_version = models.CharField(max_length=100)
-    initiate_by = models.ForeignKey(User)
+    initiated_by = models.ForeignKey(User)
 
 
 class Permission(models.Model):

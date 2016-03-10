@@ -9,3 +9,4 @@
 */*/*.pyc
 apollo/apollo/*.pyc
 *.sqlite3
+apollo/restapi/migrations/*

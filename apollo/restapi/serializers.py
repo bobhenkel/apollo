@@ -20,77 +20,77 @@ class ServiceSerializer(serializers.ModelSerializer):
 class HealthChecksSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthChecks
-        fields = ('protocol', 'path', 'grace_period_seconds', 'interval_seconds', 'port_index', 'port',
+        fields = ('id', 'protocol', 'path', 'grace_period_seconds', 'interval_seconds', 'port_index', 'port',
                   'timeout_seconds', 'max_consecutive_failures', 'command')
 
 
-class LabelsSerializer(serializers.ModelSerializer):
+class LabelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Labels
-        fields = ('name', 'value')
+        model = Label
+        fields = ('id', 'name', 'value')
 
 
-class ConstraintsSerializer(serializers.ModelSerializer):
+class ConstraintSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Constraints
-        fields = ('attribute', 'operator', 'value')
+        model = Constraint
+        fields = ('id', 'attribute', 'operator', 'value')
 
 
 class EnvironmentVariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = EnvironmentVariable
-        fields = ('name', 'value')
+        fields = ('id', 'name', 'value')
 
 
-class VolumesSerializer(serializers.ModelSerializer):
+class VolumeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Volumes
-        fields = ('container_path', 'host_path', 'mode')
+        model = Volume
+        fields = ('id', 'container_path', 'host_path', 'mode')
 
 
-class PortMappingsSerializer(serializers.ModelSerializer):
+class PortMappingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PortMappings
-        fields = ('container_port', 'host_port', 'service_port')
+        model = PortMapping
+        fields = ('id', 'container_port', 'host_port', 'service_port')
 
 
 class DeploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
-        fields = ('marathon_id', 'deployed_service', 'target_version', 'source_version', 'initiated_by')
+        fields = ('id', 'marathon_id', 'deployed_service', 'target_version', 'source_version', 'initiated_by')
 
 
 class EnvironmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Environment
-        fields = ('name', 'geo_region', 'availability', 'marathon_master')
+        fields = ('id', 'name', 'geo_region', 'availability', 'marathon_master')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = 'name'
+        fields = ('id', 'name')
 
 
-class PermissionsSerializer(serializers.ModelSerializer):
+class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        fields = ('service', 'user_group', 'can_deploy')
+        fields = ('id', 'service', 'user_group', 'can_deploy')
 
 
 class BlockerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blocker
-        fields = ('blocked_service', 'blocked_environment', 'blocked_user_group', 'description', 'created_by')
+        fields = ('id', 'blocked_service', 'blocked_environment', 'blocked_user_group', 'description', 'created_by')
 
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ('name','mailing_list','slack_channel', 'send_on')
+        fields = ('id', 'name', 'mailing_list','slack_channel', 'send_on')
 
 
 class WatcherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Watcher
-        fields = ('user', 'object_type', 'object_id', 'notifications')
+        fields = ('id', 'user', 'object_type', 'object_id', 'notifications')
