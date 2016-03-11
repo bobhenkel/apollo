@@ -99,7 +99,7 @@ class Service(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    notifications = models.ManyToManyField(Notification)
+    notifications = models.ManyToManyField(Notification, blank=True)
 
     # Marathon related
     number_of_instances = models.PositiveIntegerField()
@@ -110,12 +110,12 @@ class Service(models.Model):
 
     # Marathon related optional
     command = models.CharField(max_length=100, null=True)
-    port_mappings = models.ManyToManyField(PortMapping)
-    volumes = models.ManyToManyField(Volume)
-    environment_variable = models.ManyToManyField(EnvironmentVariable)
-    constraints = models.ManyToManyField(Constraint)
-    labels = models.ManyToManyField(Label)
-    health_checks = models.ManyToManyField(HealthChecks)
+    port_mappings = models.ManyToManyField(PortMapping, blank=True)
+    volumes = models.ManyToManyField(Volume, blank=True)
+    environment_variable = models.ManyToManyField(EnvironmentVariable, blank=True)
+    constraints = models.ManyToManyField(Constraint, blank=True)
+    labels = models.ManyToManyField(Label, blank=True)
+    health_checks = models.ManyToManyField(HealthChecks, blank=True)
 
     # Marathon related with defaults
     network_type = models.CharField(max_length=10, choices=NETWORK_TYPE, default=NETWORK_TYPE[0])
@@ -125,11 +125,20 @@ class Service(models.Model):
 
 
 class Deployment(models.Model):
+    DEPLOYMENT_STATUS = (
+        ('pending', 'PENDING'),
+        ('restart', 'RESTART'),
+        ('scale', 'SCALE'),
+        ('reverting', 'REVERT'),
+        ('done-success', 'DONE-SUCCESS'),
+        ('done-failed', 'DONE-FAIL'),
+    )
     marathon_id = models.CharField(max_length=100)
     deployed_service = models.ForeignKey(Service)
     target_version = models.CharField(max_length=100)
     source_version = models.CharField(max_length=100)
     initiated_by = models.ForeignKey(User)
+    deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
 
 
 class Permission(models.Model):

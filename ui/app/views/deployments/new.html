@@ -1,0 +1,51 @@
+<div>
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">New Deployment</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+    <div class="col-lg-12 col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading apollo-form-headline">
+                Select environment
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Region</th>
+                            <th>Availability</th>
+                            <th>Mesos Master</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="environment in allEnvironments"
+                            ng-click="setSelectedEnvironment(environment.id)"
+                            ng-class="{'active':environment.id == environmentIdSelected}">
+                            <td>{{environment.name}}</td>
+                            <td>{{environment.geo_region}}</td>
+                            <td>{{environment.availability}}</td>
+                            <td>{{environment.marathon_master}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <div class="pull-right">
+            <button type="button" class="btn btn-success btn-circle btn-lg apollo-flow-button"><i class="fa fa-arrow-right"></i> </button>
+        </div>
+    </div>
+
+    <div class="row">
+
+    </div>
+    <!-- /.row -->
+</div>

@@ -57,7 +57,8 @@ class PortMappingSerializer(serializers.ModelSerializer):
 class DeploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
-        fields = ('id', 'marathon_id', 'deployed_service', 'target_version', 'source_version', 'initiated_by')
+        fields = ('id', 'marathon_id', 'deployed_service', 'target_version', 'source_version',
+                  'initiated_by', 'deployment_status')
 
 
 class EnvironmentSerializer(serializers.ModelSerializer):

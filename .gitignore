@@ -10,3 +10,6 @@
 apollo/apollo/*.pyc
 *.sqlite3
 apollo/restapi/migrations/*
+.idea/compiler.xml
+.idea/uiDesigner.xml
+.idea/copyright/profiles_settings.xml
