@@ -13,6 +13,8 @@ angular
     'ui.router',
     'ui.bootstrap',
     'angular-loading-bar',
+    'ngAnimate',
+    'angular-growl'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     
@@ -34,7 +36,6 @@ angular
                     name:'apollo',
                     files:[
                     'scripts/directives/header/header.js',
-                    'scripts/directives/header/header-notification/header-notification.js',
                     'scripts/directives/sidebar/sidebar.js',
                     'scripts/directives/sidebar/sidebar-search/sidebar-search.js'
                     ]
@@ -95,6 +96,10 @@ angular
                 '/apollo/ui/bower_components/angular-chart.js/dist/angular-chart.min.js',
                 '/apollo/ui/bower_components/angular-chart.js/dist/angular-chart.css'
               ]
+            })
+            $ocLazyLoad.load({
+              name:'ngAnimate',
+              files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
             })
           }
         }
@@ -246,4 +251,11 @@ angular
 
   }]);
 
+
+angular
+  .module('apollo')
+  .config(['growlProvider', function(growlProvider) {
+    growlProvider.globalTimeToLive(3000);
+    growlProvider.globalReversedOrder(true);
+  }]);
     

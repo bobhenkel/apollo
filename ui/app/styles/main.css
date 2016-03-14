@@ -85,9 +85,48 @@ background-color: #eee;
 .apollo-flow-button {
 
   margin: 10px 10px 10px 10px;
+  outline: none;
 }
 
 .apollo-form-headline {
 
   font-weight: bold;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+
+/* Animation stuff */
+.panel {
+  overflow:hidden;
+}
+
+.animate-switch-container {
+    -webkit-transition: 200ms cubic-bezier(0.600, -0.280, 0.735, 0.045) all;
+    -moz-transition: 200ms cubic-bezier(0.600, -0.280, 0.735, 0.045) all;
+    -ms-transition: 200ms cubic-bezier(0.600, -0.280, 0.735, 0.045) all;
+    -o-transition: 200ms cubic-bezier(0.600, -0.280, 0.735, 0.045) all;
+    transition: 200ms cubic-bezier(0.600, -0.280, 0.735, 0.045) all;
+}
+
+.animate-switch-container.ng-enter {
+  left: 100%;
+  transition-delay: 200ms;
+}
+
+.animate-switch-container.ng-enter-active {
+  left: 0;
+
+}
+
+.animate-switch-container.ng-leave {
+
+  left: 0;
+}
+
+.animate-switch-container.ng-leave-active {
+  left: -100%;
+
 }

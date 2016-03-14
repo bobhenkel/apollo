@@ -20,8 +20,17 @@ function ApiService($q, $http){
         });
     };
 
+    var getAllServices = function() {
+        return $http.get(CONFIG.appUrl + 'service', {
+
+        });
+    };
+
+
+
     return {
       getAllUsers: getAllUsers,
-      getAllEnvironments: getAllEnvironments
+      getAllEnvironments: getAllEnvironments,
+      getAllServices: getAllServices
     };
 }

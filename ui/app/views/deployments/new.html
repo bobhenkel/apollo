@@ -1,51 +1,84 @@
 <div>
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-9">
             <h1 class="page-header">New Deployment</h1>
         </div>
-        <!-- /.col-lg-12 -->
+        <div class="col-lg-3 page-header">
+            <input class="form-control" placeholder="Search.." ng-model="globalSearch">
+        </div>
     </div>
 
-    <div class="col-lg-12 col-sm-12">
-        <div class="panel panel-default">
-            <div class="panel-heading apollo-form-headline">
-                Select environment
-            </div>
-            <!-- /.panel-heading -->
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Region</th>
-                            <th>Availability</th>
-                            <th>Mesos Master</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="environment in allEnvironments"
-                            ng-click="setSelectedEnvironment(environment.id)"
-                            ng-class="{'active':environment.id == environmentIdSelected}">
-                            <td>{{environment.name}}</td>
-                            <td>{{environment.geo_region}}</td>
-                            <td>{{environment.availability}}</td>
-                            <td>{{environment.marathon_master}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
+
+    <div class="row" ng-switch on="currentStep">
+
+        <!-- Environment chooser div -->
+        <div class="col-lg-12 col-sm-12 animate-switch-container" ng-switch-when="choose-environment">
+            <div class="panel panel-default">
+                <div class="panel-heading apollo-form-headline">
+                    Select environment
                 </div>
-                <!-- /.table-responsive -->
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Region</th>
+                                <th>Availability</th>
+                                <th>Mesos Master</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="environment in allEnvironments | filter:globalSearch"
+                                ng-click="setSelectedEnvironment(environment.id)"
+                                ng-class="{'active':environment.id == environmentIdSelected}">
+                                <td>{{environment.name}}</td>
+                                <td>{{environment.geo_region}}</td>
+                                <td>{{environment.availability}}</td>
+                                <td>{{environment.marathon_master}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <!-- /.panel-body -->
         </div>
-        <div class="pull-right">
-            <button type="button" class="btn btn-success btn-circle btn-lg apollo-flow-button"><i class="fa fa-arrow-right"></i> </button>
+
+
+        <!-- Service chooser div -->
+        <div class="col-lg-12 col-sm-12 animate-switch-container" ng-switch-when="choose-service">
+            <div class="panel panel-default">
+                <div class="panel-heading apollo-form-headline">
+                    Select service
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Image Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="service in allServices | filter:globalSearch"
+                                ng-click="setSelectedService(service.id)"
+                                ng-class="{'active':service.id == serviceIdSelected}">
+                                <td>{{service.name}}</td>
+                                <td>{{service.image_name}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-
+    <div class="pull-right">
+        <button type="button" class="btn btn-success btn-circle btn-lg apollo-flow-button" ng-click="nextStep()">
+            <i class="fa fa-arrow-right"></i>
+        </button>
     </div>
-    <!-- /.row -->
+
 </div>
