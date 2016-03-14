@@ -76,3 +76,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
 class WatcherViewSet(viewsets.ModelViewSet):
     queryset = Watcher.objects.all()
     serializer_class = WatcherSerializer
+
+
+class DeployableVersionViewSet(viewsets.ModelViewSet):
+    queryset = DeployableVersion.objects.all()
+    serializer_class = DeployableVersionSerializer

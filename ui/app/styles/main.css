@@ -93,6 +93,13 @@ background-color: #eee;
   font-weight: bold;
 }
 
+.apollo-committer-image {
+
+  width: 24px;
+  height: auto;
+  margin: 5px 5px 5px 5px;
+}
+
 .btn:focus {
   outline: none;
 }

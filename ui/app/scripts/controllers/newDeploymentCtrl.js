@@ -7,32 +7,37 @@
  * Controller of the apollo
  */
 angular.module('apollo')
-  .controller('newDeploymentCtrl', ['apolloApiService','$scope', '$timeout' ,'growl' ,function (apolloApiService, $scope, $timeout, growl) {
+  .controller('newDeploymentCtrl', ['apolloApiService', 'githubApiService', '$scope', '$timeout' ,'growl' ,
+            function (apolloApiService, githubApiService, $scope, $timeout, growl) {
 
         // Define the flow steps
-        var deploymentSteps = ["choose-environment", "choose-service"];
+        var deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
 
         // Define validation functions.. //TODO: something better?
-        var deploymentValidators = {"choose-environment" : validateEnvironment, "choose-service" : validateService};
+        var deploymentValidators = {"choose-environment" : validateEnvironment,
+                                    "choose-service" : validateService,
+                                    "choose-version" : validateVersion};
 
         // Scope variables
 		$scope.environmentIdSelected = null;
 		$scope.serviceIdSelected = null;
+		$scope.versionIdSelected = null;
 
 		$scope.currentStep = deploymentSteps[0];
 
 
-		// Change the environment table visual selection
+        // Scope setters
         $scope.setSelectedEnvironment = function (environmentIdSelected) {
            $scope.environmentIdSelected = environmentIdSelected;
         };
-
-        // Change the services table visual selection
         $scope.setSelectedService = function (serviceIdSelected) {
            $scope.serviceIdSelected = serviceIdSelected;
         };
+        $scope.setSelectedVersion = function (versionIdSelected) {
+                   $scope.versionIdSelected = versionIdSelected;
+        };
 
-
+        // Visual change the next step
         $scope.nextStep = function() {
 
             // First validate the input
@@ -40,7 +45,7 @@ angular.module('apollo')
 
                 // Get the current index
                 var currIndex = deploymentSteps.indexOf($scope.currentStep);
-    8
+
                 // Increment the index
                 currIndex++
 
@@ -73,6 +78,15 @@ angular.module('apollo')
             return true;
         }
 
+        function validateVersion() {
+
+            if ($scope.versionIdSelected == null) {
+                return false;
+            }
+            // TODO: add more checks here.. (service can get the version etc..)
+            return true;
+        }
+
         // Data fetching
 		apolloApiService.getAllEnvironments().then(function(response) {
 			$scope.allEnvironments = response.data;
@@ -82,4 +96,17 @@ angular.module('apollo')
         	$scope.allServices = response.data;
         });
 
+        apolloApiService.getAllDeployableVersions().then(function(response) {
+
+            $scope.allVersions = [];
+
+            for(var i=0; i < response.data.length; i++) {
+
+                githubApiService.getCommitDetails(response.data[i].github_repository_url,
+                                                  response.data[i].git_commit_sha).then(function(gitResponse){
+
+                                                    $scope.allVersions.push(gitResponse.data);
+                                                  });
+            }
+        });
 }]);

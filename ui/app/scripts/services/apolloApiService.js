@@ -26,11 +26,17 @@ function ApiService($q, $http){
         });
     };
 
+    var getAllDeployableVersions = function() {
+            return $http.get(CONFIG.appUrl + 'deployable-version/', {
+
+            });
+    };
 
 
     return {
       getAllUsers: getAllUsers,
       getAllEnvironments: getAllEnvironments,
-      getAllServices: getAllServices
+      getAllServices: getAllServices,
+      getAllDeployableVersions: getAllDeployableVersions
     };
 }

@@ -153,3 +153,9 @@ class Blocker(models.Model):
     blocked_user_group = models.ForeignKey(Group, null=True)
     description = models.CharField(max_length=1000)
     created_by = models.ForeignKey(User)
+
+
+class DeployableVersion(models.Model):
+    git_commit_sha = models.CharField(max_length=50)
+    github_repository_url = models.URLField()
+    related_service = models.ForeignKey(Service)

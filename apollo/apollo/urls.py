@@ -33,6 +33,7 @@ router.register(r'permission', views.PermissionViewSet)
 router.register(r'blocker', views.BlockerViewSet)
 router.register(r'notification', views.NotificationViewSet)
 router.register(r'watcher', views.WatcherViewSet)
+router.register(r'deployable-version', views.DeployableVersionViewSet)
 
 
 urlpatterns = [

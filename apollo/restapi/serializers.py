@@ -95,3 +95,9 @@ class WatcherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Watcher
         fields = ('id', 'user', 'object_type', 'object_id', 'notifications')
+
+
+class DeployableVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeployableVersion
+        fields = ('id', 'git_commit_sha', 'github_repository_url', 'related_service')
