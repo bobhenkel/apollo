@@ -7,5 +7,5 @@
  * Controller of the apollo
  */
 angular.module('apollo')
-  .controller('MainCtrl', function($scope,$position) {
+  .controller('MainCtrl', function($scope) {
   });
