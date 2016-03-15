@@ -14,7 +14,8 @@ angular
     'ui.bootstrap',
     'angular-loading-bar',
     'ngAnimate',
-    'angular-growl'
+    'angular-growl',
+    'angularSpinner'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     

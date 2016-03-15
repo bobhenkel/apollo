@@ -133,10 +133,11 @@ class Deployment(models.Model):
         ('done-success', 'DONE-SUCCESS'),
         ('done-failed', 'DONE-FAIL'),
     )
-    marathon_id = models.CharField(max_length=100)
+    marathon_id = models.CharField(max_length=100, null=True)
     deployed_service = models.ForeignKey(Service)
+    deployed_environment = models.ForeignKey(Environment)
     target_version = models.CharField(max_length=100)
-    source_version = models.CharField(max_length=100)
+    source_version = models.CharField(max_length=100, null=True)
     initiated_by = models.ForeignKey(User)
     deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
 

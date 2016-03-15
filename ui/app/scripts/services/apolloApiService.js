@@ -32,11 +32,22 @@ function ApiService($q, $http){
             });
     };
 
+    var createNewDeployment = function(targetVersion, deployedService, deployedEnvironment) {
+
+        return $http.post(CONFIG.appUrl + "deployment/", {
+
+            target_version: targetVersion,
+            deployed_service: deployedService,
+            deployed_environment: deployedEnvironment,
+            initiated_by: "0"
+        })
+    }
 
     return {
       getAllUsers: getAllUsers,
       getAllEnvironments: getAllEnvironments,
       getAllServices: getAllServices,
-      getAllDeployableVersions: getAllDeployableVersions
+      getAllDeployableVersions: getAllDeployableVersions,
+      createNewDeployment: createNewDeployment
     };
 }
