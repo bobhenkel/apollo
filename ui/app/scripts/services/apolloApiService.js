@@ -85,7 +85,15 @@ function ApiService($q, $http){
 
     var matchLabelToDeploymentStatus = function(deploymentStatus) {
 
-        
+        var statusToLable = {
+
+            "pending": "label-default",
+            "restart": "",
+            "scale": "",
+            "reverting", "",
+            "done-success", "",
+            "done-failed", ""
+        }
     };
 
 
