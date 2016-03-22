@@ -5,7 +5,37 @@
         </div>
         <!-- /.col-lg-12 -->
     </div>
-
+    <div class="col-lg-12 col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading apollo-form-headline">
+                Filters
+            </div>
+            <div class="panel-body">
+                <div class="col-lg-3 text-center" ng-model="globalSearch">
+                    <span class="apollo-form-headline">Service</span> <br>
+                    <select class="form-control">
+                        <option ng-repeat="service in allServices" value="{{service.id}}">{{service.name}}</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 text-center">
+                    <span class="apollo-form-headline">Environment</span> <br>
+                    <select class="form-control" ng-model="globalSearch">
+                        <option ng-repeat="environment in allEnvironments" value="{{environment.id}}">{{environment.name}}</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 text-center">
+                    <span class="apollo-form-headline">User</span> <br>
+                    <select class="form-control">
+                        <option ng-repeat="user in allUsers" value="{{user.email}}">{{user.email}}</option>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <span class="apollo-form-headline">Free Search</span> <br>
+                    <input class="form-control" placeholder="Search.." ng-model="globalSearch">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- /.panel -->
     <div class="row">
