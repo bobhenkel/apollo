@@ -32,6 +32,31 @@ function ApiService($q, $http){
             });
     };
 
+    var getAllRunningDeployments = function() {
+
+        return $http.get(CONFIG.appUrl + 'running-deployments', {
+
+        });
+    };
+
+    var getService = function(serviceId) {
+        return $http.get(CONFIG.appUrl + 'service/' + serviceId, {
+
+        });
+    };
+
+    var getEnvironment = function(environmentId) {
+        return $http.get(CONFIG.appUrl + 'environment/' + environmentId, {
+
+        });
+    };
+
+    var getUser = function(userId) {
+        return $http.get(CONFIG.appUrl + 'user/' + userId, {
+
+        });
+    };
+
     var createNewDeployment = function(targetVersion, deployedService, deployedEnvironment) {
 
         return $http.post(CONFIG.appUrl + "deployment/", {
@@ -39,15 +64,42 @@ function ApiService($q, $http){
             target_version: targetVersion,
             deployed_service: deployedService,
             deployed_environment: deployedEnvironment,
-            initiated_by: "0"
+            initiated_by: 2  // TODO: give the correct user id from signin
         })
-    }
+    };
+
+    var revertDeployment = function(deploymentId) {
+
+        return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId,{
+
+        });
+    };
+
+    var getDeploymentLogs = function(deploymentId) {
+
+        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs" ,{
+
+        });
+    };
+
+
+    var matchLabelToDeploymentStatus = function(deploymentStatus) {
+
+        
+    };
+
 
     return {
       getAllUsers: getAllUsers,
       getAllEnvironments: getAllEnvironments,
       getAllServices: getAllServices,
       getAllDeployableVersions: getAllDeployableVersions,
-      createNewDeployment: createNewDeployment
+      createNewDeployment: createNewDeployment,
+      getAllRunningDeployments: getAllRunningDeployments,
+      getService: getService,
+      getEnvironment: getEnvironment,
+      getUser: getUser,
+      revertDeployment: revertDeployment,
+      getDeploymentLogs: getDeploymentLogs
     };
 }

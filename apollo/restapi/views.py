@@ -1,7 +1,9 @@
 from rest_framework import viewsets
 from serializers import *
 from models import *
-
+from django.db.models import Q
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -47,6 +49,10 @@ class DeploymentViewSet(viewsets.ModelViewSet):
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
 
+    @detail_route()
+    def logs(self, request, pk=None):
+        return Response("Aaaaass")
+
 
 class EnvironmentViewSet(viewsets.ModelViewSet):
     queryset = Environment.objects.all()
@@ -81,3 +87,9 @@ class WatcherViewSet(viewsets.ModelViewSet):
 class DeployableVersionViewSet(viewsets.ModelViewSet):
     queryset = DeployableVersion.objects.all()
     serializer_class = DeployableVersionSerializer
+
+
+# TODO: Change from hard-coded values
+class RunningDeploymentsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Deployment.objects.filter(~Q(deployment_status="done-success") & ~Q(deployment_status="done-failed"))
+    serializer_class = DeploymentSerializer

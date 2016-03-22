@@ -15,7 +15,8 @@ angular
     'angular-loading-bar',
     'ngAnimate',
     'angular-growl',
-    'angularSpinner'
+    'angularSpinner',
+    'ngSanitize'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     
@@ -124,11 +125,37 @@ angular
     })
       .state('deployments.ongoing',{
         templateUrl:'views/deployments/ongoing.html',
-        url:'/ongoing'
+        controller: 'ongoingDeploymentCtrl',
+        url:'/ongoing?deploymentId',
+        resolve: {
+                  loadMyFiles:function($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                      name:'apollo',
+                      files:[
+                      'scripts/services/apolloApiService.js',
+                      'scripts/services/githubApiService.js',
+                      'scripts/controllers/ongoingDeploymentCtrl.js'
+                      ]
+                    })
+                  }
+                }
     })
       .state('deployments.history',{
             templateUrl:'views/deployments/history.html',
-            url:'/history'
+            controller: 'deploymentHistoryCtrl',
+            url:'/history',
+            resolve: {
+                      loadMyFiles:function($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                          name:'apollo',
+                          files:[
+                          'scripts/services/apolloApiService.js',
+                          'scripts/services/githubApiService.js',
+                          'scripts/controllers/deploymentHistoryCtrl.js'
+                          ]
+                        })
+                      }
+                    }
     })
 
     $stateProvider
@@ -260,4 +287,4 @@ angular
     growlProvider.globalTimeToLive(3000);
     growlProvider.globalReversedOrder(true);
   }]);
-    
+

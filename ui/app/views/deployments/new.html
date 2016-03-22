@@ -98,7 +98,7 @@
                                 <td>{{version.commit.author.date | date:'dd/MM/yy H:mm:ss'}}</td>
                                 <td><a href="{{version.html_url}}">{{version.sha | limitTo: 7}}</a></td>
                                 <td>{{version.commit.message}}</td>
-                                <td><span><img class="apollo-committer-image" ng-if="version.author" src="{{version.author.avatar_url}}">{{version.author.login}}</span></td>
+                                <td><span><img class="apollo-committer-image" ng-src="{{version.author.avatar_url}}">{{version.author.login}}</span></td>
                             </tr>
                             </tbody>
                         </table>
@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <div class="col-lg-12 col-sm-12 animate-switch-containe" ng-switch-when="confirmation">
+        <div class="col-lg-12 col-sm-12 animate-switch-container" ng-switch-when="confirmation">
 
             <div class="well">
                 <h4>So just making sure</h4>
