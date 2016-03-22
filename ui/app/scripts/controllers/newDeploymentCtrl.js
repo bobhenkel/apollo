@@ -1,15 +1,9 @@
 'use strict';
-/**
- * @ngdoc function
- * @name apollo.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the apollo
- */
+
 angular.module('apollo')
   .controller('newDeploymentCtrl', ['apolloApiService', 'githubApiService', '$scope',
-                                    '$timeout' ,'growl', 'usSpinnerService',
-            function (apolloApiService, githubApiService, $scope, $timeout, growl, usSpinnerService) {
+                                    '$timeout' , '$state', 'growl', 'usSpinnerService',
+            function (apolloApiService, githubApiService, $scope, $timeout, $state, growl, usSpinnerService) {
 
         // Define the flow steps
         var deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
@@ -89,14 +83,20 @@ angular.module('apollo')
                         // End spinner
                         usSpinnerService.stop('deployment-spinner');
 
+                        // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
+                        // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
+                        $('#confirm-modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+
                         // Redirect user to ongoing deployments
-                        $location.path('deployments.ongoing');
+                        $state.go('deployments.ongoing', {deploymentId: response.data.id});
 
                     }, function(error) {
 
                         // End spinner
                         usSpinnerService.stop('deployment-spinner');
-                        growl.error("Got error from apollo API: " + error.data)
+                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
                     });
         }
 
@@ -140,11 +140,10 @@ angular.module('apollo')
             $scope.allVersions = [];
 
             for(var i=0; i < response.data.length; i++) {
-
                 githubApiService.getCommitDetails(response.data[i].github_repository_url,
                                                   response.data[i].git_commit_sha).then(function(gitResponse){
-
                                                     $scope.allVersions.push(gitResponse.data);
+                                                    $scope.allVersions.sort(function(a, b) { return new Date(b.commit.author.date) - new Date(a.commit.author.date) });
                                                   });
             }
         });
