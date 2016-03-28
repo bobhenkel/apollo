@@ -1,18 +1,104 @@
 <div>
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-9">
             <h1 class="page-header">Ongoing Deployments</h1>
         </div>
-        <!-- /.col-lg-12 -->
+    </div>
+
+    <span us-spinner="{radius:30, width:8, length: 16}" spinner-key="ongoing-spinner"></span>
+    <div class="col-lg-12 col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading apollo-form-headline">
+                Running Deployments
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Marathon ID</th>
+                            <th>Service</th>
+                            <th>Environment</th>
+                            <th>Initiated By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="deployment in allRunningDeployments | filter:globalSearch"
+                            ng-class="{'my-deployment':deployment.id == deploymentId}">
+                            <td>{{deployment.marathon_id}}</td>
+                            <td>{{allServices[deployment.deployed_service].name}}</td>
+                            <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
+                            <td>{{allUsers[deployment.initiated_by].email}}</td>
+                            <td><span class="label" ng-class="getLabel(deployment.deployment_status)">{{deployment.deployment_status}}</span></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
+                                        ng-click="setSelectedDeployment(deployment) ; getLogs()"
+                                        data-toggle="modal" data-target="#show-logs">
+                                    <i class="fa fa-file-text-o"></i>
+                                </button>
+                                <button type="button" class="btn btn-info btn-circle" uib-tooltip="View In Marathon"
+                                        ng-click="setSelectedDeployment(deployment)">
+                                    <i class="fa fa-binoculars"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
+                                        ng-click="setSelectedDeployment(deployment)"
+                                        data-toggle="modal" data-target="#confirm-revert"
+                                        ng-class="getRevertClass(deployment.deployment_status)"
+                                        ng-disabled="isRevertDisabledBasedOnStatus(deployment.deployment_status)">
+                                    <i class="fa fa-undo"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 
-    <!-- /.panel -->
-    <div class="row">
-
+    <div class="modal fade" id="confirm-revert" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Sure?</h4>
+                </div>
+                <div class="modal-body">
+                    This will revert your deployment. <br>
+                    All of the docker will return to their previous state. <br>
+                    If you want to, you will need to deploy again. <b>No way back from here.</b> <br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="revert()">Revert!</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row">
 
+    <div class="modal fade" id="show-logs" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" ng-click="stopLogs()" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Logs from container</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <pre class="apollo-logs">
+<!-- Not identing since it will also ident what inside the code block-->
+<code ng-bind-html="dockerLogs">
+</code>
+                        </pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogs()">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- /.row -->
 </div>
