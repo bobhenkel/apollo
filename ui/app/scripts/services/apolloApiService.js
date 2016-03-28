@@ -85,8 +85,28 @@ function ApiService($q, $http){
 
     var matchLabelToDeploymentStatus = function(deploymentStatus) {
 
-        
+        var statusToLable = {
+
+            "pending": "label-default",
+            "restart": "label-primary",
+            "scale": "label-primary",
+            "reverting": "label-warning",
+            "done-success": "label-success",
+            "done-failed": "label-danger"
+        }
+
+        return statusToLable[deploymentStatus]
     };
+
+    var isRevertDisabledBasedOnStatus = function(deploymentStatus) {
+
+        if (deploymentStatus == "done-success" || deploymentStatus == "done-failed") {
+
+            return true;
+        }
+
+        return false;
+    }
 
 
     return {
@@ -100,6 +120,8 @@ function ApiService($q, $http){
       getEnvironment: getEnvironment,
       getUser: getUser,
       revertDeployment: revertDeployment,
-      getDeploymentLogs: getDeploymentLogs
+      getDeploymentLogs: getDeploymentLogs,
+      matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
+      isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus
     };
 }

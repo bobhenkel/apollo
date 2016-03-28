@@ -140,6 +140,8 @@ class Deployment(models.Model):
     source_version = models.CharField(max_length=100, null=True)
     initiated_by = models.ForeignKey(User)
     deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
+    started_at = models.DateTimeField(auto_now_add=True)  # Add timestamp only on object creation
+    last_updated = models.DateTimeField(auto_now=True)  # Add timestamp each update
 
 
 class Permission(models.Model):
