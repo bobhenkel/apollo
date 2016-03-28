@@ -31,7 +31,7 @@
                             <td>{{allServices[deployment.deployed_service].name}}</td>
                             <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
                             <td>{{allUsers[deployment.initiated_by].email}}</td>
-                            <td><span class="label label-default">{{deployment.deployment_status}}</span></td>
+                            <td><span class="label" ng-class="getLabel(deployment.deployment_status)">{{deployment.deployment_status}}</span></td>
                             <td>
                                 <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
                                         ng-click="setSelectedDeployment(deployment) ; getLogs()"
@@ -44,7 +44,9 @@
                                 </button>
                                 <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
                                         ng-click="setSelectedDeployment(deployment)"
-                                        data-toggle="modal" data-target="#confirm-revert">
+                                        data-toggle="modal" data-target="#confirm-revert"
+                                        ng-class="getRevertClass(deployment.deployment_status)"
+                                        ng-disabled="isRevertDisabledBasedOnStatus(deployment.deployment_status)">
                                     <i class="fa fa-undo"></i>
                                 </button>
                             </td>

@@ -58,7 +58,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
         fields = ('id', 'marathon_id', 'deployed_service', 'deployed_environment', 'target_version', 'source_version',
-                  'initiated_by', 'deployment_status')
+                  'initiated_by', 'deployment_status', 'started_at', 'last_updated')
 
 
 class EnvironmentSerializer(serializers.ModelSerializer):

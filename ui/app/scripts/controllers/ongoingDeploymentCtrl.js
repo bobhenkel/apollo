@@ -51,6 +51,27 @@ angular.module('apollo')
                     });
                 }
 
+                $scope.getLabel = function(deploymentStatus) {
+
+                    return apolloApiService.matchLabelToDeploymentStatus(deploymentStatus);
+                }
+
+                $scope.getRevertClass = function(deploymentStatus) {
+
+                    if (apolloApiService.isRevertDisabledBasedOnStatus(deploymentStatus)) {
+
+                        return "disabled";
+                    }
+
+                    return "";
+                }
+
+                $scope.isRevertDisabledBasedOnStatus = function(deploymentStatus) {
+
+                    return apolloApiService.isRevertDisabledBasedOnStatus(deploymentStatus);
+                }
+
+
                 // Data fetching
                 apolloApiService.getAllEnvironments().then(function(response) {
 
