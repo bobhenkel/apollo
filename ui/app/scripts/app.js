@@ -16,7 +16,8 @@ angular
     'ngAnimate',
     'angular-growl',
     'angularSpinner',
-    'ngSanitize'
+    'ngSanitize',
+    'angular.filter'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     

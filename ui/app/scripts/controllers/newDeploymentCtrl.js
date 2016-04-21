@@ -77,7 +77,7 @@ angular.module('apollo')
             usSpinnerService.spin('deployment-spinner')
 
             // Now we can deploy
-            apolloApiService.createNewDeployment($scope.versionSelected.sha,
+            apolloApiService.createNewDeployment($scope.versionSelected.sha, $scope.versionSelected.id,
                     $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
 
                         // End spinner

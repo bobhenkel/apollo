@@ -124,6 +124,12 @@ class Service(models.Model):
     upgrade_maximum_over_capacity = models.FloatField(default=1)
 
 
+class DeployableVersion(models.Model):
+    git_commit_sha = models.CharField(max_length=50)
+    github_repository_url = models.URLField()
+    related_service = models.ForeignKey(Service)
+
+
 class Deployment(models.Model):
     DEPLOYMENT_STATUS = (
         ('pending', 'PENDING'),
@@ -140,6 +146,7 @@ class Deployment(models.Model):
     source_version = models.CharField(max_length=100, null=True)
     initiated_by = models.ForeignKey(User)
     deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
+    deployable_version = models.ForeignKey(DeployableVersion)
     started_at = models.DateTimeField(auto_now_add=True)  # Add timestamp only on object creation
     last_updated = models.DateTimeField(auto_now=True)  # Add timestamp each update
 
@@ -156,9 +163,3 @@ class Blocker(models.Model):
     blocked_user_group = models.ForeignKey(Group, null=True)
     description = models.CharField(max_length=1000)
     created_by = models.ForeignKey(User)
-
-
-class DeployableVersion(models.Model):
-    git_commit_sha = models.CharField(max_length=50)
-    github_repository_url = models.URLField()
-    related_service = models.ForeignKey(Service)
