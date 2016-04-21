@@ -101,13 +101,28 @@ background-color: #eee;
 }
 
 .btn:focus {
+
   outline: none;
 }
-
 
 .apollo-logs {
 
   height: 200px;
+}
+
+.apollo-clear-filter {
+
+    margin-top: -5px;
+}
+
+.apollo-filter {
+
+    text-align-last:center;
+}
+
+#page-wrapper {
+
+    overflow: hidden;
 }
 
 /* Animation stuff */

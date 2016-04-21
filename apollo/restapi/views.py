@@ -93,7 +93,7 @@ class DeployableVersionViewSet(viewsets.ModelViewSet):
 
 # TODO: Change from hard-coded values
 class RunningDeploymentsViewSet(viewsets.ReadOnlyModelViewSet):
-    time_threshold = datetime.now() - timedelta(hours=1)
+    time_threshold = datetime.now() - timedelta(minutes=60)
     queryset = Deployment.objects.filter((~Q(deployment_status="done-success") &
                                          ~Q(deployment_status="done-failed")) |
                                          Q(last_updated__gt=time_threshold))

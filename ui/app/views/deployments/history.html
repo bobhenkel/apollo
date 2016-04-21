@@ -9,40 +9,144 @@
         <div class="panel panel-default">
             <div class="panel-heading apollo-form-headline">
                 Filters
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default btn-circle apollo-clear-filter" uib-tooltip="Clear filters" ng-click="clearFilters()">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </div>
             </div>
             <div class="panel-body">
-                <div class="col-lg-3 text-center" ng-model="globalSearch">
+                <div class="col-lg-3 text-center" >
                     <span class="apollo-form-headline">Service</span> <br>
-                    <select class="form-control">
-                        <option ng-repeat="service in allServices" value="{{service.id}}">{{service.name}}</option>
+                    <select class="form-control apollo-filter" ng-model="serviceSearch" ng-options="service.name for service in allServices">
+                        <option value="">-- choose service --</option>
                     </select>
                 </div>
                 <div class="col-lg-3 text-center">
                     <span class="apollo-form-headline">Environment</span> <br>
-                    <select class="form-control" ng-model="globalSearch">
-                        <option ng-repeat="environment in allEnvironments" value="{{environment.id}}">{{environment.name}}</option>
+                    <select class="form-control apollo-filter" ng-model="environmentSearch" ng-options="environment.name for environment in allEnvironments">
+                        <option value="">-- choose environment --</option>
                     </select>
                 </div>
                 <div class="col-lg-3 text-center">
                     <span class="apollo-form-headline">User</span> <br>
-                    <select class="form-control">
-                        <option ng-repeat="user in allUsers" value="{{user.email}}">{{user.email}}</option>
+                    <select class="form-control apollo-filter" ng-model="userSearch" ng-options="user.email for user in allUsers">
+                        <option value="">-- choose user --</option>
                     </select>
                 </div>
-                <div class="col-lg-3">
-                    <span class="apollo-form-headline">Free Search</span> <br>
-                    <input class="form-control" placeholder="Search.." ng-model="globalSearch">
+                <div class="col-lg-3 text-center">
+                    <span class="apollo-form-headline">Status</span> <br>
+                    <select class="form-control apollo-filter" ng-model="statusSearch">
+                        <option value="" selected>-- choose status --</option>
+                        <option ng-repeat="deployment in allDeployments | unique: 'deployment_status'" value="{{deployment.deployment_status}}">{{deployment.deployment_status}}</option>
+                    </select>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- /.panel -->
-    <div class="row">
 
+    <div class="col-lg-12 col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading apollo-form-headline">
+                Past & Current Deployments
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Time</th>
+                            <th>Service</th>
+                            <th>Environment</th>
+                            <th>Initiated By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="deployment in allDeployments | filter:{deployment_status: statusSearch} |
+                                                                          filter:{deployed_service: serviceSearch.id} |
+                                                                          filter:{deployed_environment: environmentSearch.id} |
+                                                                          filter:{initiated_by: userSearch.id}">
+                            <td>{{deployment.id}}</td>
+                            <td>{{deployment.started_at | date:'dd/MM/yy H:mm:ss'}}</td>
+                            <td>{{allServices[deployment.deployed_service].name}}</td>
+                            <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
+                            <td>{{allUsers[deployment.initiated_by].email}}</td>
+                            <td><span class="label" ng-class="getLabel(deployment.deployment_status)">{{deployment.deployment_status}}</span></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-circle" uib-tooltip="Details"
+                                        ng-click="setSelectedDeployment(deployment); showDetails()"
+                                        data-toggle="modal" data-target="#show-details">
+                                    <i class="fa fa-info"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Back to this version"
+                                        ng-click="setSelectedDeployment(deployment)"
+                                        data-toggle="modal" data-target="#confirm-revert">
+                                    <i class="fa fa-undo"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row">
 
+
+    <div class="modal fade" id="confirm-revert" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Sure?</h4>
+                </div>
+                <div class="modal-body">
+                    This will revert the current version to that version. <br>
+                    <b>THIS CAN SERIOUSLY BREAK THINGS!</b> <br>
+                    Please, be <b>100% sure</b> that this is what you want to do, <br>
+                    and double check with at least 2 people that this is really, <b>really</b> what you want to do.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="revert()">
+                        Im 100% sure, and i know it can break everything!
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- /.row -->
+
+    <div class="modal fade" id="show-details" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Deployment Details</h4>
+                </div>
+                <div class="modal-body">
+                    <span us-spinner="{radius:30, width:8, length: 16}" spinner-key="details-spinner"></span>
+                    <table class="table">
+                        <tr>
+                            <td>Commit Sha</td><td><a href="{{githubResponse.html_url}}">{{githubResponse.sha | limitTo: 7}}</td>
+                        </tr>
+                        <tr>
+                            <td>Commit Author</td><td><img class="apollo-committer-image" ng-src="{{githubResponse.author.avatar_url}}">{{githubResponse.author.login}}</td>
+                        </tr>
+                        <tr>
+                            <td>Commit Message</td><td>{{githubResponse.commit.message}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
