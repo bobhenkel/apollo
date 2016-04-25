@@ -212,7 +212,20 @@ angular
         })
       .state('service.status',{
             templateUrl:'views/service/status.html',
-            url:'/status'
+            controller: 'serviceVersionStatusCtrl',
+            url:'/status',
+            resolve: {
+                      loadMyFiles:function($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                          name:'apollo',
+                          files:[
+                          'scripts/services/apolloApiService.js',
+                          'scripts/services/githubApiService.js',
+                          'scripts/controllers/serviceVersionStatusCtrl.js'
+                          ]
+                        })
+                      }
+                    }
     })
       .state('service.configure',{
             templateUrl:'views/service/configure.html',

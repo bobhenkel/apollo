@@ -77,7 +77,7 @@ angular.module('apollo')
             usSpinnerService.spin('deployment-spinner')
 
             // Now we can deploy
-            apolloApiService.createNewDeployment($scope.versionSelected.sha, $scope.versionSelected.id,
+            apolloApiService.createNewDeployment($scope.versionSelected.sha, getDeployableVersionFromCommit($scope.versionSelected.sha),
                     $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
 
                         // End spinner
@@ -126,6 +126,12 @@ angular.module('apollo')
             return true;
         }
 
+        function getDeployableVersionFromCommit(sha) {
+
+            return $scope.allDeployableVersions.filter(function(a){return a.git_commit_sha == sha})[0].id
+        }
+
+
         // Data fetching
 		apolloApiService.getAllEnvironments().then(function(response) {
 			$scope.allEnvironments = response.data;
@@ -137,8 +143,12 @@ angular.module('apollo')
 
         apolloApiService.getAllDeployableVersions().then(function(response) {
 
+            // Save it aside for later data matching
+            $scope.allDeployableVersions = response.data;
+
             $scope.allVersions = [];
 
+            // Get commit data from github
             for(var i=0; i < response.data.length; i++) {
                 githubApiService.getCommitDetails(response.data[i].github_repository_url,
                                                   response.data[i].git_commit_sha).then(function(gitResponse){

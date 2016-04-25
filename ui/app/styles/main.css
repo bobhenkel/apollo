@@ -120,6 +120,11 @@ background-color: #eee;
     text-align-last:center;
 }
 
+.apollo-version-selector {
+
+    margin: 10px 10px 10px 10px;
+}
+
 #page-wrapper {
 
     overflow: hidden;

@@ -5,6 +5,8 @@ from django.db.models import Q
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from datetime import datetime, timedelta
+from rest_framework.views import APIView
+from collections import defaultdict
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -99,3 +101,21 @@ class RunningDeploymentsViewSet(viewsets.ReadOnlyModelViewSet):
                                          Q(last_updated__gt=time_threshold))
 
     serializer_class = DeploymentSerializer
+
+
+class CurrentDeploymentsView(APIView):
+
+    def get(self, request, format=None):
+        deployments = Deployment.objects.filter(deployment_status="done-success").order_by('-last_updated')
+
+        state_dict = defaultdict(int)
+        response_list = []
+
+        # TODO: If service versions screen becomes slow, this is probably the reason.
+        # TODO: It currently scans all deployment history. This probably can be done better..
+        for deployment in deployments:
+            if state_dict[(deployment.deployed_service, deployment.deployed_environment)] == 0:
+                response_list.append(deployment)
+                state_dict[(deployment.deployed_service, deployment.deployed_environment)] += 1
+
+        return Response(DeploymentSerializer(response_list, many=True).data)
