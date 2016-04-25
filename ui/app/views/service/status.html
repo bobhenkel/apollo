@@ -3,16 +3,71 @@
         <div class="col-lg-12">
             <h1 class="page-header">Services Version Status</h1>
         </div>
-        <!-- /.col-lg-12 -->
-    </div>
-
-
-    <!-- /.panel -->
-    <div class="row">
 
     </div>
-    <div class="row">
 
+    <div ng-switch on="currentScreen">
+        <div class="col-lg-12 col-sm-12" ng-switch-when="filters">
+            <div>
+                <h2 class="text-center">Select Service</h2>
+                <div class="row text-center">
+                    <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector" ng-repeat="service in allServices" ng-click="showByService(service.id)">
+                        {{service.name}}
+                    </button>
+                </div>
+            </div>
+
+
+            <div>
+                <hr>
+                <h4 class="text-center">or</h4>
+                <h2 class="text-center">Select Environment</h2>
+                <div class="row text-center">
+                    <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector" ng-repeat="environment in allEnvironments" ng-click="showByEnvironment(environment.id)">
+                        {{environment.name}}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-sm-12" ng-switch-when="results">
+            <div class="col-lg-12 col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading apollo-form-headline">
+                        Current status
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Since</th>
+                                    <th>Service</th>
+                                    <th>Environment</th>
+                                    <th>Commit</th>
+                                    <th>Initiated By</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="deployment in filteredResults">
+                                    <td>{{deployment.started_at | date:'dd/MM/yy H:mm:ss'}}</td>
+                                    <td>{{allServices[deployment.deployed_service].name}}</td>
+                                    <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
+                                    <td><a href="{{githubData[deployment.target_version].html_url}}">{{deployment.target_version | limitTo: 7}}</a></td>
+                                    <td>{{allUsers[deployment.initiated_by].email}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <p ng-show="!filteredResults.length"><b>No results found!</b></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pull-right">
+                <button type="button" class="btn btn-primary btn-circle btn-lg apollo-flow-button" ng-click="backToFilter()" tooltip="back to filters">
+                    <i class="fa fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    <!-- /.row -->
 </div>

@@ -9,77 +9,70 @@ angular
 function ApiService($q, $http){
 
     var getAllUsers = function() {
-        return $http.get(CONFIG.appUrl + 'user', {
-        });
+        return $http.get(CONFIG.appUrl + 'user');
     };
 
     var getAllEnvironments = function() {
-        return $http.get(CONFIG.appUrl + 'environment', {
-        });
+        return $http.get(CONFIG.appUrl + 'environment');
     };
 
     var getAllServices = function() {
-        return $http.get(CONFIG.appUrl + 'service', {
-        });
+        return $http.get(CONFIG.appUrl + 'service');
     };
 
     var getAllDeployableVersions = function() {
-        return $http.get(CONFIG.appUrl + 'deployable-version/', {
-        });
+        return $http.get(CONFIG.appUrl + 'deployable-version/');
     };
 
     var getAllRunningDeployments = function() {
-        return $http.get(CONFIG.appUrl + 'running-deployments', {
-        });
+        return $http.get(CONFIG.appUrl + 'running-deployments');
     };
 
     var getAllDeployments = function() {
-        return $http.get(CONFIG.appUrl + 'deployment', {
-        });
+        return $http.get(CONFIG.appUrl + 'deployment');
     };
 
     var getService = function(serviceId) {
-        return $http.get(CONFIG.appUrl + 'service/' + serviceId, {
-        });
+        return $http.get(CONFIG.appUrl + 'service/' + serviceId);
     };
 
     var getEnvironment = function(environmentId) {
-        return $http.get(CONFIG.appUrl + 'environment/' + environmentId, {
-        });
+        return $http.get(CONFIG.appUrl + 'environment/' + environmentId);
     };
 
     var getUser = function(userId) {
-        return $http.get(CONFIG.appUrl + 'user/' + userId, {
-        });
+        return $http.get(CONFIG.appUrl + 'user/' + userId);
     };
 
     var getDeployableVersion = function(deployableVerisonId) {
-        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId, {
-        });
+        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId);
     };
 
-    var createNewDeployment = function(targetVersion, deployableVerisonId,deployedService, deployedEnvironment) {
+    var getLatestDeployments = function() {
+
+        return $http.get(CONFIG.appUrl + 'latest-deployments/');
+    }
+
+    var createNewDeployment = function(targetVersion, deployableVersionId, deployedService, deployedEnvironment) {
 
         return $http.post(CONFIG.appUrl + "deployment/", {
 
             target_version: targetVersion,
             deployed_service: deployedService,
             deployed_environment: deployedEnvironment,
-            deployable_version: deployableVerisonId,
+            deployable_version: deployableVersionId,
             initiated_by: 2  // TODO: give the correct user id from signin
         })
     };
 
     var revertDeployment = function(deploymentId) {
 
-        return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId,{
-        });
+        return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId);
     };
 
     var getDeploymentLogs = function(deploymentId) {
 
-        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs" ,{
-        });
+        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs");
     };
 
 
@@ -121,6 +114,7 @@ function ApiService($q, $http){
       getEnvironment: getEnvironment,
       getUser: getUser,
       getDeployableVersion: getDeployableVersion,
+      getLatestDeployments: getLatestDeployments,
       revertDeployment: revertDeployment,
       getDeploymentLogs: getDeploymentLogs,
       matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
