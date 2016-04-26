@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, AbstractBaseUser
 from django.db import models
 
 
@@ -152,9 +152,9 @@ class Deployment(models.Model):
 
 
 class Permission(models.Model):
-    service = models.ForeignKey(Service)
+    service = models.ForeignKey(Service, null=True)
+    environment = models.ForeignKey(Environment)
     user_group = models.ForeignKey(Group)
-    can_deploy = models.BooleanField()
 
 
 class Blocker(models.Model):

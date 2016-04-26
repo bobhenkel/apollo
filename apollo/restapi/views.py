@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from collections import defaultdict
+from django.contrib.auth.models import User, Group
+from rest_framework import status
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -48,12 +51,48 @@ class PortMappingViewSet(viewsets.ModelViewSet):
     serializer_class = PortMappingSerializer
 
 
-class DeploymentViewSet(viewsets.ModelViewSet):
-    queryset = Deployment.objects.all()
-    serializer_class = DeploymentSerializer
+class DeploymentViewSet(viewsets.ViewSet):
+
     # TODO: Need to catch delete here, and send the delete to marathon in order to revert the deployment. Should delete from DB?
 
-    @detail_route()
+    def list(self, request):
+        queryset = Deployment.objects.all()
+        serializer = DeploymentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+    def create(self, request):
+        serialized = DeploymentSerializer(data=request.data)
+
+        if serialized.is_valid():
+
+
+            # Check for permissions.. if there is a permission object related to this environment and no service
+            # If there is:
+            # check if the user is a member of the usergroup of the permission. if he is, continue.
+            #
+            # Check for permission related to this environment and this service
+            # if there is:
+            # check if the user is a member of the usergroup of the permission. if he is not, return 403.
+            #
+            # If there is no permission related to this environment or service, return 403.
+
+            deployment = Deployment.objects.create(
+                target_version=request.data['target_version'],
+                deployed_service=request.data['deployed_service'],
+                deployable_version=request.data['deployable_version'],
+                initiated_by=request.user.id
+            )
+            deployment.save()
+
+            return Response("ok", status=status.HTTP_201_CREATED)
+        else:
+            return  Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request):
+        pass
+
+    @detail_route(methods=['get'])
     def logs(self, request, pk=None):
         return Response("Aaaaass")
 
@@ -119,3 +158,23 @@ class CurrentDeploymentsView(APIView):
                 state_dict[(deployment.deployed_service, deployment.deployed_environment)] += 1
 
         return Response(DeploymentSerializer(response_list, many=True).data)
+
+
+class SignUpView(APIView):
+
+    def post(self, request):
+        serialized = UserSerializer(data=request.data)
+
+        if serialized.is_valid():
+            user = User.objects.create(
+                username=request.data['email'],
+                email=request.data['email'],
+                first_name=request.data['first_name'],
+                last_name=request.data['last_name']
+            )
+            user.set_password(request.data['password'])
+            user.save()
+
+            return Response("ok", status=status.HTTP_201_CREATED)
+        else:
+            return  Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)

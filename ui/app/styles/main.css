@@ -125,6 +125,12 @@ background-color: #eee;
     margin: 10px 10px 10px 10px;
 }
 
+#apollo-login-button {
+
+    font-size: 15px;
+    padding: 5px 10px;
+}
+
 #page-wrapper {
 
     overflow: hidden;

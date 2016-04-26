@@ -17,6 +17,8 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
 from restapi import views
+from rest_framework.authtoken import views as auth_views
+
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
 router.register(r'service', views.ServiceViewSet)
@@ -26,7 +28,6 @@ router.register(r'constraints', views.ConstraintViewSet)
 router.register(r'environment-variable', views.EnvironmentVariableViewSet)
 router.register(r'volume', views.VolumeViewSet)
 router.register(r'port-mapping', views.PortMappingViewSet)
-router.register(r'deployment', views.DeploymentViewSet)
 router.register(r'environment', views.EnvironmentViewSet)
 router.register(r'group', views.GroupViewSet)
 router.register(r'permission', views.PermissionViewSet)
@@ -41,5 +42,9 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'latest-deployments', views.CurrentDeploymentsView.as_view()),
+    url(r'^login/', auth_views.obtain_auth_token),
+    url(r'latest-deployments/', views.CurrentDeploymentsView.as_view()),
+    url(r'deployment/[0-9]/logs', views.DeploymentViewSet.as_view({'get': 'logs'})),
+    url(r'deployment/', views.DeploymentViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'signup/', views.SignUpView.as_view()),
 ]

@@ -76,7 +76,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        fields = ('id', 'service', 'user_group', 'can_deploy')
+        fields = ('id', 'service', 'user_group', 'environment')
 
 
 class BlockerSerializer(serializers.ModelSerializer):

@@ -17,7 +17,9 @@ angular
     'angular-growl',
     'angularSpinner',
     'ngSanitize',
-    'angular.filter'
+    'angular.filter',
+    'LocalStorageModule',
+    'ui.gravatar'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     
@@ -80,7 +82,6 @@ angular
     })
       .state('deployments.home',{
         url:'/home',
-        controller: 'MainCtrl',
         templateUrl:'views/deployments/home.html',
         resolve: {
           loadMyFiles:function($ocLazyLoad) {
@@ -288,8 +289,20 @@ angular
             url:'/configure'
     })
       .state('login',{
-        templateUrl:'views/pages/login.html',
-        url:'/login'
+        templateUrl:'views/login/login.html',
+        url:'/login',
+        controller: 'loginCtrl',
+        resolve: {
+                  loadMyFiles:function($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                      name:'apollo',
+                      files:[
+                      'scripts/services/apolloApiService.js',
+                      'scripts/controllers/loginCtrl.js'
+                      ]
+                    })
+                  }
+                }
     })
 
   }]);
@@ -302,3 +315,15 @@ angular
     growlProvider.globalReversedOrder(true);
   }]);
 
+angular
+  .module('apollo')
+  .config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push('apolloApiInterceptor');
+  }]);
+
+angular
+  .module('apollo')
+  .config(function (localStorageServiceProvider) {
+    localStorageServiceProvider
+      .setPrefix('apollo');
+  });

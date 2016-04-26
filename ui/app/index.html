@@ -40,15 +40,18 @@
     <script src="/apollo/ui/bower_components/angular-spinner/angular-spinner.min.js"></script>
     <script src="/apollo/ui/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/apollo/ui/bower_components/angular-filter/dist/angular-filter.min.js"></script>
+    <script src="/apollo/ui/bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+    <script src="/apollo/ui/bower_components/angular-gravatar/build/angular-gravatar.min.js"></script>
 
 
     <!-- endbower -->
     <!-- endbuild -->
     
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/config.js"></script>
-        <script src="scripts/app.js"></script>
-        <script src="js/sb-admin-2.js"></script>
+    <script src="scripts/config.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/interceptors/apolloApiInterceptor.js"></script>
+    <script src="js/sb-admin-2.js"></script>
     <!-- endbuild -->
 
     <!-- Custom CSS -->
