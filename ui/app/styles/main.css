@@ -125,6 +125,11 @@ background-color: #eee;
     margin: 10px 10px 10px 10px;
 }
 
+#apollo-login-header {
+
+    margin-bottom: 50px;
+}
+
 #apollo-login-button {
 
     font-size: 15px;
@@ -166,7 +171,6 @@ background-color: #eee;
 
 .animate-switch-container.ng-leave-active {
   left: -100%;
-
 }
 
 .my-deployment {

@@ -47,7 +47,7 @@ angular.module('apollo')
             });
 
             apolloApiService.getAllUsers().then(function(response) {
-``
+
                 var tempUsers = {};
 
                 response.data.forEach(function(user) {
