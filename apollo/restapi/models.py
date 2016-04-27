@@ -144,7 +144,7 @@ class Deployment(models.Model):
     deployed_environment = models.ForeignKey(Environment)
     target_version = models.CharField(max_length=100)
     source_version = models.CharField(max_length=100, null=True)
-    initiated_by = models.ForeignKey(User)
+    initiated_by = models.ForeignKey(User, null=True)
     deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
     deployable_version = models.ForeignKey(DeployableVersion)
     started_at = models.DateTimeField(auto_now_add=True)  # Add timestamp only on object creation

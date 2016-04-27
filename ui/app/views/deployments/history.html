@@ -57,7 +57,7 @@
                         <thead>
                         <tr>
                             <th>#</th>
-                            <th>Time</th>
+                            <th>Last Updated</th>
                             <th>Service</th>
                             <th>Environment</th>
                             <th>Initiated By</th>
@@ -71,7 +71,7 @@
                                                                           filter:{deployed_environment: environmentSearch.id} |
                                                                           filter:{initiated_by: userSearch.id}">
                             <td>{{deployment.id}}</td>
-                            <td>{{deployment.started_at | date:'dd/MM/yy H:mm:ss'}}</td>
+                            <td>{{deployment.last_updated | date:'dd/MM/yy H:mm:ss'}}</td>
                             <td>{{allServices[deployment.deployed_service].name}}</td>
                             <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
                             <td>{{allUsers[deployment.initiated_by].email}}</td>

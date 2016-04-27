@@ -34,19 +34,19 @@ function ApiService($q, $http){
     };
 
     var getService = function(serviceId) {
-        return $http.get(CONFIG.appUrl + 'service/' + serviceId);
+        return $http.get(CONFIG.appUrl + 'service/' + serviceId + "/");
     };
 
     var getEnvironment = function(environmentId) {
-        return $http.get(CONFIG.appUrl + 'environment/' + environmentId);
+        return $http.get(CONFIG.appUrl + 'environment/' + environmentId + "/");
     };
 
     var getUser = function(userId) {
-        return $http.get(CONFIG.appUrl + 'user/' + userId);
+        return $http.get(CONFIG.appUrl + 'user/' + userId + "/");
     };
 
     var getDeployableVersion = function(deployableVerisonId) {
-        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId);
+        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId + "/");
     };
 
     var getLatestDeployments = function() {
@@ -61,8 +61,7 @@ function ApiService($q, $http){
             target_version: targetVersion,
             deployed_service: deployedService,
             deployed_environment: deployedEnvironment,
-            deployable_version: deployableVersionId,
-            initiated_by: 4  // TODO: give the correct user id from signin
+            deployable_version: deployableVersionId
         })
     };
 

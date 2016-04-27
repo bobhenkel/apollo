@@ -36,6 +36,7 @@ router.register(r'notification', views.NotificationViewSet)
 router.register(r'watcher', views.WatcherViewSet)
 router.register(r'deployable-version', views.DeployableVersionViewSet)
 router.register(r'running-deployments', views.RunningDeploymentsViewSet)
+router.register(r'deployment', views.DeploymentViewSet, base_name="deployment")
 
 
 urlpatterns = [
@@ -45,6 +46,5 @@ urlpatterns = [
     url(r'^login/', auth_views.obtain_auth_token),
     url(r'latest-deployments/', views.CurrentDeploymentsView.as_view()),
     url(r'deployment/[0-9]/logs', views.DeploymentViewSet.as_view({'get': 'logs'})),
-    url(r'deployment/', views.DeploymentViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'signup/', views.SignUpView.as_view()),
 ]

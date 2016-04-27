@@ -41,6 +41,7 @@ angular
                     name:'apollo',
                     files:[
                     'scripts/directives/header/header.js',
+                    'scripts/directives/header/header-notification/header-notification.js',
                     'scripts/directives/sidebar/sidebar.js',
                     'scripts/directives/sidebar/sidebar-search/sidebar-search.js'
                     ]
@@ -288,8 +289,75 @@ angular
             templateUrl:'views/blocker/configure.html',
             url:'/configure'
     })
+    $stateProvider
+               .state('auth', {
+                 url:'/auth',
+                 templateUrl: 'views/auth/main.html',
+                 resolve: {
+                     loadMyDirectives:function($ocLazyLoad){
+                         return $ocLazyLoad.load(
+                         {
+                             name:'apollo',
+                             files:[
+                             'scripts/directives/header/header.js',
+                             'scripts/directives/header/header-notification/header-notification.js',
+                             'scripts/directives/sidebar/sidebar.js',
+                             'scripts/directives/sidebar/sidebar-search/sidebar-search.js'
+                             ]
+                         }),
+                         $ocLazyLoad.load(
+                         {
+                            name:'toggle-switch',
+                            files:["/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
+                                   "/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.css"
+                               ]
+                         }),
+                         $ocLazyLoad.load(
+                         {
+                           name:'ngAnimate',
+                           files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
+                         })
+                         $ocLazyLoad.load(
+                         {
+                           name:'ngCookies',
+                           files:['/apollo/ui/bower_components/angular-cookies/angular-cookies.js']
+                         })
+                         $ocLazyLoad.load(
+                         {
+                           name:'ngResource',
+                           files:['/apollo/ui/bower_components/angular-resource/angular-resource.js']
+                         })
+                         $ocLazyLoad.load(
+                         {
+                           name:'ngSanitize',
+                           files:['/apollo/ui/bower_components/angular-sanitize/angular-sanitize.js']
+                         })
+                         $ocLazyLoad.load(
+                         {
+                           name:'ngTouch',
+                           files:['/apollo/ui/bower_components/angular-touch/angular-touch.js']
+                         })
+                     }
+                 }
+             })
+          .state('auth.signup',{
+                templateUrl:'views/auth/signup.html',
+                url:'/signup',
+                controller: 'signupCtrl',
+                resolve: {
+                          loadMyFiles:function($ocLazyLoad) {
+                            return $ocLazyLoad.load({
+                              name:'apollo',
+                              files:[
+                              'scripts/services/apolloApiService.js',
+                              'scripts/controllers/signupCtrl.js'
+                              ]
+                            })
+                          }
+                        }
+        })
       .state('login',{
-        templateUrl:'views/login/login.html',
+        templateUrl:'views/auth/login.html',
         url:'/login',
         controller: 'loginCtrl',
         resolve: {
