@@ -7,12 +7,22 @@
  * # adminPosHeader
  */
 angular.module('apollo')
-	.directive('headerNotification',function(){
+	.directive('headerNotification', ['localStorageService', function(localStorageService){
 		return {
-        templateUrl:'scripts/directives/header/header-notification/header-notification.html',
-        restrict: 'E',
-        replace: true,
-    	}
-	});
+			templateUrl:'scripts/directives/header/header-notification/header-notification.html',
+			restrict: 'E',
+			replace: true,
+			controller: function($scope, $state) {
+
+					$scope.email = localStorageService.get("email");
+
+					$scope.logout = function() {
+
+						localStorageService.clearAll();
+						$state.go('login');
+					}
+			}
+		}
+	}]);
 
 

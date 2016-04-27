@@ -50,7 +50,7 @@
                                 </thead>
                                 <tbody>
                                 <tr ng-repeat="deployment in filteredResults">
-                                    <td>{{deployment.started_at | date:'dd/MM/yy H:mm:ss'}}</td>
+                                    <td>{{deployment.last_updated | date:'dd/MM/yy H:mm:ss'}}</td>
                                     <td>{{allServices[deployment.deployed_service].name}}</td>
                                     <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
                                     <td><a href="{{githubData[deployment.target_version].html_url}}">{{deployment.target_version | limitTo: 7}}</a></td>

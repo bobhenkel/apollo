@@ -90,7 +90,7 @@ angular.module('apollo')
                         $('.modal-backdrop').remove();
 
                         // Redirect user to ongoing deployments
-                        $state.go('deployments.ongoing', {deploymentId: response.data.id});
+                        $state.go('deployments.ongoing', {deploymentId: response.data});
 
                     }, function(error) {
 

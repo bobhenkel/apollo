@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, AbstractBaseUser
 from django.db import models
 
 
@@ -144,7 +144,7 @@ class Deployment(models.Model):
     deployed_environment = models.ForeignKey(Environment)
     target_version = models.CharField(max_length=100)
     source_version = models.CharField(max_length=100, null=True)
-    initiated_by = models.ForeignKey(User)
+    initiated_by = models.ForeignKey(User, null=True)
     deployment_status = models.CharField(max_length=20, choices=DEPLOYMENT_STATUS, default=DEPLOYMENT_STATUS[0][0])
     deployable_version = models.ForeignKey(DeployableVersion)
     started_at = models.DateTimeField(auto_now_add=True)  # Add timestamp only on object creation
@@ -152,9 +152,9 @@ class Deployment(models.Model):
 
 
 class Permission(models.Model):
-    service = models.ForeignKey(Service)
+    service = models.ForeignKey(Service, null=True)
+    environment = models.ForeignKey(Environment)
     user_group = models.ForeignKey(Group)
-    can_deploy = models.BooleanField()
 
 
 class Blocker(models.Model):

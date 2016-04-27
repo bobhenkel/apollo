@@ -6,18 +6,19 @@ angular
         ApiService
     ]);
 
+
 function ApiService($q, $http){
 
     var getAllUsers = function() {
-        return $http.get(CONFIG.appUrl + 'user');
+        return $http.get(CONFIG.appUrl + 'user/');
     };
 
     var getAllEnvironments = function() {
-        return $http.get(CONFIG.appUrl + 'environment');
+        return $http.get(CONFIG.appUrl + 'environment/');
     };
 
     var getAllServices = function() {
-        return $http.get(CONFIG.appUrl + 'service');
+        return $http.get(CONFIG.appUrl + 'service/');
     };
 
     var getAllDeployableVersions = function() {
@@ -25,27 +26,27 @@ function ApiService($q, $http){
     };
 
     var getAllRunningDeployments = function() {
-        return $http.get(CONFIG.appUrl + 'running-deployments');
+        return $http.get(CONFIG.appUrl + 'running-deployments/');
     };
 
     var getAllDeployments = function() {
-        return $http.get(CONFIG.appUrl + 'deployment');
+        return $http.get(CONFIG.appUrl + 'deployment/');
     };
 
     var getService = function(serviceId) {
-        return $http.get(CONFIG.appUrl + 'service/' + serviceId);
+        return $http.get(CONFIG.appUrl + 'service/' + serviceId + "/");
     };
 
     var getEnvironment = function(environmentId) {
-        return $http.get(CONFIG.appUrl + 'environment/' + environmentId);
+        return $http.get(CONFIG.appUrl + 'environment/' + environmentId + "/");
     };
 
     var getUser = function(userId) {
-        return $http.get(CONFIG.appUrl + 'user/' + userId);
+        return $http.get(CONFIG.appUrl + 'user/' + userId + "/");
     };
 
     var getDeployableVersion = function(deployableVerisonId) {
-        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId);
+        return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId + "/");
     };
 
     var getLatestDeployments = function() {
@@ -60,19 +61,18 @@ function ApiService($q, $http){
             target_version: targetVersion,
             deployed_service: deployedService,
             deployed_environment: deployedEnvironment,
-            deployable_version: deployableVersionId,
-            initiated_by: 2  // TODO: give the correct user id from signin
+            deployable_version: deployableVersionId
         })
     };
 
     var revertDeployment = function(deploymentId) {
 
-        return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId);
+        return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId + "/");
     };
 
     var getDeploymentLogs = function(deploymentId) {
 
-        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs");
+        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs/");
     };
 
 
@@ -101,6 +101,27 @@ function ApiService($q, $http){
         return false;
     }
 
+    var signup = function(email, first_name, last_name, password) {
+
+        return $http.post(CONFIG.appUrl + "signup/", {
+
+            email: email,
+            first_name: first_name,
+            last_name: last_name,
+            password: password
+        })
+    }
+
+    var login = function(email, password) {
+
+
+        return $http.post(CONFIG.appUrl + "login/", {
+
+            username: email,
+            password: password
+        })
+    }
+
 
     return {
       getAllUsers: getAllUsers,
@@ -118,6 +139,8 @@ function ApiService($q, $http){
       revertDeployment: revertDeployment,
       getDeploymentLogs: getDeploymentLogs,
       matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
-      isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus
+      isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus,
+      signup: signup,
+      login: login
     };
 }

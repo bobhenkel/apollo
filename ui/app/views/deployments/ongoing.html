@@ -17,6 +17,7 @@
                         <thead>
                         <tr>
                             <th>Marathon ID</th>
+                            <th>Last Updated</th>
                             <th>Service</th>
                             <th>Environment</th>
                             <th>Initiated By</th>
@@ -28,6 +29,7 @@
                         <tr ng-repeat="deployment in allRunningDeployments | filter:globalSearch"
                             ng-class="{'my-deployment':deployment.id == deploymentId}">
                             <td>{{deployment.marathon_id}}</td>
+                            <td>{{deployment.last_updated | date:'H:mm:ss'}}</td>
                             <td>{{allServices[deployment.deployed_service].name}}</td>
                             <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
                             <td>{{allUsers[deployment.initiated_by].email}}</td>
