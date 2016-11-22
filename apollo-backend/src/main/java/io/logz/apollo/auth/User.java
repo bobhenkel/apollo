@@ -5,23 +5,14 @@ package io.logz.apollo.auth;
  */
 public class User {
 
-    private final String emailAddress;
-    private final String firstName;
-    private final String lastName;
-    private final String hashedPassword;
-    private final Boolean isAdmin;
+    private String emailAddress;
+    private String firstName;
+    private String lastName;
+    private String hashedPassword;
+    private Boolean isAdmin;
 
-    public User(String emailAddress, String firstName, String lastName, String hashedPassword, Boolean isAdmin) {
-        this.emailAddress = emailAddress;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.hashedPassword = hashedPassword;
-        this.isAdmin = isAdmin;
-    }
+    public User() {
 
-    // Another C'tor to represent **** as passwords when returning to the user
-    public User(String emailAddress, String firstName, String lastName, Boolean isAdmin) {
-        this(emailAddress, firstName, lastName, "*********", isAdmin);
     }
 
     public String getEmailAddress() {
@@ -42,5 +33,25 @@ public class User {
 
     public boolean isAdmin() {
         return isAdmin;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 }

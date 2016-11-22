@@ -14,6 +14,7 @@ import org.rapidoid.setup.My;
 import org.rapidoid.u.U;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by roiravhon on 11/21/16.
@@ -32,14 +33,23 @@ public class AuthController {
     @LoggedIn
     @GET("/users")
     public List<User> getAllUsers() {
-        return userDao.getAllUsers();
+        return userDao.getAllUsers().stream().map(user -> {
+            user.setHashedPassword("******");
+            return user;
+        }).collect(Collectors.toList());
     }
 
     @Administrator
     @POST("/signup")
     public User addUser(String emailAddress, String firstName, String lastName, String password) {
 
-        User newUser = new User(emailAddress, firstName, lastName, PasswordManager.encryptPassword(password), false);
+        // TODO: validate input
+        User newUser = new User();
+        newUser.setEmailAddress(emailAddress);
+        newUser.setFirstName(firstName);
+        newUser.setLastName(lastName);
+        newUser.setHashedPassword(PasswordManager.encryptPassword(password));
+        newUser.setAdmin(false);
         userDao.addUser(newUser);
 
         return newUser;
