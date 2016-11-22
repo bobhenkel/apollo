@@ -11,5 +11,5 @@ public interface UserDao {
 
     User getUser(String emailAddress);
     List<User> getAllUsers();
-    void addUser(String emailAddress, String hashedPassword);
+    void addUser(User user);
 }

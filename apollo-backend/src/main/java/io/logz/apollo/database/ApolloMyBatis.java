@@ -35,7 +35,7 @@ public class ApolloMyBatis {
 
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(myBatisConfiguration);
 
-            session = sqlSessionFactory.openSession();
+            session = sqlSessionFactory.openSession(true);
         } catch (Exception e) {
             throw new RuntimeException("Could not create MyBatis instance!", e);
         }
@@ -45,14 +45,6 @@ public class ApolloMyBatis {
     public static void initialize(ApolloConfiguration configuration) {
         logger.info("Initializing MyBatis for the first time");
         instance = new ApolloMyBatis(configuration);
-    }
-
-    public static ApolloMyBatis getInstance() {
-        if (instance == null) {
-            throw new RuntimeException("You must first initialize ApolloMyBatis before getting an instance!");
-        }
-
-        return instance;
     }
 
     public static void close() {
@@ -68,8 +60,12 @@ public class ApolloMyBatis {
         }
     }
 
-    public <T> T getDao(Class<T> clazz) {
+    public static <T> T getDao(Class<T> clazz) {
+        if (instance == null) {
+            throw new RuntimeException("You must first initialize ApolloMyBatis before getting a Dao!");
+        }
+
         logger.debug("Returning DAO for {}", clazz.getName());
-        return session.getMapper(clazz);
+        return instance.session.getMapper(clazz);
     }
 }

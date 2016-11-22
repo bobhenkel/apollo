@@ -14,26 +14,36 @@ public class ApolloConfiguration {
     private final String dbUser;
     private final String dbPassword;
     private final String dbSchema;
+    private final String apiListen;
+    private final int apiPort;
 
     @VisibleForTesting
-    public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword, String dbSchema) {
+    public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword, String dbSchema, String apiListen, int apiPort) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
         this.dbPassword = dbPassword;
         this.dbSchema = dbSchema;
+        this.apiListen = apiListen;
+        this.apiPort = apiPort;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
 
         Config config = ConfigFactory.load();
+
+        // Database related
         int dbPort = config.getInt("apollo.db.port");
         String dbHost = config.getString("apollo.db.host");
         String dbUser = config.getString("apollo.db.user");
         String dbPassword = config.getString("apollo.db.password");
         String dbSchema = config.getString("apollo.db.schema");
 
-        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema);
+        // API Related
+        String apiListen = config.getString("apollo.api.listen");
+        int apiPort = config.getInt("apollo.api.port");
+
+        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort);
     }
 
     public int getDbPort() {
@@ -54,5 +64,13 @@ public class ApolloConfiguration {
 
     public String getDbSchema() {
         return dbSchema;
+    }
+
+    public String getApiListen() {
+        return apiListen;
+    }
+
+    public int getApiPort() {
+        return apiPort;
     }
 }
