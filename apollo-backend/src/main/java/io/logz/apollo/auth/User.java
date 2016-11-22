@@ -1,0 +1,57 @@
+package io.logz.apollo.auth;
+
+/**
+ * Created by roiravhon on 11/20/16.
+ */
+public class User {
+
+    private String emailAddress;
+    private String firstName;
+    private String lastName;
+    private String hashedPassword;
+    private Boolean isAdmin;
+
+    public User() {
+
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
+}

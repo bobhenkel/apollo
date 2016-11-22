@@ -105,7 +105,7 @@ function ApiService($q, $http){
 
         return $http.post(CONFIG.appUrl + "signup/", {
 
-            email: email,
+            email: emailAddress,
             first_name: first_name,
             last_name: last_name,
             password: password
