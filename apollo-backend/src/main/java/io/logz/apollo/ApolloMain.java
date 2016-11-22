@@ -1,13 +1,6 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.PasswordManager;
-import io.logz.apollo.auth.User;
 import io.logz.apollo.configuration.ApolloConfiguration;
-import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
-import org.rapidoid.setup.App;
-import org.rapidoid.setup.My;
-import org.rapidoid.setup.On;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,17 +11,16 @@ import org.slf4j.LoggerFactory;
 public class ApolloMain {
 
     private static final Logger logger = LoggerFactory.getLogger(ApolloMain.class);
+    private static ApolloServer apolloServer;
 
     public static void main(String[] args) {
 
         try {
             logger.info("Started apollo main");
             ApolloConfiguration apolloConfiguration = ApolloConfiguration.parseConfigurationFromResources();
-            ApolloMyBatis.initialize(apolloConfiguration);
 
-            // Initialize the REST API server
-            On.address(apolloConfiguration.getApiListen()).port(apolloConfiguration.getApiPort());
-            App.bootstrap(args).auth();
+            apolloServer = new ApolloServer(apolloConfiguration);
+            apolloServer.start();
 
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -43,8 +35,8 @@ public class ApolloMain {
         }
     }
 
-    public static void shutdown() {
+    private static void shutdown() {
         logger.info("Cleaning up..");
-        ApolloMyBatis.close();
+        apolloServer.stop();
     }
 }
