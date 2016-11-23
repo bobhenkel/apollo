@@ -34,11 +34,6 @@ public class ApolloHelper {
         return instance;
     }
 
-    public void stop() {
-        mySqlHelper.stop();
-        restClientHelper.stop();
-    }
-
     public RestClientHelper rest() {
         return restClientHelper;
     }

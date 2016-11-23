@@ -42,8 +42,4 @@ public class MySqlHelper {
         // Its hard-coded into test containers, without a getter
         apolloConfiguration.setDbSchema("test");
     }
-
-    public void stop() {
-        mysql.stop();
-    }
 }

@@ -70,10 +70,6 @@ public class RestClientHelper {
         logger.info("Base url for the API is: {}", baseUrl);
     }
 
-    public void stop() {
-        server.stop();
-    }
-
     public RestResponse get(String url, String token) throws IOException {
         Request request = new Request.Builder().url(getFullUrlWithToken(url, token)).build();
         Response response = client.newCall(request).execute();
