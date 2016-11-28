@@ -17,12 +17,12 @@ import java.sql.SQLException;
 /**
  * Created by roiravhon on 11/23/16.
  */
-public class MySqlHelper {
+public class ApolloMySQL {
 
-    private static final Logger logger = LoggerFactory.getLogger(MySqlHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(ApolloMySQL.class);
     private final MySQLContainer mysql;
 
-    public MySqlHelper(ApolloConfiguration apolloConfiguration) throws SQLException, IOException, ScriptException {
+    public ApolloMySQL() throws SQLException, IOException, ScriptException {
 
         // Create mysql instance
         logger.info("Starting MySQL container");
@@ -32,14 +32,26 @@ public class MySqlHelper {
         logger.info("Creating MySQL connection and creating the schema");
         Connection connection = mysql.createConnection("");
         ScriptUtils.executeSqlScript(connection, "/" , Files.toString(new File("apollo-schema.sql"), Charsets.UTF_8));
+    }
 
-        // Replace mysql params in configuration
-        apolloConfiguration.setDbHost(mysql.getContainerIpAddress());
-        apolloConfiguration.setDbPort(mysql.getMappedPort(3306));
-        apolloConfiguration.setDbUser(mysql.getUsername());
-        apolloConfiguration.setDbPassword(mysql.getPassword());
+    public String getContainerIpAddress() {
+        return mysql.getContainerIpAddress();
+    }
 
+    public int getMappedPort() {
+        return mysql.getMappedPort(3306);
+    }
+
+    public String getUsername() {
+        return mysql.getUsername();
+    }
+
+    public String getPassword() {
+        return mysql.getPassword();
+    }
+
+    public String getSchema() {
         // Its hard-coded into test containers, without a getter
-        apolloConfiguration.setDbSchema("test");
+        return "test";
     }
 }

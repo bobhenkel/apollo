@@ -8,16 +8,16 @@
     <select id="getUser" resultType="io.logz.apollo.auth.User">
         SELECT *
         FROM users
-        WHERE email_address = #{emailAddress}
+        WHERE user_email = #{userEmail}
     </select>
 
     <select id="getAllUsers" resultType="io.logz.apollo.auth.User">
-        SELECT first_name, last_name, email_address, is_admin
+        SELECT first_name, last_name, user_email, is_admin
         FROM users
     </select>
 
     <insert id="addUser">
         INSERT INTO users
-        VALUES (#{emailAddress}, #{firstName}, #{lastName}, #{hashedPassword}, #{isAdmin})
+        VALUES (#{userEmail}, #{firstName}, #{lastName}, #{hashedPassword}, #{isAdmin})
     </insert>
 </mapper>

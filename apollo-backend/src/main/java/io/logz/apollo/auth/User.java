@@ -5,7 +5,7 @@ package io.logz.apollo.auth;
  */
 public class User {
 
-    private String emailAddress;
+    private String userEmail;
     private String firstName;
     private String lastName;
     private String hashedPassword;
@@ -15,8 +15,8 @@ public class User {
 
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getUserEmail() {
+        return userEmail;
     }
 
     public String getFirstName() {
@@ -35,8 +35,8 @@ public class User {
         return isAdmin;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public void setFirstName(String firstName) {

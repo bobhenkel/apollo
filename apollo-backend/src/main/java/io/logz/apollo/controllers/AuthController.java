@@ -41,11 +41,11 @@ public class AuthController {
 
     @Administrator
     @POST("/signup")
-    public User addUser(String emailAddress, String firstName, String lastName, String password) {
+    public User addUser(String userEmail, String firstName, String lastName, String password) {
 
         // TODO: validate input
         User newUser = new User();
-        newUser.setEmailAddress(emailAddress);
+        newUser.setUserEmail(userEmail);
         newUser.setFirstName(firstName);
         newUser.setLastName(lastName);
         newUser.setHashedPassword(PasswordManager.encryptPassword(password));
