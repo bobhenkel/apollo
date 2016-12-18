@@ -9,13 +9,13 @@ import com.typesafe.config.ConfigFactory;
  */
 public class ApolloConfiguration {
 
-    private final int dbPort;
-    private final String dbHost;
-    private final String dbUser;
-    private final String dbPassword;
-    private final String dbSchema;
-    private final String apiListen;
-    private final int apiPort;
+    private int dbPort;
+    private String dbHost;
+    private String dbUser;
+    private String dbPassword;
+    private String dbSchema;
+    private String apiListen;
+    private int apiPort;
 
     @VisibleForTesting
     public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword, String dbSchema, String apiListen, int apiPort) {
@@ -72,5 +72,40 @@ public class ApolloConfiguration {
 
     public int getApiPort() {
         return apiPort;
+    }
+
+    @VisibleForTesting
+    public void setDbPort(int dbPort) {
+        this.dbPort = dbPort;
+    }
+
+    @VisibleForTesting
+    public void setDbHost(String dbHost) {
+        this.dbHost = dbHost;
+    }
+
+    @VisibleForTesting
+    public void setDbUser(String dbUser) {
+        this.dbUser = dbUser;
+    }
+
+    @VisibleForTesting
+    public void setDbPassword(String dbPassword) {
+        this.dbPassword = dbPassword;
+    }
+
+    @VisibleForTesting
+    public void setDbSchema(String dbSchema) {
+        this.dbSchema = dbSchema;
+    }
+
+    @VisibleForTesting
+    public void setApiListen(String apiListen) {
+        this.apiListen = apiListen;
+    }
+
+    @VisibleForTesting
+    public void setApiPort(int apiPort) {
+        this.apiPort = apiPort;
     }
 }
