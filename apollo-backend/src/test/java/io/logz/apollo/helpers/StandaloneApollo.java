@@ -48,11 +48,11 @@ public class StandaloneApollo {
         return instance;
     }
 
-    public ApolloTestClient getTestClient() {
+    public ApolloTestClient createTestClient() {
         return new ApolloTestClient(apolloConfiguration);
     }
 
-    public ApolloTestAdminClient getTestAdminClient() {
+    public ApolloTestAdminClient createTestAdminClient() {
         return new ApolloTestAdminClient(apolloConfiguration);
     }
 }

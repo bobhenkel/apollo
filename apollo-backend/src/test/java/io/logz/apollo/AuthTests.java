@@ -5,6 +5,7 @@ import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.exceptions.ApolloCouldNotSignupException;
+import io.logz.apollo.exceptions.ApolloNotAuthorizedException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.StandaloneApollo;
 import org.junit.Test;
@@ -36,11 +37,11 @@ public class AuthTests {
     @Test
     public void testSignup() throws Exception {
 
-        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.getTestAdminClient();
-        ApolloTestClient apolloTestClient = standaloneApollo.getTestClient();
+        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.createTestAdminClient();
+        ApolloTestClient apolloTestClient = standaloneApollo.createTestClient();
 
         // Check that user that is not authenticated cannot sign up
-        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD)).isInstanceOf(ApolloCouldNotSignupException.class);
+        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD)).isInstanceOf(ApolloNotAuthorizedException.class);
 
         // Login admin
         apolloTestAdminClient.login();
@@ -55,8 +56,8 @@ public class AuthTests {
     @Test
     public void testLogin() throws Exception {
 
-        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.getTestAdminClient();
-        ApolloTestClient apolloTestClient = standaloneApollo.getTestClient();
+        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.createTestAdminClient();
+        ApolloTestClient apolloTestClient = standaloneApollo.createTestClient();
 
         // Try to login before signup
         assertThatThrownBy(apolloTestClient::login).isInstanceOf(ApolloCouldNotLoginException.class);
@@ -72,8 +73,8 @@ public class AuthTests {
     @Test
     public void testGetAllUsers() throws Exception {
 
-        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.getTestAdminClient();
-        ApolloTestClient apolloTestClient = standaloneApollo.getTestClient();
+        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.createTestAdminClient();
+        ApolloTestClient apolloTestClient = standaloneApollo.createTestClient();
 
         // Login admin and signup user
         apolloTestAdminClient.login();

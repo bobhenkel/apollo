@@ -3,7 +3,7 @@ package io.logz.apollo.exceptions;
 /**
  * Created by roiravhon on 11/24/16.
  */
-public class ApolloCouldNotLoginException extends Exception {
+public class ApolloCouldNotLoginException extends ApolloClientException {
     public ApolloCouldNotLoginException() {
     }
 

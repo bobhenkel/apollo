@@ -3,6 +3,7 @@ package io.logz.apollo.clients;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
@@ -38,16 +39,20 @@ public class GenericApolloClient {
         this.apolloConfiguration = apolloConfiguration;
     }
 
-    void login() throws IOException, ApolloCouldNotLoginException {
+    void login() throws ApolloCouldNotLoginException {
 
-        RestResponse response = post("/_login", generateLoginJson());
+        try {
+            RestResponse response = post("/_login", generateLoginJson());
 
-        if (!isLoginSuccessful(response)) {
-            logger.info("Could not login user {} with password {}", userName, plainPassword);
-            throw new ApolloCouldNotLoginException();
+            if (!isLoginSuccessful(response)) {
+                throw new ApolloCouldNotLoginException("Could not login user " + userName + " with password " + plainPassword);
+            }
+
+            token = getTokenFromResponse(response);
+
+        } catch (IOException | ApolloClientException e) {
+            throw new ApolloCouldNotLoginException("Could not login user due to unexpected error!", e);
         }
-
-        token = getTokenFromResponse(response);
     }
 
     RestResponse get(String url) throws IOException {
@@ -71,13 +76,21 @@ public class GenericApolloClient {
         return Common.generateJson("username", userName, "password", plainPassword);
     }
 
-    private String getTokenFromResponse(RestResponse restResponse) throws IOException {
-        JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
-        return jsonObject.get("token").getAsString();
+    private String getTokenFromResponse(RestResponse restResponse) throws ApolloClientException {
+        try {
+            JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
+            return jsonObject.get("token").getAsString();
+        } catch (Exception e) {
+            throw new ApolloClientException("Could not get token from response!", e);
+        }
     }
 
-    private boolean isLoginSuccessful(RestResponse restResponse) throws IOException {
-        JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
-        return jsonObject.get("success").getAsBoolean();
+    private boolean isLoginSuccessful(RestResponse restResponse) throws ApolloClientException {
+        try {
+            JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
+            return jsonObject.get("success").getAsBoolean();
+        } catch (Exception e) {
+            throw new ApolloClientException("Could not determine if login succeeded", e);
+        }
     }
 }

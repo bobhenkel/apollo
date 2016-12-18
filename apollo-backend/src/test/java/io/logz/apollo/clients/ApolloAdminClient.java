@@ -4,6 +4,8 @@ import io.logz.apollo.auth.User;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.exceptions.ApolloCouldNotSignupException;
+import io.logz.apollo.exceptions.ApolloNotAuthenticatedException;
+import io.logz.apollo.exceptions.ApolloNotAuthorizedException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
 
@@ -24,10 +26,17 @@ public class ApolloAdminClient {
         genericApolloClient.login();
     }
 
-    public void signup(User signupUser, String plainPassword) throws IOException, ApolloCouldNotSignupException {
+    public void signup(User signupUser, String plainPassword) throws IOException, ApolloCouldNotSignupException, ApolloNotAuthorizedException, ApolloNotAuthenticatedException {
         RestResponse response = genericApolloClient.post("/signup", generateSignupJson(signupUser, plainPassword));
-        if (response.getCode() != 200) {
-            throw new ApolloCouldNotSignupException();
+        switch (response.getCode()) {
+            case 200:
+                break;
+            case 401:
+                throw new ApolloNotAuthenticatedException();
+            case 403:
+                throw new ApolloNotAuthorizedException();
+            default:
+                throw new ApolloCouldNotSignupException();
         }
     }
 
