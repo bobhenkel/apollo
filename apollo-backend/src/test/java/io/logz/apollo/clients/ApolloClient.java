@@ -1,15 +1,20 @@
 package io.logz.apollo.clients;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
+import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
+import io.logz.apollo.models.Environment;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,27 +39,56 @@ public class ApolloClient {
         return user;
     }
 
-    public List<User> getAllUsers() throws IOException, ApolloClientException {
-        RestResponse restResponse = genericApolloClient.get("/users");
+    public List<User> getAllUsers() throws ApolloClientException {
+        try {
+            RestResponse restResponse = genericApolloClient.get("/user");
 
-        if (restResponse.getCode() != 200) {
-            throw new ApolloClientException("Could not get users! got response code=" + restResponse.getCode() + " from server, with response=" + restResponse.getBody());
+            if (restResponse.getCode() != 200) {
+                throw new ApolloClientException("Could not get users! got response code=" + restResponse.getCode() + " from server, with response=" + restResponse.getBody());
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            return Arrays.asList(mapper.readValue(restResponse.getBody(), User[].class));
+
+        } catch (IOException e) {
+            throw new ApolloClientException("Could not reach Apollo API!", e);
         }
+    }
 
-        List<User> userList = new LinkedList<>();
-        JsonArray jsonArray = new JsonParser().parse(restResponse.getBody()).getAsJsonArray();
+    public void addEnvironment(Environment environment) throws ApolloClientException {
+        try {
+            RestResponse restResponse = genericApolloClient.post("/environment",
+                    Common.generateJson("name", environment.getName(), "geoRegion", environment.getGeoRegion(),
+                            "availability", environment.getAvailability(), "kubernetesMaster", environment.getKubernetesMaster(),
+                            "kubernetesToken", environment.getKubernetesToken()));
 
-        jsonArray.forEach(user -> {
-            JsonObject currUser = user.getAsJsonObject();
-            User tempUser = new User();
-            tempUser.setUserEmail(currUser.get("userEmail").getAsString());
-            tempUser.setFirstName(currUser.get("firstName").getAsString());
-            tempUser.setLastName(currUser.get("lastName").getAsString());
-            tempUser.setHashedPassword(currUser.get("hashedPassword").getAsString());
-            tempUser.setAdmin(currUser.get("admin").getAsBoolean());
-            userList.add(tempUser);
-        });
+            if (restResponse.getCode() != 201) {
+                throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
+            }
+        } catch (IOException e) {
+            throw new ApolloClientException("Could not reach Apollo API!", e);
+        }
+    }
 
-        return userList;
+    public Environment getEnvironment(String name) throws ApolloClientException {
+        try {
+            RestResponse restResponse = genericApolloClient.get("/environment/" + name);
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(restResponse.getBody(), Environment.class);
+
+        } catch (IOException e) {
+            throw new ApolloClientException("Could not reach Apollo API!", e);
+        }
+    }
+
+    public List<Environment> getAllEnvironments() throws ApolloClientException {
+        try {
+            RestResponse restResponse = genericApolloClient.get("/environment");
+            ObjectMapper mapper = new ObjectMapper();
+            return Arrays.asList(mapper.readValue(restResponse.getBody(), Environment[].class));
+
+        } catch (IOException e) {
+            throw new ApolloClientException("Could not reach Apollo API!", e);
+        }
     }
 }

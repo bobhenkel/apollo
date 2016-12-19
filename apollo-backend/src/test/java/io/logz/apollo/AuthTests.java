@@ -73,15 +73,7 @@ public class AuthTests {
     @Test
     public void testGetAllUsers() throws Exception {
 
-        ApolloTestAdminClient apolloTestAdminClient = standaloneApollo.createTestAdminClient();
-        ApolloTestClient apolloTestClient = standaloneApollo.createTestClient();
-
-        // Login admin and signup user
-        apolloTestAdminClient.login();
-        apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
-
-        // Login the new user
-        apolloTestClient.login();
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Get all users
         List<User> allUsers = apolloTestClient.getAllUsers();

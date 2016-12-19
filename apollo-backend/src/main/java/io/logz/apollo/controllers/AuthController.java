@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @LoggedIn
-    @GET("/users")
+    @GET("/user")
     public List<User> getAllUsers() {
         return userDao.getAllUsers().stream().map(user -> {
             user.setHashedPassword("******");

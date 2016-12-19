@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.EnvironmentDao">
+    <select id="getEnvironment" resultType="io.logz.apollo.models.Environment">
+        SELECT *
+        FROM environment
+        WHERE name = #{name}
+    </select>
+
+    <select id="getAllEnvironments" resultType="io.logz.apollo.models.Environment">
+        SELECT name, geo_region, availability, kubernetes_master, kubernetes_token
+        FROM environment
+    </select>
+
+    <insert id="addEnvironment">
+        INSERT INTO environment
+        VALUES (#{name}, #{geoRegion}, #{availability}, #{kubernetesMaster}, #{kubernetesToken})
+    </insert>
+</mapper>
