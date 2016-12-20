@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface EnvironmentDao {
 
-    Environment getEnvironment(String name);
+    Environment getEnvironment(int id);
     List<Environment> getAllEnvironments();
     void addEnvironment(Environment environment);
 }

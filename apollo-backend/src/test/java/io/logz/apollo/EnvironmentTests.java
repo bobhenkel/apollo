@@ -3,6 +3,7 @@ package io.logz.apollo;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
+import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.models.Environment;
 import org.junit.Test;
@@ -32,14 +33,14 @@ public class EnvironmentTests {
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Add environment
-        Environment testEnvironment = Common.createEnvironment();
-        apolloTestClient.addEnvironment(testEnvironment);
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        Environment createdEnvironment = apolloTestClient.addEnvironment(testEnvironment);
 
         // Make sure we cant add that again
         assertThatThrownBy(() -> apolloTestClient.addEnvironment(testEnvironment)).isInstanceOf(ApolloClientException.class);
 
         // Get the environment back from the api and validate the returned value
-        Environment returnedEnv = apolloTestClient.getEnvironment(testEnvironment.getName());
+        Environment returnedEnv = apolloTestClient.getEnvironment(createdEnvironment.getId());
 
         assertThat(returnedEnv.getName()).isEqualTo(testEnvironment.getName());
         assertThat(returnedEnv.getGeoRegion()).isEqualTo(testEnvironment.getGeoRegion());
@@ -54,12 +55,12 @@ public class EnvironmentTests {
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Add environment
-        Environment testEnvironment = Common.createEnvironment();
-        apolloTestClient.addEnvironment(testEnvironment);
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        Environment createdEnvironment = apolloTestClient.addEnvironment(testEnvironment);
 
         // Get all environments, and filter for ours
         Optional<Environment> environmentFromApi = apolloTestClient.getAllEnvironments().stream()
-                .filter(environment -> environment.getName().equals(testEnvironment.getName())).findFirst();
+                .filter(environment -> environment.getId() == createdEnvironment.getId()).findFirst();
 
         boolean found = false;
 

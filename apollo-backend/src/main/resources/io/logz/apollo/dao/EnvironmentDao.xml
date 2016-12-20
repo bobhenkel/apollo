@@ -7,16 +7,16 @@
     <select id="getEnvironment" resultType="io.logz.apollo.models.Environment">
         SELECT *
         FROM environment
-        WHERE name = #{name}
+        WHERE id = #{id}
     </select>
 
     <select id="getAllEnvironments" resultType="io.logz.apollo.models.Environment">
-        SELECT name, geo_region, availability, kubernetes_master, kubernetes_token
+        SELECT *
         FROM environment
     </select>
 
-    <insert id="addEnvironment">
-        INSERT INTO environment
+    <insert id="addEnvironment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO environment (name, geo_region, availability, kubernetes_master, kubernetes_token)
         VALUES (#{name}, #{geoRegion}, #{availability}, #{kubernetesMaster}, #{kubernetesToken})
     </insert>
 </mapper>

@@ -5,6 +5,7 @@ package io.logz.apollo.models;
  */
 public class Environment {
 
+    private int id;
     private String name;
     private String geoRegion;
     private String availability;
@@ -13,6 +14,14 @@ public class Environment {
 
     public Environment() {
 
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

@@ -6,9 +6,9 @@ import io.logz.apollo.models.Environment;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
+import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
-import org.rapidoid.setup.My;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,9 +35,11 @@ public class EnvironmentController {
     }
 
     @LoggedIn
-    @GET("/environment/{name}")
-    public Environment getEnvironment(String name) {
-        return environmentDao.getEnvironment(name);
+    @GET("/environment/{id}")
+    public Environment getEnvironment(int id) {
+        Environment gotEnvironment = environmentDao.getEnvironment(id);
+        gotEnvironment.setKubernetesToken("******");
+        return gotEnvironment;
     }
 
     @LoggedIn
@@ -49,11 +51,12 @@ public class EnvironmentController {
         newEnvironment.setGeoRegion(geoRegion);
         newEnvironment.setAvailability(availability);
         newEnvironment.setKubernetesMaster(kubernetesMaster);
-        newEnvironment.setKubernetesToken("******");
+        newEnvironment.setKubernetesToken(kubernetesToken);
 
         environmentDao.addEnvironment(newEnvironment);
 
         req.response().code(201);
-        req.response().result("Ok");
+        req.response().contentType(MediaType.APPLICATION_JSON);
+        req.response().json(newEnvironment);
     }
 }

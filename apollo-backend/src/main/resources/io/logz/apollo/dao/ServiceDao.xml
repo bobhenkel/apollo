@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.ServiceDao">
+    <select id="getService" resultType="io.logz.apollo.models.Service">
+        SELECT *
+        FROM service
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllServices" resultType="io.logz.apollo.models.Service">
+        SELECT *
+        FROM service
+    </select>
+
+    <insert id="addService" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO service (name)
+        VALUES (#{name})
+    </insert>
+</mapper>

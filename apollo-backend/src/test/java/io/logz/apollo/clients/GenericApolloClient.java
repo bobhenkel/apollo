@@ -1,5 +1,7 @@
 package io.logz.apollo.clients;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.logz.apollo.configuration.ApolloConfiguration;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 11/24/16.
@@ -29,6 +32,7 @@ public class GenericApolloClient {
     private final String userName;
     private final String plainPassword;
     private final ApolloConfiguration apolloConfiguration;
+    private final ObjectMapper mapper;
     private String token;
 
     GenericApolloClient(String userName, String plainPassword, ApolloConfiguration apolloConfiguration) {
@@ -37,6 +41,7 @@ public class GenericApolloClient {
         this.userName = userName;
         this.plainPassword = plainPassword;
         this.apolloConfiguration = apolloConfiguration;
+        this.mapper = new ObjectMapper();
     }
 
     void login() throws ApolloCouldNotLoginException {
@@ -66,6 +71,36 @@ public class GenericApolloClient {
         Request request = new Request.Builder().url(getFullUrlWithToken(url)).post(requestBody).build();
         Response response = client.newCall(request).execute();
         return new RestResponse(response.code(), response.body().string());
+    }
+
+    <T> T getResult(String url, TypeReference<T> responseType) throws ApolloClientException {
+        return runAndGetResult(url, Optional.empty(), responseType);
+    }
+
+    <T> T postAndGetResult(String url, String body, TypeReference<T> responseType) throws ApolloClientException {
+        return runAndGetResult(url, Optional.of(body), responseType);
+    }
+
+    private <T> T runAndGetResult(String url, Optional<String> body, TypeReference<T> responseType) throws ApolloClientException {
+        try {
+            RestResponse restResponse;
+
+            if (body.isPresent()) {
+                restResponse = post(url, body.get());
+                if (restResponse.getCode() != 201) {
+                    throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
+                }
+            } else {
+                restResponse = get(url);
+                if (restResponse.getCode() != 200) {
+                    throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
+                }
+            }
+            return mapper.readValue(restResponse.getBody(), responseType);
+
+        } catch (IOException e) {
+            throw new ApolloClientException("Could not reach Apollo API!", e);
+        }
     }
 
     private String getFullUrlWithToken(String url) {

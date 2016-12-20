@@ -1,22 +1,14 @@
 package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
-import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
-import io.logz.apollo.exceptions.ApolloCouldNotSignupException;
-import io.logz.apollo.exceptions.ApolloNotAuthenticatedException;
-import io.logz.apollo.exceptions.ApolloNotAuthorizedException;
-import io.logz.apollo.models.Environment;
 
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,8 +23,6 @@ public class Common {
     public static String randomStr(int size) {
         return UUID.randomUUID().toString().substring(0, size);
     }
-
-
 
     public static int getAvailablePort() throws IOException {
         ServerSocket socket = new ServerSocket(0);
@@ -88,36 +78,5 @@ public class Common {
         } catch (Exception e) {
             throw new RuntimeException("Could not signup or login..", e);
         }
-    }
-
-    public static User createRegularUser() {
-        return createUser(false);
-    }
-
-    public static User createAdminUser() {
-        return createUser(true);
-    }
-
-    public static Environment createEnvironment() {
-        Environment testEnvironment = new Environment();
-        testEnvironment.setName("env-name-" + Common.randomStr(5));
-        testEnvironment.setGeoRegion("us-east-" + Common.randomStr(5));
-        testEnvironment.setAvailability("PROD-" + Common.randomStr(5));
-        testEnvironment.setKubernetesMaster("kube.prod." + Common.randomStr(5));
-        testEnvironment.setKubernetesToken("AaBbCc" + Common.randomStr(10));
-
-        return testEnvironment;
-    }
-
-    private static User createUser(boolean admin) {
-
-        User testUser = new User();
-        testUser.setUserEmail("tahat+" + randomStr(5) + "@logz.io");
-        testUser.setFirstName("Tahat " + randomStr(5));
-        testUser.setLastName("Tahatson " + randomStr(5));
-        testUser.setHashedPassword(PasswordManager.encryptPassword(DEFAULT_PASSWORD));
-        testUser.setAdmin(admin);
-
-        return testUser;
     }
 }
