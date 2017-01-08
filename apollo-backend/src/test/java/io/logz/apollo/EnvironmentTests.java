@@ -4,13 +4,10 @@ import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
-import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.models.Environment;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import javax.script.ScriptException;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,26 +18,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class EnvironmentTests {
 
-    private final StandaloneApollo standaloneApollo;
-
-    public EnvironmentTests() throws ScriptException, IOException, SQLException {
-        standaloneApollo = StandaloneApollo.getOrCreateServer();
-    }
-
     @Test
     public void testAddAndGetEnvironment() throws ApolloClientException {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Add environment
-        Environment testEnvironment = ModelsGenerator.createEnvironment();
-        Environment createdEnvironment = apolloTestClient.addEnvironment(testEnvironment);
+        Environment testEnvironment = createAndSubmitEnvironment(apolloTestClient);
 
         // Make sure we cant add that again
         assertThatThrownBy(() -> apolloTestClient.addEnvironment(testEnvironment)).isInstanceOf(ApolloClientException.class);
 
         // Get the environment back from the api and validate the returned value
-        Environment returnedEnv = apolloTestClient.getEnvironment(createdEnvironment.getId());
+        Environment returnedEnv = apolloTestClient.getEnvironment(testEnvironment.getId());
 
         assertThat(returnedEnv.getName()).isEqualTo(testEnvironment.getName());
         assertThat(returnedEnv.getGeoRegion()).isEqualTo(testEnvironment.getGeoRegion());
@@ -55,12 +45,11 @@ public class EnvironmentTests {
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Add environment
-        Environment testEnvironment = ModelsGenerator.createEnvironment();
-        Environment createdEnvironment = apolloTestClient.addEnvironment(testEnvironment);
+        Environment testEnvironment = createAndSubmitEnvironment(apolloTestClient);
 
         // Get all environments, and filter for ours
         Optional<Environment> environmentFromApi = apolloTestClient.getAllEnvironments().stream()
-                .filter(environment -> environment.getId() == createdEnvironment.getId()).findFirst();
+                .filter(environment -> environment.getId() == testEnvironment.getId()).findFirst();
 
         boolean found = false;
 
@@ -75,5 +64,11 @@ public class EnvironmentTests {
             }
         }
         assertThat(found).isTrue();
+    }
+
+    private Environment createAndSubmitEnvironment(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
+        return testEnvironment;
     }
 }

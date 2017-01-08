@@ -3,9 +3,9 @@ package io.logz.apollo.helpers;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import org.rapidoid.serialize.Ser;
 
 /**
  * Created by roiravhon on 12/20/16.
@@ -27,7 +27,7 @@ public class ModelsGenerator {
         DeployableVersion testDeployableVersion = new DeployableVersion();
         testDeployableVersion.setGitCommitSha("abc129aed837f6" + Common.randomStr(5));
         testDeployableVersion.setGithubRepositoryUrl("http://github/logzio/" + Common.randomStr(5));
-        testDeployableVersion.setRelatedService(relatedService.getId());
+        testDeployableVersion.setServiceId(relatedService.getId());
 
         return testDeployableVersion;
     }
@@ -37,6 +37,20 @@ public class ModelsGenerator {
         testService.setName("Prod app " + Common.randomStr(5));
 
         return testService;
+    }
+
+    public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
+                                              DeployableVersion relatedDeployableVersion, User relatedUser) {
+
+        Deployment testDeployment = new Deployment();
+        testDeployment.setEnvironmentId(relatedEnvironment.getId());
+        testDeployment.setServiceId(relatedService.getId());
+        testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
+        testDeployment.setUserEmail(relatedUser.getUserEmail());
+        testDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
+        testDeployment.setSourceVersion("abc1234" + Common.randomStr(10));
+
+        return testDeployment;
     }
 
     public static User createRegularUser() {

@@ -16,7 +16,7 @@
     </select>
 
     <insert id="addDeployableVersion" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO deployable_version (github_repository_url, git_commit_sha, related_service)
-        VALUES (#{githubRepositoryUrl}, #{gitCommitSha}, #{relatedService})
+        INSERT INTO deployable_version (github_repository_url, git_commit_sha, service_id)
+        VALUES (#{githubRepositoryUrl}, #{gitCommitSha}, #{serviceId})
     </insert>
 </mapper>

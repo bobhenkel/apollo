@@ -8,7 +8,7 @@ public class DeployableVersion {
     private int id;
     private String gitCommitSha;
     private String githubRepositoryUrl;
-    private int relatedService;
+    private int serviceId;
 
     public DeployableVersion() {
 
@@ -38,11 +38,11 @@ public class DeployableVersion {
         this.githubRepositoryUrl = githubRepositoryUrl;
     }
 
-    public int getRelatedService() {
-        return relatedService;
+    public int getServiceId() {
+        return serviceId;
     }
 
-    public void setRelatedService(int relatedService) {
-        this.relatedService = relatedService;
+    public void setServiceId(int serviceId) {
+        this.serviceId = serviceId;
     }
 }

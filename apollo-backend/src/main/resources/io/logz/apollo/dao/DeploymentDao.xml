@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.DeploymentDao">
+    <select id="getDeployment" resultType="io.logz.apollo.models.Deployment">
+        SELECT *
+        FROM deployment
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllDeployments" resultType="io.logz.apollo.models.Deployment">
+        SELECT *
+        FROM deployment
+    </select>
+
+    <insert id="addDeployment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO deployment (environment_id, service_id, deployable_version_id, user_email, status, source_version)
+        VALUES (#{environmentId}, #{serviceId}, #{deployableVersionId}, #{userEmail}, #{status}, #{sourceVersion})
+    </insert>
+
+    <update id="updateDeploymentStatus">
+        UPDATE deployment
+        SET status=#{status}
+        WHERE id=#{id}
+    </update>
+</mapper>

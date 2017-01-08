@@ -35,8 +35,25 @@ CREATE TABLE `deployable_version` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `git_commit_sha` varchar(1000) NOT NULL,
   `github_repository_url` varchar(1000) NOT NULL,
-  `related_service` int(11) unsigned NOT NULL,
+  `service_id` int(11) unsigned NOT NULL,
    PRIMARY KEY (`id`),
-   CONSTRAINT `deployable_version_service_fk` FOREIGN KEY (`related_service`) REFERENCES `service` (`id`)
+   CONSTRAINT `deployable_version_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `deployment`;
+CREATE TABLE `deployment` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `environment_id` int(11) unsigned NOT NULL,
+  `service_id` int(11) unsigned NOT NULL,
+  `deployable_version_id` int(11) unsigned NOT NULL,
+  `user_email` varchar(1000) NOT NULL,
+  `status` varchar(1000) NOT NULL,
+  `source_version` varchar(1000) NOT NULL,
+  `started_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_update` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (`id`),
+   CONSTRAINT `deployment_environment_fk` FOREIGN KEY (`environment_id`) REFERENCES `environment` (`id`),
+   CONSTRAINT `deployment_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),
+   CONSTRAINT `deployment_deployable_version_fk` FOREIGN KEY (`deployable_version_id`) REFERENCES `service` (`id`),
+   CONSTRAINT `deployment_user_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

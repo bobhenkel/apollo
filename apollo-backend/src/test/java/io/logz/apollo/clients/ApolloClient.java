@@ -7,9 +7,9 @@ import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import org.rapidoid.serialize.Ser;
 
 import java.io.IOException;
 import java.util.List;
@@ -71,7 +71,7 @@ public class ApolloClient {
     public DeployableVersion addDeployableVersion(DeployableVersion deployableVersion) throws ApolloClientException {
         String requestBody = Common.generateJson("gitCommitSha", deployableVersion.getGitCommitSha(),
                 "githubRepositoryUrl", deployableVersion.getGithubRepositoryUrl(),
-                "relatedService", String.valueOf(deployableVersion.getRelatedService()));
+                "serviceId", String.valueOf(deployableVersion.getServiceId()));
 
         return genericApolloClient.postAndGetResult("/deployable-version", requestBody, new TypeReference<DeployableVersion>(){});
     }
@@ -82,5 +82,24 @@ public class ApolloClient {
 
     public List<DeployableVersion> getAllDeployableVersions() throws ApolloClientException {
         return genericApolloClient.getResult("/deployable-version/", new TypeReference<List<DeployableVersion>>(){});
+    }
+
+    public Deployment addDeployment(Deployment deployment) throws ApolloClientException {
+        String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
+                "serviceId", String.valueOf(deployment.getServiceId()),
+                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
+                "userEmail", deployment.getUserEmail(),
+                "status", deployment.getStatus().toString(),
+                "sourceVersion", deployment.getSourceVersion());
+
+        return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
+    }
+
+    public Deployment getDeployment(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/deployment/" + id, new TypeReference<Deployment>() {});
+    }
+
+    public List<Deployment> getAllDeployments() throws ApolloClientException {
+        return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
     }
 }

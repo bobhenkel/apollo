@@ -38,13 +38,13 @@ public class DeployableVersionController {
 
     @LoggedIn
     @POST("/deployable-version")
-    public void addDeployableVersion(String gitCommitSha, String githubRepositoryUrl, int relatedService, Req req) {
+    public void addDeployableVersion(String gitCommitSha, String githubRepositoryUrl, int serviceId, Req req) {
 
         DeployableVersion newDeployableVersion = new DeployableVersion();
 
         newDeployableVersion.setGitCommitSha(gitCommitSha);
         newDeployableVersion.setGithubRepositoryUrl(githubRepositoryUrl);
-        newDeployableVersion.setRelatedService(relatedService);
+        newDeployableVersion.setServiceId(serviceId);
 
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
 
