@@ -29,7 +29,7 @@ public class EnvironmentController {
     @GET("/environment")
     public List<Environment> getEnvironments() {
         return environmentDao.getAllEnvironments().stream().map(environment -> {
-            environment.setKubernetesToken("******");
+            environment = maskCredentials(environment);
             return environment;
         }).collect(Collectors.toList());
     }
@@ -38,7 +38,7 @@ public class EnvironmentController {
     @GET("/environment/{id}")
     public Environment getEnvironment(int id) {
         Environment gotEnvironment = environmentDao.getEnvironment(id);
-        gotEnvironment.setKubernetesToken("******");
+        gotEnvironment = maskCredentials(gotEnvironment);
         return gotEnvironment;
     }
 
@@ -58,5 +58,10 @@ public class EnvironmentController {
         req.response().code(201);
         req.response().contentType(MediaType.APPLICATION_JSON);
         req.response().json(newEnvironment);
+    }
+
+    private Environment maskCredentials(Environment environment) {
+        environment.setKubernetesToken("******");
+        return environment;
     }
 }

@@ -39,14 +39,14 @@ public class DeploymentController {
     @LoggedIn
     @POST("/deployment")
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId,
-                              String userEmail, Deployment.DeploymentStatus status, String sourceVersion, Req req) {
+                              String userEmail, String sourceVersion, Req req) {
 
         Deployment newDeployment = new Deployment();
         newDeployment.setEnvironmentId(environmentId);
         newDeployment.setServiceId(serviceId);
         newDeployment.setDeployableVersionId(deployableVersionId);
         newDeployment.setUserEmail(userEmail);
-        newDeployment.setStatus(status);
+        newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
         newDeployment.setSourceVersion(sourceVersion);
 
         deploymentDao.addDeployment(newDeployment);

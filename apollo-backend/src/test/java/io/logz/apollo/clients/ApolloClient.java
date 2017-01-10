@@ -89,7 +89,6 @@ public class ApolloClient {
                 "serviceId", String.valueOf(deployment.getServiceId()),
                 "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
                 "userEmail", deployment.getUserEmail(),
-                "status", deployment.getStatus().toString(),
                 "sourceVersion", deployment.getSourceVersion());
 
         return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
