@@ -33,9 +33,8 @@ public class DeploymentTests {
         assertThat(returnedDeployment.getServiceId()).isEqualTo(testDeployment.getServiceId());
         assertThat(returnedDeployment.getDeployableVersionId()).isEqualTo(testDeployment.getDeployableVersionId());
         assertThat(returnedDeployment.getUserEmail()).isEqualTo(testDeployment.getUserEmail());
-        assertThat(returnedDeployment.getStatus()).isEqualTo(testDeployment.getStatus());
+        assertThat(returnedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.PENDING);
         assertThat(returnedDeployment.getSourceVersion()).isEqualTo(testDeployment.getSourceVersion());
-
     }
 
     @Test
@@ -54,7 +53,7 @@ public class DeploymentTests {
             if (deploymentFromApi.get().getEnvironmentId() == testDeployment.getEnvironmentId() &&
                     deploymentFromApi.get().getServiceId() == testDeployment.getServiceId() &&
                     deploymentFromApi.get().getDeployableVersionId() == testDeployment.getDeployableVersionId() &&
-                    deploymentFromApi.get().getStatus().toString().equals(testDeployment.getStatus().toString()) &&
+                    deploymentFromApi.get().getStatus().toString().equals(Deployment.DeploymentStatus.PENDING.toString()) &&
                     deploymentFromApi.get().getSourceVersion().equals(testDeployment.getSourceVersion())) {
                 found = true;
             }

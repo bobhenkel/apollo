@@ -47,7 +47,6 @@ public class ModelsGenerator {
         testDeployment.setServiceId(relatedService.getId());
         testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
         testDeployment.setUserEmail(relatedUser.getUserEmail());
-        testDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
         testDeployment.setSourceVersion("abc1234" + Common.randomStr(10));
 
         return testDeployment;

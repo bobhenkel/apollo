@@ -37,6 +37,7 @@ CREATE TABLE `deployable_version` (
   `github_repository_url` varchar(1000) NOT NULL,
   `service_id` int(11) unsigned NOT NULL,
    PRIMARY KEY (`id`),
+   UNIQUE KEY `deployable_version_pair` (`service_id`, `git_commit_sha`),
    CONSTRAINT `deployable_version_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -57,3 +58,4 @@ CREATE TABLE `deployment` (
    CONSTRAINT `deployment_deployable_version_fk` FOREIGN KEY (`deployable_version_id`) REFERENCES `service` (`id`),
    CONSTRAINT `deployment_user_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
