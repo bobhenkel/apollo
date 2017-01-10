@@ -59,14 +59,3 @@ CREATE TABLE `deployment` (
    CONSTRAINT `deployment_user_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `permissions`;
-CREATE TABLE `permissions` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(1000) NOT NULL,
-  `service_id` int(11) unsigned NULL,
-  `environment_id` int(11) unsigned NULL,
-  `permission_type` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `permission_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),
-  CONSTRAINT `permission_environment_fk` FOREIGN KEY (`environment_id`) REFERENCES `environment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
