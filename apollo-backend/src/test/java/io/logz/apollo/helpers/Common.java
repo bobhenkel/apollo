@@ -1,8 +1,9 @@
 package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
-import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.clients.ApolloTestAdminClient;
+import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.ApolloMyBatis;
 
@@ -22,8 +23,6 @@ public class Common {
     public static String randomStr(int size) {
         return UUID.randomUUID().toString().substring(0, size);
     }
-
-
 
     public static int getAvailablePort() throws IOException {
         ServerSocket socket = new ServerSocket(0);
@@ -61,23 +60,23 @@ public class Common {
         return gson.toJson(jsonMap);
     }
 
-    public static User createRegularUser() {
-        return createUser(false);
-    }
+    public static ApolloTestClient signupAndLogin() {
 
-    public static User createAdminUser() {
-        return createUser(true);
-    }
+        try {
+            ApolloTestAdminClient apolloTestAdminClient = StandaloneApollo.getOrCreateServer().createTestAdminClient();
+            ApolloTestClient apolloTestClient = StandaloneApollo.getOrCreateServer().createTestClient();
 
-    private static User createUser(boolean admin) {
+            // Login admin and signup user
+            apolloTestAdminClient.login();
+            apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
 
-        User testUser = new User();
-        testUser.setUserEmail("tahat+" + randomStr(5) + "@logz.io");
-        testUser.setFirstName("Tahat " + randomStr(5));
-        testUser.setLastName("Tahatson " + randomStr(5));
-        testUser.setHashedPassword(PasswordManager.encryptPassword(DEFAULT_PASSWORD));
-        testUser.setAdmin(admin);
+            // Login the new user
+            apolloTestClient.login();
 
-        return testUser;
+            return apolloTestClient;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not signup or login..", e);
+        }
     }
 }

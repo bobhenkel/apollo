@@ -1,16 +1,17 @@
 package io.logz.apollo.clients;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
-import io.logz.apollo.helpers.RestResponse;
+import io.logz.apollo.helpers.Common;
+import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -34,27 +35,71 @@ public class ApolloClient {
         return user;
     }
 
-    public List<User> getAllUsers() throws IOException, ApolloClientException {
-        RestResponse restResponse = genericApolloClient.get("/users");
+    public List<User> getAllUsers() throws ApolloClientException {
+        return genericApolloClient.getResult("/user", new TypeReference<List<User>>(){});
+    }
 
-        if (restResponse.getCode() != 200) {
-            throw new ApolloClientException("Could not get users! got response code=" + restResponse.getCode() + " from server, with response=" + restResponse.getBody());
-        }
+    public Environment addEnvironment(Environment environment) throws ApolloClientException {
+        String requestBody = Common.generateJson("name", environment.getName(), "geoRegion", environment.getGeoRegion(),
+                "availability", environment.getAvailability(), "kubernetesMaster", environment.getKubernetesMaster(),
+                "kubernetesToken", environment.getKubernetesToken());
 
-        List<User> userList = new LinkedList<>();
-        JsonArray jsonArray = new JsonParser().parse(restResponse.getBody()).getAsJsonArray();
+        return genericApolloClient.postAndGetResult("/environment", requestBody, new TypeReference<Environment>(){});
+    }
 
-        jsonArray.forEach(user -> {
-            JsonObject currUser = user.getAsJsonObject();
-            User tempUser = new User();
-            tempUser.setUserEmail(currUser.get("userEmail").getAsString());
-            tempUser.setFirstName(currUser.get("firstName").getAsString());
-            tempUser.setLastName(currUser.get("lastName").getAsString());
-            tempUser.setHashedPassword(currUser.get("hashedPassword").getAsString());
-            tempUser.setAdmin(currUser.get("admin").getAsBoolean());
-            userList.add(tempUser);
-        });
+    public Environment getEnvironment(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/environment/" + id, new TypeReference<Environment>(){});
+    }
 
-        return userList;
+    public List<Environment> getAllEnvironments() throws ApolloClientException {
+        return genericApolloClient.getResult("/environment", new TypeReference<List<Environment>>(){});
+    }
+
+    public Service addService(Service service) throws ApolloClientException {
+        String requestBody = Common.generateJson("name", service.getName());
+        return genericApolloClient.postAndGetResult("/service", requestBody, new TypeReference<Service>(){});
+    }
+
+    public Service getService(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/service/" + id, new TypeReference<Service>(){});
+    }
+
+    public List<Service> getAllServices() throws ApolloClientException {
+        return genericApolloClient.getResult("/service", new TypeReference<List<Service>>(){});
+    }
+
+    public DeployableVersion addDeployableVersion(DeployableVersion deployableVersion) throws ApolloClientException {
+        String requestBody = Common.generateJson("gitCommitSha", deployableVersion.getGitCommitSha(),
+                "githubRepositoryUrl", deployableVersion.getGithubRepositoryUrl(),
+                "serviceId", String.valueOf(deployableVersion.getServiceId()));
+
+        return genericApolloClient.postAndGetResult("/deployable-version", requestBody, new TypeReference<DeployableVersion>(){});
+    }
+
+    public DeployableVersion getDeployableVersion(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/deployable-version/" + id, new TypeReference<DeployableVersion>(){});
+    }
+
+    public List<DeployableVersion> getAllDeployableVersions() throws ApolloClientException {
+        return genericApolloClient.getResult("/deployable-version/", new TypeReference<List<DeployableVersion>>(){});
+    }
+
+    public Deployment addDeployment(Deployment deployment) throws ApolloClientException {
+        String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
+                "serviceId", String.valueOf(deployment.getServiceId()),
+                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
+                "userEmail", deployment.getUserEmail(),
+                "status", deployment.getStatus().toString(),
+                "sourceVersion", deployment.getSourceVersion());
+
+        return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
+    }
+
+    public Deployment getDeployment(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/deployment/" + id, new TypeReference<Deployment>() {});
+    }
+
+    public List<Deployment> getAllDeployments() throws ApolloClientException {
+        return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
     }
 }

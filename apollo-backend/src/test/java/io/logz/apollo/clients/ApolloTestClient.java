@@ -2,6 +2,7 @@ package io.logz.apollo.clients;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.helpers.Common;
+import io.logz.apollo.helpers.ModelsGenerator;
 
 
 /**
@@ -10,6 +11,6 @@ import io.logz.apollo.helpers.Common;
 public class ApolloTestClient extends ApolloClient {
 
     public ApolloTestClient(ApolloConfiguration apolloConfiguration) {
-        super(Common.createRegularUser(), Common.DEFAULT_PASSWORD, apolloConfiguration);
+        super(ModelsGenerator.createRegularUser(), Common.DEFAULT_PASSWORD, apolloConfiguration);
     }
 }
