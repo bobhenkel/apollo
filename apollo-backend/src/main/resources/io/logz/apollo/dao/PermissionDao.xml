@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.PermissionDao">
+    <select id="getPermission" resultType="io.logz.apollo.auth.Permission">
+        SELECT *
+        FROM permissions
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllPermissions" resultType="io.logz.apollo.auth.Permission">
+        SELECT *
+        FROM permissions
+    </select>
+
+    <insert id="addPermission" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO permissions (name, service_id, environment_id, permission_type)
+        VALUES (#{name}, #{serviceId}, #{environmentId}, #{permissionType})
+    </insert>
+</mapper>

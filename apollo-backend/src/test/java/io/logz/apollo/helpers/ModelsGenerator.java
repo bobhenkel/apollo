@@ -1,11 +1,17 @@
 package io.logz.apollo.helpers;
 
+import io.logz.apollo.auth.Group;
+import io.logz.apollo.auth.GroupPermission;
 import io.logz.apollo.auth.PasswordManager;
+import io.logz.apollo.auth.Permission;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.auth.UserGroup;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 12/20/16.
@@ -50,6 +56,52 @@ public class ModelsGenerator {
         testDeployment.setSourceVersion("abc1234" + Common.randomStr(10));
 
         return testDeployment;
+    }
+
+    public static Group createGroup() {
+        Group testGroup = new Group();
+        testGroup.setName("Group " + Common.randomStr(10));
+
+        return testGroup;
+    }
+
+    public static UserGroup createUserGroup(User user, Group group) {
+        UserGroup testGroup = new UserGroup();
+        testGroup.setUserEmail(user.getUserEmail());
+        testGroup.setGroupId(group.getId());
+
+        return testGroup;
+    }
+
+    public static GroupPermission createGroupPermission(Group group, Permission permission) {
+        GroupPermission testGroupPermission = new GroupPermission();
+        testGroupPermission.setGroupId(group.getId());
+        testGroupPermission.setPermissionId(permission.getId());
+
+        return testGroupPermission;
+    }
+
+    public static Permission createAllowPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
+        return createPermission(relatedEnvironment, relatedService, true);
+    }
+
+    public static Permission createDenyPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
+        return createPermission(relatedEnvironment, relatedService, false);
+    }
+
+    private static Permission createPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService, boolean allow) {
+        Permission testPermission = new Permission();
+        testPermission.setName("Permission " + Common.randomStr(10));
+        relatedEnvironment.ifPresent(environment -> testPermission.setEnvironmentId(environment.getId()));
+        relatedService.ifPresent(service -> testPermission.setServiceId(service.getId()));
+
+        if (allow) {
+            testPermission.setPermissionType(Permission.PermissionType.ALLOW);
+        } else {
+            testPermission.setPermissionType(Permission.PermissionType.DENY);
+        }
+
+        return testPermission;
     }
 
     public static User createRegularUser() {

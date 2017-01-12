@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.UserGroupDao">
+    <select id="getAllUserGroupsByUser" resultType="io.logz.apollo.auth.UserGroup">
+        SELECT *
+        FROM user_groups
+        WHERE user_email = #{userEmail}
+    </select>
+
+    <select id="getAllUserGroups" resultType="io.logz.apollo.auth.UserGroup">
+        SELECT *
+        FROM user_groups
+    </select>
+
+    <insert id="addUserGroup">
+        INSERT INTO user_groups (user_email, group_id)
+        VALUES (#{userEmail}, #{groupId})
+    </insert>
+</mapper>

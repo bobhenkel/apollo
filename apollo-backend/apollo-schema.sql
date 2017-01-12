@@ -59,3 +59,40 @@ CREATE TABLE `deployment` (
    CONSTRAINT `deployment_user_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE `permissions` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(1000) NOT NULL,
+  `service_id` int(11) unsigned NULL,
+  `environment_id` int(11) unsigned NULL,
+  `permission_type` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permission_pairs` (`service_id`, `environment_id`, `permission_type`),
+  CONSTRAINT `permission_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`),
+  CONSTRAINT `permission_environment_fk` FOREIGN KEY (`environment_id`) REFERENCES `environment` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE `groups` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(1000) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `user_groups`;
+CREATE TABLE `user_groups` (
+  `user_email` varchar(1000) NOT NULL,
+  `group_id` int(11) unsigned NOT NULL,
+  UNIQUE KEY (`user_email`, `group_id`),
+  CONSTRAINT `user_groups_user_email_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`),
+  CONSTRAINT `user_groups_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `group_permissions`;
+CREATE TABLE `group_permissions` (
+  `group_id` int(11) unsigned NOT NULL,
+  `permission_id` int(11) unsigned NOT NULL,
+  UNIQUE KEY (`group_id`, `permission_id`),
+  CONSTRAINT `group_permissions_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`),
+  CONSTRAINT `group_permissions_permission_id_fk` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

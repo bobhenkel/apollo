@@ -6,9 +6,12 @@ import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 
+import javax.script.ScriptException;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,11 +66,11 @@ public class Common {
     public static ApolloTestClient signupAndLogin() {
 
         try {
-            ApolloTestAdminClient apolloTestAdminClient = StandaloneApollo.getOrCreateServer().createTestAdminClient();
-            ApolloTestClient apolloTestClient = StandaloneApollo.getOrCreateServer().createTestClient();
+            // Create and login admin
+            ApolloTestAdminClient apolloTestAdminClient = getAndLoginApolloTestAdminClient();
 
-            // Login admin and signup user
-            apolloTestAdminClient.login();
+            // Create and signup user
+            ApolloTestClient apolloTestClient = StandaloneApollo.getOrCreateServer().createTestClient();
             apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
 
             // Login the new user
@@ -78,5 +81,11 @@ public class Common {
         } catch (Exception e) {
             throw new RuntimeException("Could not signup or login..", e);
         }
+    }
+
+    public static ApolloTestAdminClient getAndLoginApolloTestAdminClient() throws ScriptException, IOException, SQLException, ApolloCouldNotLoginException {
+        ApolloTestAdminClient apolloTestAdminClient = StandaloneApollo.getOrCreateServer().createTestAdminClient();
+        apolloTestAdminClient.login();
+        return apolloTestAdminClient;
     }
 }
