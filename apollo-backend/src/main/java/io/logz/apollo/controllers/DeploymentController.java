@@ -1,5 +1,6 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.models.Deployment;
@@ -9,6 +10,7 @@ import org.rapidoid.annotation.POST;
 import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
+import sun.net.ftp.FtpDirEntry;
 
 import java.util.List;
 
@@ -41,18 +43,24 @@ public class DeploymentController {
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId,
                               String userEmail, String sourceVersion, Req req) {
 
-        Deployment newDeployment = new Deployment();
-        newDeployment.setEnvironmentId(environmentId);
-        newDeployment.setServiceId(serviceId);
-        newDeployment.setDeployableVersionId(deployableVersionId);
-        newDeployment.setUserEmail(userEmail);
-        newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
-        newDeployment.setSourceVersion(sourceVersion);
+        if (! PermissionsValidator.validatePermissions(serviceId, environmentId, userEmail)) {
+            req.response().code(403);
+            req.response().contentType(MediaType.APPLICATION_JSON);
+            req.response().json("Not Authorized!");
+        } else {
+            Deployment newDeployment = new Deployment();
+            newDeployment.setEnvironmentId(environmentId);
+            newDeployment.setServiceId(serviceId);
+            newDeployment.setDeployableVersionId(deployableVersionId);
+            newDeployment.setUserEmail(userEmail);
+            newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
+            newDeployment.setSourceVersion(sourceVersion);
 
-        deploymentDao.addDeployment(newDeployment);
+            deploymentDao.addDeployment(newDeployment);
 
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeployment);
+            req.response().code(201);
+            req.response().contentType(MediaType.APPLICATION_JSON);
+            req.response().json(newDeployment);
+        }
     }
 }

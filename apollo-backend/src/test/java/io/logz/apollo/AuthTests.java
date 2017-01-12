@@ -148,7 +148,7 @@ public class AuthTests {
         Deployment okDeployment = ModelsGenerator.createDeployment(testService, firstTestEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
         apolloTestClient.addDeployment(okDeployment);
 
-        Deployment failDeployment = ModelsGenerator.createDeployment(testService, firstTestEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment failDeployment = ModelsGenerator.createDeployment(testService, secondTestEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
@@ -224,8 +224,32 @@ public class AuthTests {
         // And allow the specific service
         createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), Permission.PermissionType.ALLOW);
 
+        Deployment successfulDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        apolloTestClient.addDeployment(successfulDeployment);
+    }
+
+    @Test
+    public void testDeploymentWithBothBroadAllowAndDeny() throws ApolloClientException, ScriptException, IOException, SQLException {
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
+
+        // Add two services, one that will get permissions and one that does not
+        Service testService = ModelsGenerator.createService();
+        testService.setId(apolloTestClient.addService(testService).getId());
+
+        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
+        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
+
+        // Set broad allow permission
+        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), Permission.PermissionType.ALLOW);
+
+        // Set broad deny permission
+        createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(testService), Permission.PermissionType.DENY);
+
         Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
-        apolloTestClient.addDeployment(failDeployment);
+        assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
     private void createAndSubmitPermissions(ApolloTestClient apolloTestClient, Optional<Environment> testEnvironment,

@@ -89,7 +89,6 @@ public class GenericApolloClient {
 
             if (body.isPresent()) {
                 restResponse = post(url, body.get());
-
                 switch (restResponse.getCode()) {
                     case 201:
                         break;
