@@ -15,6 +15,12 @@
         FROM deployment
     </select>
 
+    <select id="getAllRunningDeployments" resultType="io.logz.apollo.models.Deployment">
+        SELECT *
+        FROM deployment
+        WHERE status not in ("DONE", "CANCELED")
+    </select>
+
     <insert id="addDeployment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO deployment (environment_id, service_id, deployable_version_id, user_email, status, source_version)
         VALUES (#{environmentId}, #{serviceId}, #{deployableVersionId}, #{userEmail}, #{status}, #{sourceVersion})

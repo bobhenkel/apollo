@@ -11,6 +11,7 @@ public interface DeploymentDao {
 
     Deployment getDeployment(int id);
     List<Deployment> getAllDeployments();
+    List<Deployment> getAllRunningDeployments();
     void addDeployment(Deployment deployment);
     void updateDeploymentStatus(int id, Deployment.DeploymentStatus status);
 }
