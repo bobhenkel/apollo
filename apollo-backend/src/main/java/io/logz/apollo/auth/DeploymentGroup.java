@@ -3,12 +3,12 @@ package io.logz.apollo.auth;
 /**
  * Created by roiravhon on 1/10/17.
  */
-public class Group {
+public class DeploymentGroup {
 
     private int id;
     private String name;
 
-    public Group() {
+    public DeploymentGroup() {
 
     }
 

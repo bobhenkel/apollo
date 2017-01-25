@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.DeploymentGroupPermissionDao">
+    <select id="getAllDeploymentGroupPermissionsByGroup" resultType="io.logz.apollo.auth.DeploymentGroupPermission">
+        SELECT *
+        FROM deployment_group_permissions
+        WHERE deployment_group_id = #{deploymentGroupId}
+    </select>
+
+    <select id="getAllDeploymentGroupPermissions" resultType="io.logz.apollo.auth.DeploymentGroupPermission">
+        SELECT *
+        FROM deployment_group_permissions
+    </select>
+
+    <insert id="addDeploymentGroupPermission">
+        INSERT INTO deployment_group_permissions (deployment_group_id, deployment_permission_id)
+        VALUES (#{deploymentGroupId}, #{deploymentPermissionId})
+    </insert>
+</mapper>

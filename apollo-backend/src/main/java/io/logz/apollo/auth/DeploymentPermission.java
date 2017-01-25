@@ -3,7 +3,7 @@ package io.logz.apollo.auth;
 /**
  * Created by roiravhon on 1/10/17.
  */
-public class Permission {
+public class DeploymentPermission {
 
     public enum PermissionType {
         ALLOW,
@@ -16,7 +16,7 @@ public class Permission {
     private Integer environmentId;
     private PermissionType permissionType;
 
-    public Permission() {
+    public DeploymentPermission() {
 
     }
 

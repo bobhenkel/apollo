@@ -1,13 +1,11 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.Group;
-import io.logz.apollo.auth.GroupPermission;
-import io.logz.apollo.auth.Permission;
-import io.logz.apollo.auth.UserGroup;
-import io.logz.apollo.clients.ApolloClient;
+import io.logz.apollo.auth.DeploymentGroup;
+import io.logz.apollo.auth.DeploymentGroupPermission;
+import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.auth.DeploymentUserGroup;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
-import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.models.DeployableVersion;
@@ -93,16 +91,16 @@ public class DeploymentTests {
 
         ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
 
-        Group newGroup = ModelsGenerator.createGroup();
-        newGroup.setId(apolloTestAdminClient.addGroup(newGroup).getId());
+        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
+        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
 
-        Permission newPermission = ModelsGenerator.createAllowPermission(Optional.of(environment), Optional.empty());
-        newPermission.setId(apolloTestAdminClient.addPermission(newPermission).getId());
+        DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
+        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
-        GroupPermission newGroupPermission = ModelsGenerator.createGroupPermission(newGroup, newPermission);
-        apolloTestAdminClient.addGroupPermission(newGroupPermission);
+        DeploymentGroupPermission newDeploymentGroupPermission = ModelsGenerator.createGroupPermission(newDeploymentGroup, newDeploymentPermission);
+        apolloTestAdminClient.addGroupPermission(newDeploymentGroupPermission);
 
-        UserGroup newUserGroup = ModelsGenerator.createUserGroup(apolloTestClient.getClientUser(), newGroup);
-        apolloTestAdminClient.addUserGroup(newUserGroup);
+        DeploymentUserGroup newDeploymentUserGroup = ModelsGenerator.createUserGroup(apolloTestClient.getClientUser(), newDeploymentGroup);
+        apolloTestAdminClient.addUserGroup(newDeploymentUserGroup);
     }
 }

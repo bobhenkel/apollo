@@ -1,11 +1,7 @@
 package io.logz.apollo.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.logz.apollo.auth.Group;
-import io.logz.apollo.auth.GroupPermission;
-import io.logz.apollo.auth.Permission;
 import io.logz.apollo.auth.User;
-import io.logz.apollo.auth.UserGroup;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
