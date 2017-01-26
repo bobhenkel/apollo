@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
+import io.logz.apollo.exceptions.ApolloNotAuthenticatedException;
+import io.logz.apollo.exceptions.ApolloNotAuthorizedException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
 import okhttp3.MediaType;
@@ -87,13 +89,28 @@ public class GenericApolloClient {
 
             if (body.isPresent()) {
                 restResponse = post(url, body.get());
-                if (restResponse.getCode() != 201) {
-                    throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
+                switch (restResponse.getCode()) {
+                    case 201:
+                        break;
+                    case 401:
+                        throw new ApolloNotAuthenticatedException();
+                    case 403:
+                        throw new ApolloNotAuthorizedException();
+                    default:
+                        throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
                 }
+
             } else {
                 restResponse = get(url);
-                if (restResponse.getCode() != 200) {
-                    throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
+                switch (restResponse.getCode()) {
+                    case 200:
+                        break;
+                    case 401:
+                        throw new ApolloNotAuthenticatedException();
+                    case 403:
+                        throw new ApolloNotAuthorizedException();
+                    default:
+                        throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
                 }
             }
             return mapper.readValue(restResponse.getBody(), responseType);

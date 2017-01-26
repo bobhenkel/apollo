@@ -1,8 +1,9 @@
 package io.logz.apollo;
 
-import io.logz.apollo.clients.ApolloClient;
+import io.logz.apollo.auth.DeploymentGroup;
+import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
-import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.models.DeployableVersion;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DeploymentTests {
 
     @Test
-    public void testGetAndAddDeployment() throws ApolloClientException {
+    public void testGetAndAddDeployment() throws Exception {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
@@ -38,7 +39,7 @@ public class DeploymentTests {
     }
 
     @Test
-    public void testGetAllDeployments() throws ApolloClientException {
+    public void testGetAllDeployments() throws Exception {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
@@ -62,7 +63,7 @@ public class DeploymentTests {
         assertThat(found).isTrue();
     }
 
-    private Deployment createAndSumbitDeployment(ApolloTestClient apolloTestClient) throws ApolloClientException {
+    private Deployment createAndSumbitDeployment(ApolloTestClient apolloTestClient) throws Exception {
 
         // Add all foreign keys
         Environment testEnvironment = ModelsGenerator.createEnvironment();
@@ -74,10 +75,27 @@ public class DeploymentTests {
         DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
+        // Give the user permissions to deploy
+        grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
+
         // Now we have enough to create a deployment
         Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
         testDeployment.setId(apolloTestClient.addDeployment(testDeployment).getId());
 
         return testDeployment;
+    }
+
+    private void grantUserFullPermissionsOnEnvironment(ApolloTestClient apolloTestClient, Environment environment) throws Exception {
+
+        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
+
+        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
+        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
+
+        DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
+        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
+
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

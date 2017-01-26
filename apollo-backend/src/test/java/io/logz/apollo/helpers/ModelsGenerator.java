@@ -1,11 +1,15 @@
 package io.logz.apollo.helpers;
 
+import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.PasswordManager;
+import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 12/20/16.
@@ -50,6 +54,36 @@ public class ModelsGenerator {
         testDeployment.setSourceVersion("abc1234" + Common.randomStr(10));
 
         return testDeployment;
+    }
+
+    public static DeploymentGroup createDeploymentGroup() {
+        DeploymentGroup testDeploymentGroup = new DeploymentGroup();
+        testDeploymentGroup.setName("DeploymentGroup " + Common.randomStr(10));
+
+        return testDeploymentGroup;
+    }
+
+    public static DeploymentPermission createAllowDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
+        return createDeploymentPermission(relatedEnvironment, relatedService, true);
+    }
+
+    public static DeploymentPermission createDenyDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
+        return createDeploymentPermission(relatedEnvironment, relatedService, false);
+    }
+
+    private static DeploymentPermission createDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService, boolean allow) {
+        DeploymentPermission testDeploymentPermission = new DeploymentPermission();
+        testDeploymentPermission.setName("DeploymentPermission " + Common.randomStr(10));
+        relatedEnvironment.ifPresent(environment -> testDeploymentPermission.setEnvironmentId(environment.getId()));
+        relatedService.ifPresent(service -> testDeploymentPermission.setServiceId(service.getId()));
+
+        if (allow) {
+            testDeploymentPermission.setPermissionType(DeploymentPermission.PermissionType.ALLOW);
+        } else {
+            testDeploymentPermission.setPermissionType(DeploymentPermission.PermissionType.DENY);
+        }
+
+        return testDeploymentPermission;
     }
 
     public static User createRegularUser() {
