@@ -3,9 +3,7 @@ package io.logz.apollo.clients;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.DeploymentGroupPermission;
 import io.logz.apollo.auth.User;
-import io.logz.apollo.auth.DeploymentUserGroup;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
@@ -77,34 +75,18 @@ public class ApolloAdminClient {
         return genericApolloClient.getResult("/deployment-permission", new TypeReference<List<DeploymentPermission>>() {});
     }
 
-    public DeploymentUserGroup addUserGroup(DeploymentUserGroup deploymentUserGroup) throws ApolloClientException {
-        String requestBody = Common.generateJson("userEmail", deploymentUserGroup.getUserEmail(),
-                "deploymentGroupId", String.valueOf(deploymentUserGroup.getDeploymentGroupId()));
+    public void addUserToGroup(String userEmail, int deploymentGroupId) throws ApolloClientException {
+        String requestBody = Common.generateJson("userEmail", userEmail,
+                "deploymentGroupId", String.valueOf(deploymentGroupId));
 
-        return genericApolloClient.postAndGetResult("/deployment-user-group", requestBody, new TypeReference<DeploymentUserGroup>() {});
+        genericApolloClient.postAndGetResult("/add-user-to-deployment-group", requestBody, new TypeReference<Object>() {});
     }
 
-    public List<DeploymentUserGroup> getAllUserGroupsByUser(String userEmail) throws ApolloClientException {
-        return genericApolloClient.getResult("/deployment-user-group/" + userEmail, new TypeReference<List<DeploymentUserGroup>>() {});
-    }
+    public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId) throws ApolloClientException {
+        String requestBody = Common.generateJson("deploymentGroupId", String.valueOf(deploymentGroupId),
+                "deploymentPermissionId", String.valueOf(deploymentPermissionId));
 
-    public List<DeploymentUserGroup> getAllUserGroups() throws ApolloClientException {
-        return genericApolloClient.getResult("/deployment-user-group", new TypeReference<List<DeploymentUserGroup>>() {});
-    }
-
-    public DeploymentGroupPermission addGroupPermission(DeploymentGroupPermission deploymentGroupPermission) throws ApolloClientException {
-        String requestBody = Common.generateJson("deploymentGroupId", String.valueOf(deploymentGroupPermission.getDeploymentGroupId()),
-                "deploymentPermissionId", String.valueOf(deploymentGroupPermission.getDeploymentPermissionId()));
-
-        return genericApolloClient.postAndGetResult("/deployment-group-permission", requestBody, new TypeReference<DeploymentGroupPermission>() {});
-    }
-
-    public List<DeploymentGroupPermission> getAllGroupPermissionsByGroup(int groupId) throws ApolloClientException {
-        return genericApolloClient.getResult("/deployment-group-permission/" + groupId, new TypeReference<List<DeploymentGroupPermission>>() {});
-    }
-
-    public List<DeploymentGroupPermission> getAllGroupPermissions() throws ApolloClientException {
-        return genericApolloClient.getResult("/deployment-group-permission", new TypeReference<List<DeploymentGroupPermission>>() {});
+        genericApolloClient.postAndGetResult("/add-deployment-permission-to-deployment-group", requestBody, new TypeReference<Object>() {});
     }
 
     private String generateSignupJson(User user, String plainPassword) {

@@ -1,11 +1,9 @@
 package io.logz.apollo.helpers;
 
 import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentGroupPermission;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.User;
-import io.logz.apollo.auth.DeploymentUserGroup;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
@@ -63,22 +61,6 @@ public class ModelsGenerator {
         testDeploymentGroup.setName("DeploymentGroup " + Common.randomStr(10));
 
         return testDeploymentGroup;
-    }
-
-    public static DeploymentUserGroup createUserGroup(User user, DeploymentGroup deploymentGroup) {
-        DeploymentUserGroup testGroup = new DeploymentUserGroup();
-        testGroup.setUserEmail(user.getUserEmail());
-        testGroup.setDeploymentGroupId(deploymentGroup.getId());
-
-        return testGroup;
-    }
-
-    public static DeploymentGroupPermission createGroupPermission(DeploymentGroup deploymentGroup, DeploymentPermission deploymentPermission) {
-        DeploymentGroupPermission testDeploymentGroupPermission = new DeploymentGroupPermission();
-        testDeploymentGroupPermission.setDeploymentGroupId(deploymentGroup.getId());
-        testDeploymentGroupPermission.setDeploymentPermissionId(deploymentPermission.getId());
-
-        return testDeploymentGroupPermission;
     }
 
     public static DeploymentPermission createAllowDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {

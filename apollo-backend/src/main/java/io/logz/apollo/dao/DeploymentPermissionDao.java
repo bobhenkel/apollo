@@ -11,5 +11,6 @@ public interface DeploymentPermissionDao {
 
     DeploymentPermission getDeploymentPermission(int id);
     List<DeploymentPermission> getAllDeploymentPermissions();
+    List<DeploymentPermission> getPermissionsByUser(String userEmail);
     void addDeploymentPermission(DeploymentPermission deploymentPermission);
 }

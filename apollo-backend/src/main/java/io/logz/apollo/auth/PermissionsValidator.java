@@ -1,80 +1,59 @@
 package io.logz.apollo.auth;
 
-import io.logz.apollo.dao.DeploymentGroupPermissionDao;
-import io.logz.apollo.dao.DeploymentPermissionDao;
-import io.logz.apollo.dao.DeploymentUserGroupDao;
-import io.logz.apollo.database.ApolloMyBatis;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 1/12/17.
  */
 public class PermissionsValidator {
 
-    public static boolean validatePermissions(int serviceId, int environmentId, String userEmail) {
+    public static boolean isAllowedToDeploy(int serviceId, int environmentId, List<DeploymentPermission> userDeploymentPermissions) {
 
-        AtomicBoolean gotPermission = new AtomicBoolean(false);
+        boolean isAllowed = false;
 
-        List<DeploymentPermission> userDeploymentPermissions = getUserPermissions(userEmail);
+        // Check if there are wildcard permissions, either on service or environment (with the other one null)
+        Optional<Boolean> isAllowedOnWildcard = isAllowedWildcard(serviceId, environmentId, userDeploymentPermissions);
 
-        // First iterate over permissions with no environment or no service, as those are the weakest, giving "Deny" the latest word
-        userDeploymentPermissions.stream()
-                .filter(permission -> {
-                    if (permission.getEnvironmentId() == null && permission.getServiceId() == serviceId) {
-                        return true;
-                    } else if (permission.getServiceId() == null && permission.getEnvironmentId() == environmentId) {
-                        return true;
-                    }
-                    return false;
-                }).sorted(PermissionsValidator::sortPermissionsByAllowDeny)
-                .forEachOrdered(permission -> {
-                    if (permission.getPermissionType().equals(DeploymentPermission.PermissionType.ALLOW)) {
-                        gotPermission.set(true);
-                    } else {
-                        gotPermission.set(false);
-                    }
-        });
+        // Check if there are specific permissions for service + environment pair
+        Optional<Boolean> isAllowedOnSpecific = isAllowedSpecific(serviceId, environmentId, userDeploymentPermissions);
 
-        // Now iterate over specific permissions, giving "Deny" the latest word
-        userDeploymentPermissions.stream()
-                .filter(permission ->
-                        Objects.equals(permission.getEnvironmentId(), environmentId) &&
-                        Objects.equals(permission.getServiceId(), serviceId))
-                .sorted(PermissionsValidator::sortPermissionsByAllowDeny)
-                .forEachOrdered(permission -> {
-                    if (permission.getPermissionType().equals(DeploymentPermission.PermissionType.ALLOW)) {
-                        gotPermission.set(true);
-                    } else {
-                        gotPermission.set(false);
-                    }
-                });
+        if (isAllowedOnWildcard.isPresent()) {
+            isAllowed = isAllowedOnWildcard.get();
+        }
 
-        return gotPermission.get();
+        if (isAllowedOnSpecific.isPresent()) {
+            isAllowed = isAllowedOnSpecific.get();
+        }
+
+        return isAllowed;
     }
 
-    private static List<DeploymentPermission> getUserPermissions(String userEmail) {
-
-        DeploymentPermissionDao deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
-        DeploymentGroupPermissionDao deploymentGroupPermissionDao = ApolloMyBatis.getDao(DeploymentGroupPermissionDao.class);
-        DeploymentUserGroupDao deploymentUserGroupDao = ApolloMyBatis.getDao(DeploymentUserGroupDao.class);
-
-        return deploymentUserGroupDao.getAllDeploymentUserGroupsByUser(userEmail)
+    private static Optional<Boolean> isAllowedWildcard(int serviceId, int environmentId, List<DeploymentPermission> userDeploymentPermissions) {
+        return userDeploymentPermissions
                 .stream()
-                .map(userGroup -> deploymentGroupPermissionDao.getAllDeploymentGroupPermissionsByGroup(userGroup.getDeploymentGroupId()))
-                .map(groupPermissions ->
-                        groupPermissions.stream()
-                        .map(groupPermission -> deploymentPermissionDao.getDeploymentPermission(groupPermission.getDeploymentPermissionId()))
-                        .collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .filter(deploymentPermission -> (Objects.equals(deploymentPermission.getServiceId(), serviceId) &&
+                                                    Objects.equals(deploymentPermission.getEnvironmentId(), null)) ||
+                                                (Objects.equals(deploymentPermission.getServiceId(), null) &&
+                                                    Objects.equals(deploymentPermission.getEnvironmentId(), environmentId)))
+                .sorted(PermissionsValidator::sortPermissionsByAllowDeny)
+                .map(deploymentPermission -> deploymentPermission.getPermissionType() == DeploymentPermission.PermissionType.ALLOW)
+                .reduce((result, permission) -> permission);
     }
 
-    private static int sortPermissionsByAllowDeny(DeploymentPermission deploymentPermission1, DeploymentPermission deploymentPermission2) {
+    private static Optional<Boolean> isAllowedSpecific(int serviceId, int environmentId, List<DeploymentPermission> userDeploymentPermissions) {
+        return userDeploymentPermissions
+                .stream()
+                .filter(deploymentPermission -> Objects.equals(deploymentPermission.getServiceId(), serviceId) &&
+                                                Objects.equals(deploymentPermission.getEnvironmentId(), environmentId))
+                .sorted(PermissionsValidator::sortPermissionsByAllowDeny)
+                .map(deploymentPermission -> deploymentPermission.getPermissionType() == DeploymentPermission.PermissionType.ALLOW)
+                .reduce((permission, result) -> permission);
+    }
+
+    // Deny permissions are always stronger than the allow ones, so this sort return the allow first, and the deny after
+    public static int sortPermissionsByAllowDeny(DeploymentPermission deploymentPermission1, DeploymentPermission deploymentPermission2) {
         if (deploymentPermission1.getPermissionType().equals(deploymentPermission2.getPermissionType())) {
             return 0;
         } else if (deploymentPermission1.getPermissionType().equals(DeploymentPermission.PermissionType.ALLOW)) {

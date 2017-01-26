@@ -2,9 +2,7 @@ package io.logz.apollo;
 
 import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.DeploymentGroupPermission;
 import io.logz.apollo.auth.User;
-import io.logz.apollo.auth.DeploymentUserGroup;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
@@ -269,10 +267,7 @@ public class AuthTests {
 
         newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
-        DeploymentGroupPermission newDeploymentGroupPermission = ModelsGenerator.createGroupPermission(newDeploymentGroup, newDeploymentPermission);
-        apolloTestAdminClient.addGroupPermission(newDeploymentGroupPermission);
-
-        DeploymentUserGroup newDeploymentUserGroup = ModelsGenerator.createUserGroup(apolloTestClient.getClientUser(), newDeploymentGroup);
-        apolloTestAdminClient.addUserGroup(newDeploymentUserGroup);
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

@@ -2,6 +2,7 @@ package io.logz.apollo.controllers;
 
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.models.Deployment;
 import org.rapidoid.annotation.Controller;
@@ -10,7 +11,6 @@ import org.rapidoid.annotation.POST;
 import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
-import sun.net.ftp.FtpDirEntry;
 
 import java.util.List;
 
@@ -21,9 +21,11 @@ import java.util.List;
 public class DeploymentController {
 
     private final DeploymentDao deploymentDao;
+    private final DeploymentPermissionDao deploymentPermissionDao;
 
     public DeploymentController() {
         this.deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
+        this.deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
     }
 
     @LoggedIn
@@ -43,7 +45,8 @@ public class DeploymentController {
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId,
                               String userEmail, String sourceVersion, Req req) {
 
-        if (! PermissionsValidator.validatePermissions(serviceId, environmentId, userEmail)) {
+        if (! PermissionsValidator.isAllowedToDeploy(serviceId, environmentId,
+                deploymentPermissionDao.getPermissionsByUser(userEmail))) {
             req.response().code(403);
             req.response().contentType(MediaType.APPLICATION_JSON);
             req.response().json("Not Authorized!");

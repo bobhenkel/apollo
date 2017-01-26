@@ -19,4 +19,14 @@
         INSERT INTO deployment_groups (name)
         VALUES (#{name})
     </insert>
+
+    <insert id="addUserToDeploymentGroup">
+        INSERT INTO deployment_user_groups (user_email, deployment_group_id)
+        VALUES (#{userEmail}, #{deploymentGroupId})
+    </insert>
+
+    <insert id="addDeploymentPermissionToDeploymentGroup">
+        INSERT INTO deployment_group_permissions (deployment_group_id, deployment_permission_id)
+        VALUES (#{deploymentGroupId}, #{deploymentPermissionId})
+    </insert>
 </mapper>

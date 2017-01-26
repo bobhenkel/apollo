@@ -1,16 +1,12 @@
 package io.logz.apollo.controllers;
 
 import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentGroupPermission;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.User;
-import io.logz.apollo.auth.DeploymentUserGroup;
 import io.logz.apollo.dao.DeploymentGroupDao;
-import io.logz.apollo.dao.DeploymentGroupPermissionDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.dao.DeploymentUserGroupDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
@@ -35,15 +31,11 @@ public class AuthController {
     private final UserDao userDao;
     private final DeploymentGroupDao deploymentGroupDao;
     private final DeploymentPermissionDao deploymentPermissionDao;
-    private final DeploymentGroupPermissionDao deploymentGroupPermissionDao;
-    private final DeploymentUserGroupDao deploymentUserGroupDao;
 
     public AuthController() {
         userDao = ApolloMyBatis.getDao(UserDao.class);
         deploymentGroupDao = ApolloMyBatis.getDao(DeploymentGroupDao.class);
         deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
-        deploymentGroupPermissionDao = ApolloMyBatis.getDao(DeploymentGroupPermissionDao.class);
-        deploymentUserGroupDao = ApolloMyBatis.getDao(DeploymentUserGroupDao.class);
         initializeLoginProvider();
         initializeRolesProvider();
     }
@@ -139,55 +131,24 @@ public class AuthController {
     }
 
     @Administrator
-    @GET("/deployment-user-group")
-    public List<DeploymentUserGroup> getAllDeploymentUserGroups(Req req) {
-        return deploymentUserGroupDao.getAllDeploymentUserGroups();
-    }
-
-    @Administrator
-    @GET("/deployment-user-group/{userEmail}")
-    public List<DeploymentUserGroup> getAllDeploymentUserGroupsByUser(String userEmail, Req req) {
-        return deploymentUserGroupDao.getAllDeploymentUserGroupsByUser(userEmail);
-    }
-
-    @Administrator
-    @POST("/deployment-user-group")
-    public void addDeploymentUserGroup(String userEmail, int deploymentGroupId, Req req) {
-        DeploymentUserGroup newDeploymentUserGroup = new DeploymentUserGroup();
-        newDeploymentUserGroup.setUserEmail(userEmail);
-        newDeploymentUserGroup.setDeploymentGroupId(deploymentGroupId);
-
-        deploymentUserGroupDao.addDeploymentUserGroup(newDeploymentUserGroup);
+    @POST("/add-user-to-deployment-group")
+    public void addUserToDeploymentGroup(String userEmail, int deploymentGroupId, Req req) {
+        deploymentGroupDao.addUserToDeploymentGroup(userEmail, deploymentGroupId);
 
         req.response().code(201);
         req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeploymentUserGroup);
+        req.response().json("ok");
     }
 
     @Administrator
-    @GET("/deployment-group-permission")
-    public List<DeploymentGroupPermission> getAllDeploymentGroupPermissions(Req req) {
-        return deploymentGroupPermissionDao.getAllDeploymentGroupPermissions();
-    }
+    @POST("/add-deployment-permission-to-deployment-group")
+    public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId, Req req) {
 
-    @Administrator
-    @GET("/deployment-group-permission/{id}")
-    public List<DeploymentGroupPermission> getAllDeploymentGroupPermissionsByGroup(int id, Req req) {
-        return deploymentGroupPermissionDao.getAllDeploymentGroupPermissionsByGroup(id);
-    }
-
-    @Administrator
-    @POST("/deployment-group-permission")
-    public void addDeploymentGroupPermission(int deploymentGroupId, int deploymentPermissionId, Req req) {
-        DeploymentGroupPermission newDeploymentGroupPermission = new DeploymentGroupPermission();
-        newDeploymentGroupPermission.setDeploymentGroupId(deploymentGroupId);
-        newDeploymentGroupPermission.setDeploymentPermissionId(deploymentPermissionId);
-
-        deploymentGroupPermissionDao.addDeploymentGroupPermission(newDeploymentGroupPermission);
+        deploymentGroupDao.addDeploymentPermissionToDeploymentGroup(deploymentGroupId, deploymentPermissionId);
 
         req.response().code(201);
         req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeploymentGroupPermission);
+        req.response().json("ok");
     }
 
     private void initializeLoginProvider() {
