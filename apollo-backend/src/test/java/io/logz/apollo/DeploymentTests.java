@@ -1,10 +1,7 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.Group;
-import io.logz.apollo.auth.GroupPermission;
-import io.logz.apollo.auth.Permission;
-import io.logz.apollo.auth.UserGroup;
-import io.logz.apollo.clients.ApolloClient;
+import io.logz.apollo.auth.DeploymentGroup;
+import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
@@ -108,16 +105,13 @@ public class DeploymentTests {
 
         ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
 
-        Group newGroup = ModelsGenerator.createGroup();
-        newGroup.setId(apolloTestAdminClient.addGroup(newGroup).getId());
+        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
+        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
 
-        Permission newPermission = ModelsGenerator.createAllowPermission(Optional.of(environment), Optional.empty());
-        newPermission.setId(apolloTestAdminClient.addPermission(newPermission).getId());
+        DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
+        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
-        GroupPermission newGroupPermission = ModelsGenerator.createGroupPermission(newGroup, newPermission);
-        apolloTestAdminClient.addGroupPermission(newGroupPermission);
-
-        UserGroup newUserGroup = ModelsGenerator.createUserGroup(apolloTestClient.getClientUser(), newGroup);
-        apolloTestAdminClient.addUserGroup(newUserGroup);
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

@@ -3,6 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.LockService;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.models.Deployment;
 import org.rapidoid.annotation.Controller;
@@ -26,9 +27,11 @@ public class DeploymentController {
 
     private final DeploymentDao deploymentDao;
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
+    private final DeploymentPermissionDao deploymentPermissionDao;
 
     public DeploymentController() {
         this.deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
+        this.deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
     }
 
     @LoggedIn
@@ -56,13 +59,14 @@ public class DeploymentController {
 
         logger.info("Got request for a new deployment");
 
-        if (! PermissionsValidator.validatePermissions(serviceId, environmentId, userEmail)) {
+        if (! PermissionsValidator.isAllowedToDeploy(serviceId, environmentId,
+                deploymentPermissionDao.getPermissionsByUser(userEmail))) {
 
             logger.info("User is not authorized to perform this deployment!");
-
             req.response().code(403);
             req.response().contentType(MediaType.APPLICATION_JSON);
             req.response().json("Not Authorized!");
+
         } else {
 
             String lockName = "lock-service-" + serviceId + "-environment-" + environmentId;
