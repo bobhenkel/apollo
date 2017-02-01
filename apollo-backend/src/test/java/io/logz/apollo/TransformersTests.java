@@ -39,10 +39,12 @@ public class TransformersTests {
     private class CreateDeploymentResult {
         private final Deployment deployment;
         private final DeployableVersion deployableVersion;
+        private final Environment environment;
 
-        CreateDeploymentResult(Deployment deployment, DeployableVersion deployableVersion) {
+        CreateDeploymentResult(Deployment deployment, DeployableVersion deployableVersion, Environment environment) {
             this.deployment = deployment;
             this.deployableVersion = deployableVersion;
+            this.environment = environment;
         }
 
         Deployment getDeployment() {
@@ -51,6 +53,10 @@ public class TransformersTests {
 
         DeployableVersion getDeployableVersion() {
             return deployableVersion;
+        }
+
+        public Environment getEnvironment() {
+            return environment;
         }
     }
 
@@ -100,44 +106,68 @@ public class TransformersTests {
     }
 
     @Test
-    public void testLabelsTransformer() throws ApolloParseException {
+    public void testDeploymentLabelsTransformer() throws ApolloParseException {
 
         CreateDeploymentResult createDeploymentResult;
         ApolloToKubernetes apolloToKubernetes;
 
-        String SampleLabelFromTransformer = "current_commit_sha";
+        String SampleLabelFromTransformer = "environment";
 
         createDeploymentResult = createDeployment("image", "key", "value");
         apolloToKubernetes = new ApolloToKubernetes(createDeploymentResult.getDeployment());
-        assertLabelExists(apolloToKubernetes.getKubernetesDeployment(), DEFAULT_LABEL_KEY, DEFAULT_LABEL_VALUE);
+        assertDeploymentLabelExists(apolloToKubernetes.getKubernetesDeployment(), DEFAULT_LABEL_KEY, DEFAULT_LABEL_VALUE);
 
         // Check for one of the default labels that the transformer assigns
         createDeploymentResult = createDeployment("image", "key", "value");
         apolloToKubernetes = new ApolloToKubernetes(createDeploymentResult.getDeployment());
-        assertLabelExists(apolloToKubernetes.getKubernetesDeployment(), SampleLabelFromTransformer, createDeploymentResult.deployableVersion.getGitCommitSha());
+        assertDeploymentLabelExists(apolloToKubernetes.getKubernetesDeployment(),
+                SampleLabelFromTransformer, createDeploymentResult.getEnvironment().getName());
 
         // Check that the transformer does not override a given label with a default one
         createDeploymentResult = createDeployment("image", SampleLabelFromTransformer, "value");
         apolloToKubernetes = new ApolloToKubernetes(createDeploymentResult.getDeployment());
-        assertLabelExists(apolloToKubernetes.getKubernetesDeployment(), SampleLabelFromTransformer, "value");
+        assertDeploymentLabelExists(apolloToKubernetes.getKubernetesDeployment(), SampleLabelFromTransformer, "value");
+    }
+
+    @Test
+    public void testServiceLabelsTransformer() throws ApolloParseException {
+
+        CreateDeploymentResult createDeploymentResult;
+        ApolloToKubernetes apolloToKubernetes;
+
+        String SampleLabelFromTransformer = "environment";
+
+        createDeploymentResult = createDeployment("image", "key", "value");
+        apolloToKubernetes = new ApolloToKubernetes(createDeploymentResult.getDeployment());
+        assertServiceLabelExists(apolloToKubernetes.getKubernetesService(), DEFAULT_LABEL_KEY, DEFAULT_LABEL_VALUE);
+
+        createDeploymentResult = createDeployment("image", "key", "value");
+        apolloToKubernetes = new ApolloToKubernetes(createDeploymentResult.getDeployment());
+        assertServiceLabelExists(apolloToKubernetes.getKubernetesService(),
+                SampleLabelFromTransformer, createDeploymentResult.getEnvironment().getName());
     }
 
     private void assertImageName(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String imageName) {
         assertThat(deployment.getSpec().getTemplate().getSpec().getContainers().stream().findFirst().get().getImage()).isEqualTo(imageName);
     }
 
-    private void assertLabelExists(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String labelKey, String labelValue) {
+    private void assertDeploymentLabelExists(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String labelKey, String labelValue) {
         assertThat(deployment.getSpec().getTemplate().getMetadata().getLabels().get(labelKey)).isEqualTo(labelValue);
     }
 
-    private CreateDeploymentResult createDeployment(String deploymentImageName, String deploymentExtraLabelKey, String deploymentExtraLabelValue) {
+    private void assertServiceLabelExists(io.fabric8.kubernetes.api.model.Service service, String labelKey, String labelValue) {
+        assertThat(service.getMetadata().getLabels().get(labelKey)).isEqualTo(labelValue);
+    }
+
+    private CreateDeploymentResult createDeployment(String deploymentImageName, String extraLabelKey, String extraLabelValue) {
 
         // Create all models in DB
         Environment testEnvironment = ModelsGenerator.createEnvironment();
         environmentDao.addEnvironment(testEnvironment);
 
         Service testService = ModelsGenerator.createService();
-        testService.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, deploymentExtraLabelKey, deploymentExtraLabelValue));
+        testService.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
+        testService.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
         serviceDao.addService(testService);
 
         DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
@@ -150,7 +180,7 @@ public class TransformersTests {
         testDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
         deploymentDao.addDeployment(testDeployment);
 
-        return new CreateDeploymentResult(testDeployment, testDeployableVersion);
+        return new CreateDeploymentResult(testDeployment, testDeployableVersion, testEnvironment);
     }
 
     private String getDeploymentKubernetesYaml(String imageName, String extraLabelKey, String extraLabelValue) {
@@ -187,5 +217,28 @@ public class TransformersTests {
                 "      restartPolicy: Always\n" +
                 "      securityContext: {}\n" +
                 "      terminationGracePeriodSeconds: 30";
+    }
+
+    private String getServiceDeploymentYaml(String extraLabelKey, String extraLabelValue) {
+        return "apiVersion: v1\n" +
+                "kind: Service\n" +
+                "metadata:\n" +
+                "  labels:\n" +
+                "    " + DEFAULT_LABEL_KEY + ": " + DEFAULT_LABEL_VALUE + "\n" +
+                "    " + extraLabelKey + ": " + extraLabelValue + "\n" +
+                "  name: roi-test-service\n" +
+                "  namespace: default\n" +
+                "spec:  \n" +
+                "  ports:\n" +
+                "  - nodePort: 30002\n" +
+                "    port: 80\n" +
+                "    protocol: TCP\n" +
+                "    targetPort: 80\n" +
+                "  selector:\n" +
+                "    app: nginx\n" +
+                "  sessionAffinity: None\n" +
+                "  type: NodePort\n" +
+                "status:\n" +
+                "  loadBalancer: {}";
     }
 }

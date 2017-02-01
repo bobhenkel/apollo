@@ -10,15 +10,11 @@ import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.excpetions.ApolloParseException;
-import io.logz.apollo.excpetions.ApolloTransformException;
-import io.logz.apollo.models.DeployableVersion;
-import io.logz.apollo.models.Environment;
 import io.logz.apollo.transformers.deployment.BaseDeploymentTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentImageNameTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentLabelsTransformer;
 import io.logz.apollo.transformers.service.BaseServiceTransformer;
 import io.logz.apollo.transformers.service.ServiceLabelTransformer;
-import org.rapidoid.serialize.Ser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +82,7 @@ public class ApolloToKubernetes {
         }
     }
 
-    public Service getKubernetesService() throws ApolloParseException, ApolloTransformException {
+    public Service getKubernetesService() throws ApolloParseException {
         try {
             // Convert the service object to fabric8 model
             Service service = mapper.readValue(apolloService.getServiceYaml(), Service.class);
@@ -105,7 +101,19 @@ public class ApolloToKubernetes {
     }
 
     public static String getApolloDeploymentUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
-                                                      io.logz.apollo.models.Service apolloService) {
-        return "apollo_" + apolloEnvironment.getName() + "_" + apolloService.getName();
+                                                             io.logz.apollo.models.Service apolloService) {
+
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "deployment");
+    }
+
+    public static String getApolloServiceUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
+                                                           io.logz.apollo.models.Service apolloService) {
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "service");
+    }
+
+    private static String getApolloUniqueIdentifierWithPrefix(io.logz.apollo.models.Environment apolloEnvironment,
+                                                              io.logz.apollo.models.Service apolloService,
+                                                              String prefix) {
+        return "apollo_" + prefix + "_" + apolloEnvironment.getName() + "_" + apolloService.getName();
     }
 }
