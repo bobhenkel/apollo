@@ -56,7 +56,9 @@ public class ApolloClient {
     }
 
     public Service addService(Service service) throws ApolloClientException {
-        String requestBody = Common.generateJson("name", service.getName());
+        String requestBody = Common.generateJson("name", service.getName(),
+                "deploymentYaml", service.getDeploymentYaml(),
+                "serviceYaml", service.getServiceYaml());
         return genericApolloClient.postAndGetResult("/service", requestBody, new TypeReference<Service>(){});
     }
 

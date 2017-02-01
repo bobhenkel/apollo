@@ -16,7 +16,7 @@
     </select>
 
     <insert id="addService" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO service (name)
-        VALUES (#{name})
+        INSERT INTO service (name, deployment_yaml, service_yaml)
+        VALUES (#{name}, #{deploymentYaml}, #{serviceYaml})
     </insert>
 </mapper>

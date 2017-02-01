@@ -25,7 +25,8 @@ DROP TABLE IF EXISTS `service`;
 CREATE TABLE `service` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
-
+  `deployment_yaml` text NOT NULL,
+  `service_yaml` text NULL,
    PRIMARY KEY (`id`),
    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

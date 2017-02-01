@@ -38,12 +38,13 @@ public class ServiceController {
 
     @LoggedIn
     @POST("/service")
-    public void addDeployableVersion(String name, Req req) {
+    public void addDeployableVersion(String name, String deploymentYaml, String serviceYaml, Req req) {
 
         Service newService = new Service();
 
-        //TODO: fill more here..
         newService.setName(name);
+        newService.setDeploymentYaml(deploymentYaml);
+        newService.setServiceYaml(serviceYaml);
 
         serviceDao.addService(newService);
 

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <deploymentGroupId>io.logz.apollo</deploymentGroupId>
+    <groupId>io.logz.apollo</groupId>
     <artifactId>apollo-backend</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -12,7 +12,7 @@
     <build>
         <plugins>
             <plugin>
-                <deploymentGroupId>org.apache.maven.plugins</deploymentGroupId>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
@@ -22,7 +22,7 @@
             </plugin>
 
             <plugin>
-                <deploymentGroupId>org.apache.maven.plugins</deploymentGroupId>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
@@ -47,7 +47,7 @@
             </plugin>
             <!--
             <plugin>
-                <deploymentGroupId>com.spotify</deploymentGroupId>
+                <groupId>com.spotify</deploymentGroupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.13</version>
                 <configuration>
@@ -67,88 +67,101 @@
     </build>
     <dependencies>
         <dependency>
-            <deploymentGroupId>com.google.guava</deploymentGroupId>
+            <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>ch.qos.logback</deploymentGroupId>
+            <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.7</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>ch.qos.logback</deploymentGroupId>
+            <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>1.1.7</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>org.slf4j</deploymentGroupId>
+            <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>io.logz.logback</deploymentGroupId>
+            <groupId>io.logz.logback</groupId>
             <artifactId>logzio-logback-appender</artifactId>
             <version>1.0.11</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>org.mybatis</deploymentGroupId>
+            <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
             <version>3.4.1</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>org.rapidoid</deploymentGroupId>
+            <groupId>org.rapidoid</groupId>
             <artifactId>rapidoid-quick</artifactId>
             <version>5.2.6</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>com.zaxxer</deploymentGroupId>
+            <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>2.5.1</version>
         </dependency>
         <dependency>
-            <deploymentGroupId>com.typesafe</deploymentGroupId>
+            <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
             <version>1.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-model</artifactId>
+            <version>1.0.65</version>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>1.4.33</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.8.5</version>
         </dependency>
 
         <!-- Test dependencies -->
         <dependency>
-            <deploymentGroupId>junit</deploymentGroupId>
+            <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <deploymentGroupId>org.testcontainers</deploymentGroupId>
+            <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
             <version>1.1.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <deploymentGroupId>com.squareup.okhttp3</deploymentGroupId>
+            <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <deploymentGroupId>com.google.code.gson</deploymentGroupId>
+            <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <deploymentGroupId>org.assertj</deploymentGroupId>
+            <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <deploymentGroupId>com.fasterxml.jackson.core</deploymentGroupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.8.5</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 </project>
