@@ -11,6 +11,7 @@ public class Environment {
     private String availability;
     private String kubernetesMaster;
     private String kubernetesToken;
+    private String kubernetesNamespace;
 
     public Environment() {
 
@@ -62,5 +63,13 @@ public class Environment {
 
     public void setKubernetesToken(String kubernetesToken) {
         this.kubernetesToken = kubernetesToken;
+    }
+
+    public String getKubernetesNamespace() {
+        return kubernetesNamespace;
+    }
+
+    public void setKubernetesNamespace(String kubernetesNamespace) {
+        this.kubernetesNamespace = kubernetesNamespace;
     }
 }

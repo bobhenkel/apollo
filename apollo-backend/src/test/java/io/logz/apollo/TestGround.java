@@ -1,19 +1,36 @@
 package io.logz.apollo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.extensions.Deployment;
-import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
+import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.ClientPodResource;
+import io.fabric8.kubernetes.client.dsl.internal.PodOperationsImpl;
+import io.logz.apollo.auth.User;
+import io.logz.apollo.dao.DeployableVersionDao;
+import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.ServiceDao;
+import io.logz.apollo.dao.UserDao;
+import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.helpers.ModelsGenerator;
+import io.logz.apollo.helpers.StandaloneApollo;
+import io.logz.apollo.kubernetes.ApolloToKubernetes;
+import io.logz.apollo.kubernetes.KubernetesHandler;
+import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
 import org.junit.Test;
 
+import javax.script.ScriptException;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by roiravhon on 1/15/17.
@@ -21,67 +38,14 @@ import java.io.IOException;
 public class TestGround {
 
     @Test
-    public void testGround() throws IOException {
+    public void testGround() throws IOException, ScriptException, SQLException {
 
-        Config config = new ConfigBuilder().withMasterUrl("https://172.31.24.6:6443").withOauthToken("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImFwb2xsby10b2tlbi1pZHZ4OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhcG9sbG8iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5MDAwYjA1ZS1hY2MwLTExZTYtOWI1ZC0wYTc3MGIxYWQ4NDAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDphcG9sbG8ifQ.HNzku2KCbqClA_APVWsS_r4NxAS_Kf9-2eW770PJTT7buoAdJNLMjgObAyc4-Lh0D6BRzkcY8JmCsILcnisgy5OWmoY86qV1011mYIb-_SINa11O8TpEraqYbLZGk2GbQCJaXUzlyzvaXx2eJoZ1XABhDWLp7D4JdM0-ac4kY9_vKcVGnosrB8-zIMqWZVjd467wKyv78-kG3uQr2mkP4ZKY-JKAxkcK_WOC-AgsRfN9ekPfeSCFj3gqrRB5_ep9bLPURf8sEcdb3LYwb81QH0S5-2ZqNM170gWsGv5tUvBXXhox0J9FQm1u9J9EyD3tPiDBB6x7OyyyoT7x64bDyA").build();
+        String kubeMaster = "https://172.31.24.6:6443";
+        String oauthToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImFwb2xsby10b2tlbi1pZHZ4OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhcG9sbG8iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5MDAwYjA1ZS1hY2MwLTExZTYtOWI1ZC0wYTc3MGIxYWQ4NDAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDphcG9sbG8ifQ.HNzku2KCbqClA_APVWsS_r4NxAS_Kf9-2eW770PJTT7buoAdJNLMjgObAyc4-Lh0D6BRzkcY8JmCsILcnisgy5OWmoY86qV1011mYIb-_SINa11O8TpEraqYbLZGk2GbQCJaXUzlyzvaXx2eJoZ1XABhDWLp7D4JdM0-ac4kY9_vKcVGnosrB8-zIMqWZVjd467wKyv78-kG3uQr2mkP4ZKY-JKAxkcK_WOC-AgsRfN9ekPfeSCFj3gqrRB5_ep9bLPURf8sEcdb3LYwb81QH0S5-2ZqNM170gWsGv5tUvBXXhox0J9FQm1u9J9EyD3tPiDBB6x7OyyyoT7x64bDyA";
+        Config config = new ConfigBuilder().withMasterUrl(kubeMaster).withOauthToken(oauthToken).build();
         KubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
 
-        String json = "{\n" +
-                "    \"kind\": \"Deployment\",\n" +
-                "    \"apiVersion\": \"extensions/v1beta1\",\n" +
-                "    \"metadata\": {\n" +
-                "        \"name\": \"nginx\",\n" +
-                "        \"namespace\": \"default\",\n" +
-                "        \"labels\": {\n" +
-                "            \"app\": \"nginx\"\n" +
-                "        }  \n" +
-                "    },\n" +
-                "    \"spec\": {\n" +
-                "        \"replicas\": 1,\n" +
-                "        \"selector\": {\n" +
-                "            \"matchLabels\": {\n" +
-                "                \"app\": \"nginx\"\n" +
-                "            }\n" +
-                "        },\n" +
-                "        \"template\": {\n" +
-                "            \"metadata\": {\n" +
-                "                \"labels\": {\n" +
-                "                    \"app\": \"nginx\"\n" +
-                "                }\n" +
-                "            },\n" +
-                "            \"spec\": {\n" +
-                "                \"containers\": [\n" +
-                "                    {\n" +
-                "                        \"name\": \"roi-apollo-test\",\n" +
-                "                        \"image\": \"registry.internal.logz.io:5000/roi-sample-app\",\n" +
-                "                        \"ports\": [\n" +
-                "                            {\n" +
-                "                                \"containerPort\": 80,\n" +
-                "                                \"protocol\": \"TCP\"\n" +
-                "                            }\n" +
-                "                        ],\n" +
-                "                        \"resources\": {},\n" +
-                "                        \"imagePullPolicy\": \"Always\"\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"restartPolicy\": \"Always\",\n" +
-                "                \"terminationGracePeriodSeconds\": 30,\n" +
-                "                \"dnsPolicy\": \"ClusterFirst\",\n" +
-                "                \"securityContext\": {}\n" +
-                "            }\n" +
-                "        },\n" +
-                "        \"strategy\": {\n" +
-                "            \"type\": \"RollingUpdate\",\n" +
-                "            \"rollingUpdate\": {\n" +
-                "                \"maxUnavailable\": 0,\n" +
-                "                \"maxSurge\": 1\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
-
-
-        String yaml = "apiVersion: extensions/v1beta1\n" +
+        String depyaml = "apiVersion: extensions/v1beta1\n" +
                 "kind: Deployment\n" +
                 "metadata:\n" +
                 "  labels:\n" +
@@ -116,67 +80,74 @@ public class TestGround {
                 "      securityContext: {}\n" +
                 "      terminationGracePeriodSeconds: 30";
 
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Deployment deployment = mapper.readValue(yaml, Deployment.class);
+        String seryaml = "apiVersion: v1\n" +
+                "kind: Service\n" +
+                "metadata:\n" +
+                "  labels:\n" +
+                "    app: nginx\n" +
+                "  name: roi-test-service\n" +
+                "  namespace: default\n" +
+                "spec:  \n" +
+                "  ports:\n" +
+                "  - nodePort: 30002\n" +
+                "    port: 80\n" +
+                "    protocol: TCP\n" +
+                "    targetPort: 80\n" +
+                "  selector:\n" +
+                "    app: nginx\n" +
+                "  sessionAffinity: None\n" +
+                "  type: NodePort\n" +
+                "status:\n" +
+                "  loadBalancer: {}";
 
-        deployment.getSpec().getTemplate().getSpec().getContainers().forEach(container -> container.setImage(container.getImage() + ":1"));
-        kubernetesClient.extensions().deployments().inNamespace("default").createOrReplace(deployment);
 
-        System.out.println(deployment.getSpec().getTemplate().getSpec().getContainers().stream().findFirst().get().getImage());
+        kubernetesClient
+                .pods()
+                .inNamespace("default")
+                .withLabel("apollo_unique_identifier", "apollo_deployment_env-name-62e05_Prod_app_e90d6")
+                .list()
+                .getItems()
+                .stream()
+                .map(pod -> pod.getMetadata().getName())
+                .forEach(name -> {
+                    System.out.println("Logs from " + name + ":");
+                    System.out.println(kubernetesClient.pods().inNamespace("default").withName(name).getLog(true));
+                });
 
-//        Deployment deployment = new DeploymentBuilder()
-//                .withNewMetadata()
-//                .withName("nginx")
-//                .endMetadata()
-//                .withNewSpec()
-//                .withReplicas(1)
-//                .withNewTemplate()
-//                .withNewMetadata()
-//                .addToLabels("app", "nginx")
-//                .endMetadata()
-//                .withNewSpec()
-//                .addNewContainer()
-//                .withName("roi-apollo-test")
-//                .withImage("registry.internal.logz.io:5000/roi-sample-app:2")
-//                .withImagePullPolicy("Always")
-//                .addNewPort()
-//                .withContainerPort(80)
-//                .endPort()
-//                .endContainer()
-//                .endSpec()
-//                .endTemplate()
-//                .endSpec()
-//                .build();
-//
-//        Service service = new ServiceBuilder()
-//                .withNewMetadata()
-//                .withName("roi-test-service")
-//                .addToLabels("app", "nginx")
-//                .endMetadata()
-//                .withNewSpec()
-//                .withType("NodePort")
-//                .addNewPort()
-//                .withPort(80)
-//                .withNodePort(30002)
-//                .withProtocol("TCP")
-//                .endPort()
-//                .addToSelector("app", "nginx")
-//                .endSpec()
-//                .build();
-//
-//        //Namespace namespace = new NamespaceBuilder().withNewMetadata().withName("default").endMetadata().build();
-//        //ServiceAccount serviceAccount = new ServiceAccountBuilder().withNewMetadata().withName("apollo").endMetadata().build();
-//
-//        //kubernetesClient.namespaces().createOrReplace(namespace);
-//        //kubernetesClient.serviceAccounts().inNamespace("default").createOrReplace(serviceAccount);
-//        kubernetesClient.extensions().deployments().inNamespace("default").createOrReplace(deployment);
-//        kubernetesClient.services().inNamespace("default").createOrReplace(service);
-//
-//        //DeploymentSpec n = new DeploymentSpecBuilder().with
-//        //Deployment deployment = new DeploymentBuilder().with
-//
-//        //kubernetesClient.extensions().deployments().create()
 
+//        StandaloneApollo.getOrCreateServer();
+//
+//        // Get the DAOs we need
+//        EnvironmentDao environmentDao = ApolloMyBatis.getDao(EnvironmentDao.class);
+//        ServiceDao serviceDao = ApolloMyBatis.getDao(ServiceDao.class);
+//        DeployableVersionDao deployableVersionDao = ApolloMyBatis.getDao(DeployableVersionDao.class);
+//        UserDao userDao = ApolloMyBatis.getDao(UserDao.class);
+//        DeploymentDao deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
+//
+//        Environment testEnvironment = ModelsGenerator.createEnvironment();
+//        testEnvironment.setKubernetesNamespace("default");
+//        testEnvironment.setKubernetesToken(oauthToken);
+//        testEnvironment.setKubernetesMaster(kubeMaster);
+//        environmentDao.addEnvironment(testEnvironment);
+//
+//        Service testService = ModelsGenerator.createService();
+//        testService.setDeploymentYaml(depyaml);
+//        testService.setServiceYaml(seryaml);
+//        serviceDao.addService(testService);
+//
+//        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
+//        testDeployableVersion.setGitCommitSha("1");
+//        deployableVersionDao.addDeployableVersion(testDeployableVersion);
+//
+//        User testUser = ModelsGenerator.createRegularUser();
+//        userDao.addUser(testUser);
+//
+//        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, testUser);
+//        testDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
+//        deploymentDao.addDeployment(testDeployment);
+//
+//        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(testEnvironment);
+//        Deployment returnedDep = kubernetesHandler.startDeployment(testDeployment);
 
 
     }

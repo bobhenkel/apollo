@@ -16,9 +16,11 @@ public class ApolloConfiguration {
     private String dbSchema;
     private String apiListen;
     private int apiPort;
+    private int monitorThreadFrequencySeconds;
 
     @VisibleForTesting
-    public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword, String dbSchema, String apiListen, int apiPort) {
+    public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword,
+                               String dbSchema, String apiListen, int apiPort, int monitorThreadFrequencySeconds) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
@@ -26,6 +28,7 @@ public class ApolloConfiguration {
         this.dbSchema = dbSchema;
         this.apiListen = apiListen;
         this.apiPort = apiPort;
+        this.monitorThreadFrequencySeconds = monitorThreadFrequencySeconds;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
@@ -43,7 +46,10 @@ public class ApolloConfiguration {
         String apiListen = config.getString("apollo.api.listen");
         int apiPort = config.getInt("apollo.api.port");
 
-        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort);
+        // Kubernetes related
+        int monitorThreadFrequencySeconds = config.getInt("apollo.kubernetes.monitoringFrequencySeconds");
+
+        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort, monitorThreadFrequencySeconds);
     }
 
     public int getDbPort() {
@@ -72,6 +78,10 @@ public class ApolloConfiguration {
 
     public int getApiPort() {
         return apiPort;
+    }
+
+    public int getMonitorThreadFrequencySeconds() {
+        return monitorThreadFrequencySeconds;
     }
 
     @VisibleForTesting
@@ -107,5 +117,10 @@ public class ApolloConfiguration {
     @VisibleForTesting
     public void setApiPort(int apiPort) {
         this.apiPort = apiPort;
+    }
+
+    @VisibleForTesting
+    public void setMonitorThreadFrequencySeconds(int monitorThreadFrequencySeconds) {
+        this.monitorThreadFrequencySeconds = monitorThreadFrequencySeconds;
     }
 }

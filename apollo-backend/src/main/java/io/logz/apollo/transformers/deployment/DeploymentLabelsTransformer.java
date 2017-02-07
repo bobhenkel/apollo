@@ -3,6 +3,7 @@ package io.logz.apollo.transformers.deployment;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
+import io.logz.apollo.transformers.LabelsNormalizer;
 
 import java.util.Map;
 
@@ -19,12 +20,12 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
                                 io.logz.apollo.models.DeployableVersion apolloDeployableVersion) {
 
         Map<String, String> desiredLabels = ImmutableMap.<String, String> builder()
-                .put("environment", apolloEnvironment.getName())
-                .put("geo_region", apolloEnvironment.getGeoRegion())
-                .put("service", apolloService.getName())
-                .put("current_commit_sha", apolloDeployableVersion.getGitCommitSha())
-                .put("availability", apolloEnvironment.getAvailability())
-                .put("apollo_unique_identifier", ApolloToKubernetes.getApolloDeploymentUniqueIdentifier(apolloEnvironment, apolloService))
+                .put("environment", LabelsNormalizer.normalize(apolloEnvironment.getName()))
+                .put("geo_region", LabelsNormalizer.normalize(apolloEnvironment.getGeoRegion()))
+                .put("service", LabelsNormalizer.normalize(apolloService.getName()))
+                .put("current_commit_sha", LabelsNormalizer.normalize(apolloDeployableVersion.getGitCommitSha()))
+                .put("availability", LabelsNormalizer.normalize(apolloEnvironment.getAvailability()))
+                .put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService))
                 .build();
 
         Map<String, String> labelsFromDeployment = deployment.getSpec().getTemplate().getMetadata().getLabels();

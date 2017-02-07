@@ -3,6 +3,7 @@ package io.logz.apollo.transformers.service;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Service;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
+import io.logz.apollo.transformers.LabelsNormalizer;
 
 import java.util.Map;
 
@@ -18,8 +19,8 @@ public class ServiceLabelTransformer implements BaseServiceTransformer {
                              io.logz.apollo.models.DeployableVersion apolloDeployableVersion) {
 
         Map<String, String> desiredLabels = ImmutableMap.<String, String> builder()
-                .put("environment", apolloEnvironment.getName())
-                .put("geo_region", apolloEnvironment.getGeoRegion())
+                .put("environment", LabelsNormalizer.normalize(apolloEnvironment.getName()))
+                .put("geo_region", LabelsNormalizer.normalize(apolloEnvironment.getGeoRegion()))
                 .put("apollo_unique_identifier", ApolloToKubernetes.getApolloServiceUniqueIdentifier(apolloEnvironment, apolloService))
                 .build();
 

@@ -36,6 +36,7 @@ public class EnvironmentTests {
         assertThat(returnedEnv.getGeoRegion()).isEqualTo(testEnvironment.getGeoRegion());
         assertThat(returnedEnv.getAvailability()).isEqualTo(testEnvironment.getAvailability());
         assertThat(returnedEnv.getKubernetesMaster()).isEqualTo(testEnvironment.getKubernetesMaster());
+        assertThat(returnedEnv.getKubernetesNamespace()).isEqualTo(testEnvironment.getKubernetesNamespace());
         assertThat(returnedEnv.getKubernetesToken()).contains("*");
     }
 
@@ -59,7 +60,8 @@ public class EnvironmentTests {
                     environmentFromApi.get().getGeoRegion().equals(testEnvironment.getGeoRegion()) &&
                     environmentFromApi.get().getAvailability().equals(testEnvironment.getAvailability()) &&
                     environmentFromApi.get().getKubernetesMaster().equals(testEnvironment.getKubernetesMaster()) &&
-                    environmentFromApi.get().getKubernetesToken().contains("*")) {
+                    environmentFromApi.get().getKubernetesToken().contains("*") &&
+                    environmentFromApi.get().getKubernetesNamespace().equals(testEnvironment.getKubernetesNamespace())) {
                 found = true;
             }
         }

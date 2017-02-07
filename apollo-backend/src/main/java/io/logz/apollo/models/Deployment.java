@@ -9,7 +9,9 @@ public class Deployment {
 
     public enum DeploymentStatus {
         PENDING,
+        PENDING_CANCELLATION,
         STARTED,
+        CANCELING,
         DONE,
         CANCELED
     }

@@ -17,6 +17,7 @@ CREATE TABLE `environment` (
   `availability` varchar(100) NOT NULL,
   `kubernetes_master` varchar(1000) NOT NULL,
   `kubernetes_token` varchar(1000) NOT NULL,
+  `kubernetes_namespace` varchar(1000) NOT NULL,
    PRIMARY KEY (`id`),
    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

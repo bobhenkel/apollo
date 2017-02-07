@@ -44,7 +44,8 @@ public class EnvironmentController {
 
     @LoggedIn
     @POST("/environment")
-    public void addEnvironment(String name, String geoRegion, String availability, String kubernetesMaster, String kubernetesToken, Req req) {
+    public void addEnvironment(String name, String geoRegion, String availability, String kubernetesMaster,
+                               String kubernetesToken, String kubernetesNamespace, Req req) {
 
         Environment newEnvironment = new Environment();
         newEnvironment.setName(name);
@@ -52,6 +53,7 @@ public class EnvironmentController {
         newEnvironment.setAvailability(availability);
         newEnvironment.setKubernetesMaster(kubernetesMaster);
         newEnvironment.setKubernetesToken(kubernetesToken);
+        newEnvironment.setKubernetesNamespace(kubernetesNamespace);
 
         environmentDao.addEnvironment(newEnvironment);
 
