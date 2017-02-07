@@ -16,7 +16,7 @@ import java.util.List;
  * Created by roiravhon on 12/20/16.
  */
 @Controller
-public class DeployableVersionController {
+public class DeployableVersionController extends BaseController {
 
     private final DeployableVersionDao deployableVersionDao;
 
@@ -47,9 +47,6 @@ public class DeployableVersionController {
         newDeployableVersion.setServiceId(serviceId);
 
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeployableVersion);
+        assignJsonResponseToReq(req, 201, newDeployableVersion);
     }
 }

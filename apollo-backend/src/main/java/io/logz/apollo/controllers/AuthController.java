@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * Created by roiravhon on 11/21/16.
  */
 @Controller
-public class AuthController {
+public class AuthController extends BaseController {
 
     private final UserDao userDao;
     private final DeploymentGroupDao deploymentGroupDao;
@@ -84,10 +84,7 @@ public class AuthController {
         newDeploymentGroup.setName(name);
 
         deploymentGroupDao.addDeploymentGroup(newDeploymentGroup);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeploymentGroup);
+        assignJsonResponseToReq(req, 201, newDeploymentGroup);
     }
 
     @Administrator
@@ -124,20 +121,14 @@ public class AuthController {
         newDeploymentPermission.setPermissionType(permissionType);
 
         deploymentPermissionDao.addDeploymentPermission(newDeploymentPermission);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newDeploymentPermission);
+        assignJsonResponseToReq(req, 201, newDeploymentPermission);
     }
 
     @Administrator
     @POST("/add-user-to-deployment-group")
     public void addUserToDeploymentGroup(String userEmail, int deploymentGroupId, Req req) {
         deploymentGroupDao.addUserToDeploymentGroup(userEmail, deploymentGroupId);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json("ok");
+        assignJsonResponseToReq(req, 201, "ok");
     }
 
     @Administrator
@@ -145,10 +136,7 @@ public class AuthController {
     public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId, Req req) {
 
         deploymentGroupDao.addDeploymentPermissionToDeploymentGroup(deploymentGroupId, deploymentPermissionId);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json("ok");
+        assignJsonResponseToReq(req, 201, "ok");
     }
 
     private void initializeLoginProvider() {

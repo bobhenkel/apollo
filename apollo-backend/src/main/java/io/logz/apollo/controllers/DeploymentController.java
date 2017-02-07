@@ -23,7 +23,7 @@ import java.util.Optional;
  * Created by roiravhon on 1/5/17.
  */
 @Controller
-public class DeploymentController {
+public class DeploymentController extends BaseController {
 
     private final DeploymentDao deploymentDao;
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
@@ -63,13 +63,11 @@ public class DeploymentController {
                 deploymentPermissionDao.getPermissionsByUser(userEmail))) {
 
             logger.info("User is not authorized to perform this deployment!");
-            req.response().code(403);
-            req.response().contentType(MediaType.APPLICATION_JSON);
-            req.response().json("Not Authorized!");
+            assignJsonResponseToReq(req, 403, "Not Authorized!");
 
         } else {
 
-            String lockName = "lock-service-" + serviceId + "-environment-" + environmentId;
+            String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
             if (LockService.getAndObtainLock(lockName)) {
                 try {
                     logger.info("Permissions verified, Checking that no other deployment is currently running");
@@ -86,9 +84,7 @@ public class DeploymentController {
                         logger.warn("There is already a running deployment that initiated by {}. Can't start a new one",
                                 runningDeployment.get().getUserEmail());
 
-                        req.response().code(409);
-                        req.response().contentType(MediaType.APPLICATION_JSON);
-                        req.response().json("There is an on-going deployment for this service in this environment");
+                        assignJsonResponseToReq(req, 409, "There is an on-going deployment for this service in this environment");;
                         return;
                     }
 
@@ -103,19 +99,14 @@ public class DeploymentController {
                     newDeployment.setSourceVersion(sourceVersion);
 
                     deploymentDao.addDeployment(newDeployment);
-
-                    req.response().code(201);
-                    req.response().contentType(MediaType.APPLICATION_JSON);
-                    req.response().json(newDeployment);
+                    assignJsonResponseToReq(req, 201, newDeployment);
                 } finally {
                     LockService.releaseLock(lockName);
                 }
 
             } else {
                 logger.warn("A deployment request of this sort is currently being running");
-                req.response().code(429);
-                req.response().contentType(MediaType.APPLICATION_JSON);
-                req.response().json("A deployment request is currently running for this service and environment! Wait until its done");
+                assignJsonResponseToReq(req, 429, "A deployment request is currently running for this service and environment! Wait until its done");
             }
         }
     }
