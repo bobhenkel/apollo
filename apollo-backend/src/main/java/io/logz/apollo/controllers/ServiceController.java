@@ -16,7 +16,7 @@ import java.util.List;
  * Created by roiravhon on 12/20/16.
  */
 @Controller
-public class ServiceController {
+public class ServiceController extends BaseController {
 
     private final ServiceDao serviceDao;
 
@@ -38,8 +38,7 @@ public class ServiceController {
 
     @LoggedIn
     @POST("/service")
-    public void addDeployableVersion(String name, String deploymentYaml, String serviceYaml, Req req) {
-
+    public void addService(String name, String deploymentYaml, String serviceYaml, Req req) {
         Service newService = new Service();
 
         newService.setName(name);
@@ -47,6 +46,7 @@ public class ServiceController {
         newService.setServiceYaml(serviceYaml);
 
         serviceDao.addService(newService);
+        assignJsonResponseToReq(req, 201, newService);
 
         req.response().code(201);
         req.response().contentType(MediaType.APPLICATION_JSON);
