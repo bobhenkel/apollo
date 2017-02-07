@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Created by roiravhon on 12/19/16.
  */
 @Controller
-public class EnvironmentController {
+public class EnvironmentController extends BaseController {
 
     private final EnvironmentDao environmentDao;
 
@@ -56,10 +56,7 @@ public class EnvironmentController {
         newEnvironment.setKubernetesNamespace(kubernetesNamespace);
 
         environmentDao.addEnvironment(newEnvironment);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newEnvironment);
+        assignJsonResponseToReq(req, 201, newEnvironment);
     }
 
     private Environment maskCredentials(Environment environment) {

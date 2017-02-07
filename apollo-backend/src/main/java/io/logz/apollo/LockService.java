@@ -1,5 +1,6 @@
 package io.logz.apollo;
 
+import io.logz.apollo.models.Deployment;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class LockService {
         lockMap = new HashMap<>();
     }
 
-    private static LockService getInstance() {
+    private synchronized static LockService getInstance() {
         if (instance == null) {
             instance = new LockService();
         }
@@ -48,5 +49,9 @@ public class LockService {
             logger.debug("Got request to release a lock for key {}. released.", lockName);
             lockService.lockMap.put(lockName, false);
         }
+    }
+
+    public static String getDeploymentLockName(int serviceId, int environmentId) {
+        return "lock-service-" + serviceId + "-environment-" + environmentId;
     }
 }
