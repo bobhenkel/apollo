@@ -4,6 +4,7 @@ import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
+import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.models.DeployableVersion;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Created by roiravhon on 1/5/17.
@@ -61,6 +63,20 @@ public class DeploymentTests {
         }
 
         assertThat(found).isTrue();
+    }
+
+    @Test
+    public void testSimultaniouseDeployments() throws Exception {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        Deployment deployment1 = createAndSumbitDeployment(apolloTestClient);
+
+        // Submit that again to verify we can't run the same one twice
+        assertThatThrownBy(() -> apolloTestClient.addDeployment(deployment1)).isInstanceOf(ApolloClientException.class);
+
+        // Just to make sure we are not blocking different deployments to run on the same time
+        Deployment deployment2 = createAndSumbitDeployment(apolloTestClient);
     }
 
     private Deployment createAndSumbitDeployment(ApolloTestClient apolloTestClient) throws Exception {

@@ -9,7 +9,9 @@ public class Deployment {
 
     public enum DeploymentStatus {
         PENDING,
-        STARTED
+        STARTED,
+        DONE,
+        CANCELED
     }
 
     private int id;
