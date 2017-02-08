@@ -41,6 +41,6 @@ public class DeploymentImageNameTransformer implements BaseDeploymentTransformer
             }
         });
 
-        return null;
+        return deployment;
     }
 }
