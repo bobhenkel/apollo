@@ -28,7 +28,7 @@ public class DeploymentTests {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
-        Deployment testDeployment = createAndSumbitDeployment(apolloTestClient);
+        Deployment testDeployment = createAndSubmitDeployment(apolloTestClient);
 
         Deployment returnedDeployment = apolloTestClient.getDeployment(testDeployment.getId());
 
@@ -45,7 +45,7 @@ public class DeploymentTests {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
-        Deployment testDeployment = createAndSumbitDeployment(apolloTestClient);
+        Deployment testDeployment = createAndSubmitDeployment(apolloTestClient);
 
         Optional<Deployment> deploymentFromApi = apolloTestClient.getAllDeployments().stream()
                 .filter(deployment -> deployment.getId() == testDeployment.getId()).findFirst();
@@ -66,20 +66,20 @@ public class DeploymentTests {
     }
 
     @Test
-    public void testSimultaniouseDeployments() throws Exception {
+    public void testSimultaneousDeployments() throws Exception {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
-        Deployment deployment1 = createAndSumbitDeployment(apolloTestClient);
+        Deployment deployment1 = createAndSubmitDeployment(apolloTestClient);
 
         // Submit that again to verify we can't run the same one twice
         assertThatThrownBy(() -> apolloTestClient.addDeployment(deployment1)).isInstanceOf(ApolloClientException.class);
 
         // Just to make sure we are not blocking different deployments to run on the same time
-        Deployment deployment2 = createAndSumbitDeployment(apolloTestClient);
+        Deployment deployment2 = createAndSubmitDeployment(apolloTestClient);
     }
 
-    private Deployment createAndSumbitDeployment(ApolloTestClient apolloTestClient) throws Exception {
+    private Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient) throws Exception {
 
         // Add all foreign keys
         Environment testEnvironment = ModelsGenerator.createEnvironment();

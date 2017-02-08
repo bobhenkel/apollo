@@ -7,7 +7,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
-import jdk.nashorn.internal.runtime.ECMAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,7 @@ public class KubernetesHandler {
 
     Deployment startDeployment(Deployment deployment) {
         try {
-            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateKubernetesHandler(deployment);
+            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = apolloToKubernetes.getKubernetesDeployment();
             io.fabric8.kubernetes.api.model.Service kubernetesService = apolloToKubernetes.getKubernetesService();
 
@@ -68,7 +67,7 @@ public class KubernetesHandler {
 
     Deployment cancelDeployment(Deployment deployment) {
         try {
-            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateKubernetesHandler(deployment);
+            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = apolloToKubernetes.getKubernetesDeployment();
             kubernetesClient
                     .extensions()
@@ -89,7 +88,7 @@ public class KubernetesHandler {
     Deployment monitorDeployment(Deployment deployment) {
 
         try {
-            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateKubernetesHandler(deployment);
+            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             Optional<io.fabric8.kubernetes.api.model.extensions.Deployment> returnedDeployment = kubernetesClient
                     .extensions()
                     .deployments()
@@ -111,8 +110,10 @@ public class KubernetesHandler {
                     if (deployment.getStatus().equals(Deployment.DeploymentStatus.STARTED)) {
                         logger.info("Deployment id {} is done deploying", deployment.getId());
                         deployment.setStatus(Deployment.DeploymentStatus.DONE);
+
                     } else if (deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELING)) {
                         logger.info("Deployment id {} is done canceling", deployment.getId());
+                        deployment.setStatus(Deployment.DeploymentStatus.CANCELED);
                     }
                 }
 
@@ -131,7 +132,7 @@ public class KubernetesHandler {
     public String getDeploymentLogs(Deployment deployment) {
 
         try {
-            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateKubernetesHandler(deployment);
+            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             StringBuilder sb = new StringBuilder();
             kubernetesClient
                     .pods()
@@ -143,7 +144,7 @@ public class KubernetesHandler {
                     .map(pod -> pod.getMetadata().getName())
                     .forEach(name -> {
                         sb.append("Logs from ").append(name).append(":\n")
-                                .append(kubernetesClient.pods().inNamespace("default").withName(name).getLog(true))
+                                .append(kubernetesClient.pods().inNamespace(environment.getKubernetesNamespace()).withName(name).getLog(true))
                                 .append("\n");
                     });
 

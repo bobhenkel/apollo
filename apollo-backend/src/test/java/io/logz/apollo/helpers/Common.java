@@ -88,4 +88,12 @@ public class Common {
         apolloTestAdminClient.login();
         return apolloTestAdminClient;
     }
+
+    public static void waitABit(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while waiting..");
+        }
+    }
 }

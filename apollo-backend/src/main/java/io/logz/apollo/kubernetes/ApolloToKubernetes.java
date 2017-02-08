@@ -102,7 +102,7 @@ public class ApolloToKubernetes {
         }
     }
 
-    String getApolloDeploymentUniqueIdentifierValue() {
+    public String getApolloDeploymentUniqueIdentifierValue() {
         return getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService);
     }
 

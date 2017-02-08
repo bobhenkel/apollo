@@ -1,6 +1,7 @@
 package io.logz.apollo.dao;
 
 import io.logz.apollo.models.Deployment;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -13,5 +14,5 @@ public interface DeploymentDao {
     List<Deployment> getAllDeployments();
     List<Deployment> getAllRunningDeployments();
     void addDeployment(Deployment deployment);
-    void updateDeploymentStatus(int id, Deployment.DeploymentStatus status);
+    void updateDeploymentStatus(@Param("id") int id, @Param("status") Deployment.DeploymentStatus status);
 }

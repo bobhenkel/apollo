@@ -27,7 +27,7 @@ public class ApolloToKubernetesFactory {
         return instance;
     }
 
-    public static ApolloToKubernetes getOrCreateKubernetesHandler(Deployment deployment) {
+    public static ApolloToKubernetes getOrCreateApolloToKubernetes(Deployment deployment) {
 
         ApolloToKubernetesFactory instance = getInstance();
         return instance.apolloToKubernetesMap.computeIfAbsent(deployment.getId(), key -> new ApolloToKubernetes(deployment));

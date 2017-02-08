@@ -4,6 +4,7 @@ import io.logz.apollo.ApolloServer;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.kubernetes.KubernetesMonitor;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class StandaloneApollo {
 
     private static StandaloneApollo instance;
     private final ApolloServer server;
+    private final KubernetesMonitor kubernetesMonitor;
 
     private ApolloConfiguration apolloConfiguration;
     private ApolloMySQL apolloMySQL;
@@ -38,6 +40,9 @@ public class StandaloneApollo {
         // Start REST Server
         server = new ApolloServer(apolloConfiguration);
         server.start();
+
+        // Create Kubernetes monitor, but dont start it yet (usually will want to inject mock first)
+        kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
     }
 
     public static StandaloneApollo getOrCreateServer() throws ScriptException, IOException, SQLException {
@@ -46,6 +51,10 @@ public class StandaloneApollo {
             instance = new StandaloneApollo();
         }
         return instance;
+    }
+
+    public void startKubernetesMonitor() {
+        kubernetesMonitor.start();
     }
 
     public ApolloTestClient createTestClient() {

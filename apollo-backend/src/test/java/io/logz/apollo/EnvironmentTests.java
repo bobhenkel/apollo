@@ -5,7 +5,6 @@ import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.models.Environment;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.Optional;
