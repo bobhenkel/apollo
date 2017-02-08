@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by roiravhon on 12/20/16.
  */
-public class DeployableVersionTests {
+public class DeployableVersionTest {
 
     @Test
     public void testAddAndGetDeployableVersion() throws ApolloClientException {

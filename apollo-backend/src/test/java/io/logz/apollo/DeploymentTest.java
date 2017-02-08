@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Created by roiravhon on 1/5/17.
  */
-public class DeploymentTests {
+public class DeploymentTest {
 
     @Test
     public void testGetAndAddDeployment() throws Exception {

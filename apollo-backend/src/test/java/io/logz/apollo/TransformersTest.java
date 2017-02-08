@@ -27,9 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by roiravhon on 2/1/17.
  */
-public class TransformersTests {
+public class TransformersTest {
 
-    public TransformersTests() throws ScriptException, IOException, SQLException {
+    public TransformersTest() throws ScriptException, IOException, SQLException {
 
         // We just need to make sure we have a DB instance running, since this class does not uses apollo client
         StandaloneApollo.getOrCreateServer();

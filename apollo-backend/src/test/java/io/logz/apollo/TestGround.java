@@ -40,10 +40,10 @@ public class TestGround {
     @Test
     public void testGround() throws IOException, ScriptException, SQLException {
 
-        String kubeMaster = "https://172.31.24.6:6443";
-        String oauthToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImFwb2xsby10b2tlbi1pZHZ4OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhcG9sbG8iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5MDAwYjA1ZS1hY2MwLTExZTYtOWI1ZC0wYTc3MGIxYWQ4NDAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDphcG9sbG8ifQ.HNzku2KCbqClA_APVWsS_r4NxAS_Kf9-2eW770PJTT7buoAdJNLMjgObAyc4-Lh0D6BRzkcY8JmCsILcnisgy5OWmoY86qV1011mYIb-_SINa11O8TpEraqYbLZGk2GbQCJaXUzlyzvaXx2eJoZ1XABhDWLp7D4JdM0-ac4kY9_vKcVGnosrB8-zIMqWZVjd467wKyv78-kG3uQr2mkP4ZKY-JKAxkcK_WOC-AgsRfN9ekPfeSCFj3gqrRB5_ep9bLPURf8sEcdb3LYwb81QH0S5-2ZqNM170gWsGv5tUvBXXhox0J9FQm1u9J9EyD3tPiDBB6x7OyyyoT7x64bDyA";
-        Config config = new ConfigBuilder().withMasterUrl(kubeMaster).withOauthToken(oauthToken).build();
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
+//        String kubeMaster = "https://172.31.24.6:6443";
+//        String oauthToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImFwb2xsby10b2tlbi1pZHZ4OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhcG9sbG8iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5MDAwYjA1ZS1hY2MwLTExZTYtOWI1ZC0wYTc3MGIxYWQ4NDAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDphcG9sbG8ifQ.HNzku2KCbqClA_APVWsS_r4NxAS_Kf9-2eW770PJTT7buoAdJNLMjgObAyc4-Lh0D6BRzkcY8JmCsILcnisgy5OWmoY86qV1011mYIb-_SINa11O8TpEraqYbLZGk2GbQCJaXUzlyzvaXx2eJoZ1XABhDWLp7D4JdM0-ac4kY9_vKcVGnosrB8-zIMqWZVjd467wKyv78-kG3uQr2mkP4ZKY-JKAxkcK_WOC-AgsRfN9ekPfeSCFj3gqrRB5_ep9bLPURf8sEcdb3LYwb81QH0S5-2ZqNM170gWsGv5tUvBXXhox0J9FQm1u9J9EyD3tPiDBB6x7OyyyoT7x64bDyA";
+//        Config config = new ConfigBuilder().withMasterUrl(kubeMaster).withOauthToken(oauthToken).build();
+//        KubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
 
         String depyaml = "apiVersion: extensions/v1beta1\n" +
                 "kind: Deployment\n" +
@@ -101,18 +101,18 @@ public class TestGround {
                 "  loadBalancer: {}";
 
 
-        kubernetesClient
-                .pods()
-                .inNamespace("default")
-                .withLabel("apollo_unique_identifier", "apollo_deployment_env-name-62e05_Prod_app_e90d6")
-                .list()
-                .getItems()
-                .stream()
-                .map(pod -> pod.getMetadata().getName())
-                .forEach(name -> {
-                    System.out.println("Logs from " + name + ":");
-                    System.out.println(kubernetesClient.pods().inNamespace("default").withName(name).getLog(true));
-                });
+//        kubernetesClient
+//                .pods()
+//                .inNamespace("default")
+//                .withLabel("apollo_unique_identifier", "apollo_deployment_env-name-62e05_Prod_app_e90d6")
+//                .list()
+//                .getItems()
+//                .stream()
+//                .map(pod -> pod.getMetadata().getName())
+//                .forEach(name -> {
+//                    System.out.println("Logs from " + name + ":");
+//                    System.out.println(kubernetesClient.pods().inNamespace("default").withName(name).getLog(true));
+//                });
 
 
 //        StandaloneApollo.getOrCreateServer();

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Created by roiravhon on 12/19/16.
  */
-public class EnvironmentTests {
+public class EnvironmentTest {
 
     @Test
     public void testAddAndGetEnvironment() throws ApolloClientException {
