@@ -7,6 +7,8 @@ public class Service {
 
     private int id;
     private String name;
+    private String deploymentYaml;
+    private String serviceYaml;
 
     public Service() {
 
@@ -26,5 +28,21 @@ public class Service {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDeploymentYaml() {
+        return deploymentYaml;
+    }
+
+    public void setDeploymentYaml(String deploymentYaml) {
+        this.deploymentYaml = deploymentYaml;
+    }
+
+    public String getServiceYaml() {
+        return serviceYaml;
+    }
+
+    public void setServiceYaml(String serviceYaml) {
+        this.serviceYaml = serviceYaml;
     }
 }

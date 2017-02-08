@@ -38,12 +38,12 @@ public class ServiceController extends BaseController {
 
     @LoggedIn
     @POST("/service")
-    public void addService(String name, Req req) {
-
+    public void addService(String name, String deploymentYaml, String serviceYaml, Req req) {
         Service newService = new Service();
 
-        //TODO: fill more here..
         newService.setName(name);
+        newService.setDeploymentYaml(deploymentYaml);
+        newService.setServiceYaml(serviceYaml);
 
         serviceDao.addService(newService);
         assignJsonResponseToReq(req, 201, newService);

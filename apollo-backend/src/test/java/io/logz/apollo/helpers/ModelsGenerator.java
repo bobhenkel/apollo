@@ -39,6 +39,8 @@ public class ModelsGenerator {
     public static Service createService() {
         Service testService = new Service();
         testService.setName("Prod app " + Common.randomStr(5));
+        testService.setDeploymentYaml("");  // TODO: fill something real
+        testService.setServiceYaml("");  // TODO: fill something real
 
         return testService;
     }
