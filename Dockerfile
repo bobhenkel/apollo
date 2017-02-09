@@ -7,7 +7,6 @@ RUN apk add --update \
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/go.sh /go.sh
-EXPOSE 8080:80
 
 COPY ui/dist /usr/share/nginx/html
 COPY apollo-backend/target/apollo-backend-jar-with-dependencies.jar /apollo-backend-jar-with-dependencies.jar
