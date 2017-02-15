@@ -23,6 +23,7 @@ public class ModelsGenerator {
         testEnvironment.setAvailability("PROD-" + Common.randomStr(5));
         testEnvironment.setKubernetesMaster("kube.prod." + Common.randomStr(5));
         testEnvironment.setKubernetesToken("AaBbCc" + Common.randomStr(10));
+        testEnvironment.setKubernetesNamespace("namespace-" + Common.randomStr(5));
 
         return testEnvironment;
     }

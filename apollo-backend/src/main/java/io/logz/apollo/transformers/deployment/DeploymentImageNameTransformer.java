@@ -4,6 +4,8 @@ import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.logz.apollo.models.Deployment.DeploymentStatus.*;
+
 /**
  * Created by roiravhon on 1/31/17.
  */
@@ -33,7 +35,11 @@ public class DeploymentImageNameTransformer implements BaseDeploymentTransformer
             if (containerImageWithoutRepo.contains(":")) {
                 logger.debug("Got container image {}. Not appending version, as this is already contains a version", containerImage);
             } else {
-                containerImage = containerImage + ":" + apolloDeployableVersion.getGitCommitSha();
+                if (apolloDeployment.getStatus().equals(PENDING_CANCELLATION) || apolloDeployment.getStatus().equals(CANCELING)) {
+                    containerImage = containerImage + ":" + apolloDeployment.getSourceVersion();
+                } else {
+                    containerImage = containerImage + ":" + apolloDeployableVersion.getGitCommitSha();
+                }
                 logger.info("Setting image of container {} out of deployment id {} to {}",
                         container.getName(), apolloDeployment.getId(), containerImage);
 

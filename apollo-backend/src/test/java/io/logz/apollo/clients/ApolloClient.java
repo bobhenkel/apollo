@@ -42,7 +42,7 @@ public class ApolloClient {
     public Environment addEnvironment(Environment environment) throws ApolloClientException {
         String requestBody = Common.generateJson("name", environment.getName(), "geoRegion", environment.getGeoRegion(),
                 "availability", environment.getAvailability(), "kubernetesMaster", environment.getKubernetesMaster(),
-                "kubernetesToken", environment.getKubernetesToken());
+                "kubernetesToken", environment.getKubernetesToken(), "kubernetesNamespace", environment.getKubernetesNamespace());
 
         return genericApolloClient.postAndGetResult("/environment", requestBody, new TypeReference<Environment>(){});
     }

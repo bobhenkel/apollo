@@ -1,6 +1,7 @@
 package io.logz.apollo;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.kubernetes.KubernetesMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ public class ApolloMain {
 
     private static final Logger logger = LoggerFactory.getLogger(ApolloMain.class);
     private static ApolloServer apolloServer;
+    private static KubernetesMonitor kubernetesMonitor;
 
     public static void main(String[] args) {
 
@@ -21,6 +23,9 @@ public class ApolloMain {
 
             apolloServer = new ApolloServer(apolloConfiguration);
             apolloServer.start();
+
+            kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
+            kubernetesMonitor.start();
 
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -37,6 +42,7 @@ public class ApolloMain {
 
     private static void shutdown() {
         logger.info("Cleaning up..");
+        kubernetesMonitor.stop();
         apolloServer.stop();
     }
 }

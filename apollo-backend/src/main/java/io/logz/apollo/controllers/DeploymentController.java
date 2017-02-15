@@ -4,8 +4,14 @@ import io.logz.apollo.LockService;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
+import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.kubernetes.ApolloToKubernetes;
+import io.logz.apollo.kubernetes.ApolloToKubernetesFactory;
+import io.logz.apollo.kubernetes.KubernetesHandler;
+import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.Environment;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
@@ -26,11 +32,13 @@ import java.util.Optional;
 public class DeploymentController extends BaseController {
 
     private final DeploymentDao deploymentDao;
+    private final EnvironmentDao environmentDao;
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
     private final DeploymentPermissionDao deploymentPermissionDao;
 
     public DeploymentController() {
         this.deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
+        this.environmentDao = ApolloMyBatis.getDao(EnvironmentDao.class);
         this.deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
     }
 
@@ -44,6 +52,18 @@ public class DeploymentController extends BaseController {
     @GET("/deployment/{id}")
     public Deployment getDeployment(int id) {
         return deploymentDao.getDeployment(id);
+    }
+
+    @LoggedIn
+    @GET("/deployment/{id}/logs")
+    public String getDeploymentLogs(int id) {
+
+        // TODO: ideally i would not need a KubernetesHandler here, but since no DI and desired simplicity - i can live with this for now
+        Deployment deployment = deploymentDao.getDeployment(id);
+        Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
+        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+
+        return kubernetesHandler.getDeploymentLogs(deployment);
     }
 
     @LoggedIn
