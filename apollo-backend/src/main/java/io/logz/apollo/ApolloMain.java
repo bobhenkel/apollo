@@ -42,7 +42,7 @@ public class ApolloMain {
 
     private static void shutdown() {
         logger.info("Cleaning up..");
-        apolloServer.stop();
         kubernetesMonitor.stop();
+        apolloServer.stop();
     }
 }
