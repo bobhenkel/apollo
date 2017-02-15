@@ -77,50 +77,40 @@ function ApiService($q, $http){
 
 
     var matchLabelToDeploymentStatus = function(deploymentStatus) {
-
         var statusToLabel = {
-
             "pending": "label-default",
             "restart": "label-primary",
             "scale": "label-primary",
             "reverting": "label-warning",
             "done-success": "label-success",
             "done-failed": "label-danger"
-        }
+        };
 
         return statusToLabel[deploymentStatus]
     };
 
     var isRevertDisabledBasedOnStatus = function(deploymentStatus) {
-
         if (deploymentStatus == "done-success" || deploymentStatus == "done-failed") {
-
             return true;
         }
-
         return false;
-    }
+    };
 
     var signup = function(email, first_name, last_name, password) {
-
-        return $http.post(CONFIG.appUrl + "signup/", {
-
-            email: emailAddress,
-            first_name: first_name,
-            last_name: last_name,
+        return $http.post(CONFIG.appUrl + "_signup/", {
+            userEmail: emailAddress,
+            firstName: first_name,
+            lastName: last_name,
             password: password
         })
-    }
+    };
 
     var login = function(email, password) {
-
-
-        return $http.post(CONFIG.appUrl + "login/", {
-
+        return $http.post(CONFIG.appUrl + "_login/", {
             username: email,
             password: password
         })
-    }
+    };
 
 
     return {
