@@ -18,7 +18,7 @@ public class ApolloToKubernetesFactory {
         apolloToKubernetesMap = new HashMap<>();
     }
 
-    private static ApolloToKubernetesFactory getInstance() {
+    private static synchronized ApolloToKubernetesFactory getInstance() {
 
         if (instance == null) {
             instance = new ApolloToKubernetesFactory();

@@ -19,7 +19,7 @@ public class KubernetesHandlerFactory {
         kubernetesHandlerMap = new HashMap<>();
     }
 
-    private static KubernetesHandlerFactory getInstance() {
+    private static synchronized KubernetesHandlerFactory getInstance() {
 
         if (instance == null) {
             instance = new KubernetesHandlerFactory();
