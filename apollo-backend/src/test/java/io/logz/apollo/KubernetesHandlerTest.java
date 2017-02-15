@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by roiravhon on 2/7/17.
  */
-public class KubernetesHandlerTests {
+public class KubernetesHandlerTest {
 
     private final String LOG_MESSAGE_IN_POD = "test log message to search..";
 
@@ -41,7 +41,7 @@ public class KubernetesHandlerTests {
 
     private final KubernetesHandler notFinishedDeploymentHandler;
 
-    public KubernetesHandlerTests() throws ScriptException, IOException, SQLException {
+    public KubernetesHandlerTest() throws ScriptException, IOException, SQLException {
 
         // We need a server here
         StandaloneApollo.getOrCreateServer();

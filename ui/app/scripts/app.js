@@ -25,7 +25,7 @@ angular
     
     $ocLazyLoadProvider.config({
       debug:false,
-      events:true,
+      events:true
     });
 
     $urlRouterProvider.otherwise('/deployments/home');
@@ -49,34 +49,34 @@ angular
                 $ocLazyLoad.load(
                 {
                    name:'toggle-switch',
-                   files:["/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
-                          "/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.css"
+                   files:["bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
+                          "bower_components/angular-toggle-switch/angular-toggle-switch.css"
                       ]
                 }),
                 $ocLazyLoad.load(
                 {
                   name:'ngAnimate',
-                  files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
-                })
+                  files:['bower_components/angular-animate/angular-animate.js']
+                }),
                 $ocLazyLoad.load(
                 {
                   name:'ngCookies',
-                  files:['/apollo/ui/bower_components/angular-cookies/angular-cookies.js']
-                })
+                  files:['bower_components/angular-cookies/angular-cookies.js']
+                }),
                 $ocLazyLoad.load(
                 {
                   name:'ngResource',
-                  files:['/apollo/ui/bower_components/angular-resource/angular-resource.js']
-                })
+                  files:['bower_components/angular-resource/angular-resource.js']
+                }),
                 $ocLazyLoad.load(
                 {
                   name:'ngSanitize',
-                  files:['/apollo/ui/bower_components/angular-sanitize/angular-sanitize.js']
-                })
+                  files:['bower_components/angular-sanitize/angular-sanitize.js']
+                }),
                 $ocLazyLoad.load(
                 {
                   name:'ngTouch',
-                  files:['/apollo/ui/bower_components/angular-touch/angular-touch.js']
+                  files:['bower_components/angular-touch/angular-touch.js']
                 })
             }
         }
@@ -98,13 +98,13 @@ angular
             $ocLazyLoad.load({
               name:'chart.js',
               files:[
-                '/apollo/ui/bower_components/angular-chart.js/dist/angular-chart.min.js',
-                '/apollo/ui/bower_components/angular-chart.js/dist/angular-chart.css'
+                'bower_components/angular-chart.js/dist/angular-chart.min.js',
+                'bower_components/angular-chart.js/dist/angular-chart.css'
               ]
-            })
+            }),
             $ocLazyLoad.load({
               name:'ngAnimate',
-              files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
+              files:['bower_components/angular-animate/angular-animate.js']
             })
           }
         }
@@ -180,34 +180,34 @@ angular
                     $ocLazyLoad.load(
                     {
                        name:'toggle-switch',
-                       files:["/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
-                              "/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.css"
+                       files:["bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
+                              "bower_components/angular-toggle-switch/angular-toggle-switch.css"
                           ]
                     }),
                     $ocLazyLoad.load(
                     {
                       name:'ngAnimate',
-                      files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
-                    })
+                      files:['bower_components/angular-animate/angular-animate.js']
+                    }),
                     $ocLazyLoad.load(
                     {
                       name:'ngCookies',
-                      files:['/apollo/ui/bower_components/angular-cookies/angular-cookies.js']
-                    })
+                      files:['bower_components/angular-cookies/angular-cookies.js']
+                    }),
                     $ocLazyLoad.load(
                     {
                       name:'ngResource',
-                      files:['/apollo/ui/bower_components/angular-resource/angular-resource.js']
-                    })
+                      files:['bower_components/angular-resource/angular-resource.js']
+                    }),
                     $ocLazyLoad.load(
                     {
                       name:'ngSanitize',
-                      files:['/apollo/ui/bower_components/angular-sanitize/angular-sanitize.js']
-                    })
+                      files:['bower_components/angular-sanitize/angular-sanitize.js']
+                    }),
                     $ocLazyLoad.load(
                     {
                       name:'ngTouch',
-                      files:['/apollo/ui/bower_components/angular-touch/angular-touch.js']
+                      files:['bower_components/angular-touch/angular-touch.js']
                     })
                 }
             }
@@ -253,34 +253,34 @@ angular
                      $ocLazyLoad.load(
                      {
                         name:'toggle-switch',
-                        files:["/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
-                               "/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.css"
+                        files:["bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
+                               "bower_components/angular-toggle-switch/angular-toggle-switch.css"
                            ]
                      }),
                      $ocLazyLoad.load(
                      {
                        name:'ngAnimate',
-                       files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
-                     })
+                       files:['bower_components/angular-animate/angular-animate.js']
+                     }),
                      $ocLazyLoad.load(
                      {
                        name:'ngCookies',
-                       files:['/apollo/ui/bower_components/angular-cookies/angular-cookies.js']
-                     })
+                       files:['bower_components/angular-cookies/angular-cookies.js']
+                     }),
                      $ocLazyLoad.load(
                      {
                        name:'ngResource',
-                       files:['/apollo/ui/bower_components/angular-resource/angular-resource.js']
-                     })
+                       files:['bower_components/angular-resource/angular-resource.js']
+                     }),
                      $ocLazyLoad.load(
                      {
                        name:'ngSanitize',
-                       files:['/apollo/ui/bower_components/angular-sanitize/angular-sanitize.js']
-                     })
+                       files:['bower_components/angular-sanitize/angular-sanitize.js']
+                     }),
                      $ocLazyLoad.load(
                      {
                        name:'ngTouch',
-                       files:['/apollo/ui/bower_components/angular-touch/angular-touch.js']
+                       files:['bower_components/angular-touch/angular-touch.js']
                      })
                  }
              }
@@ -308,34 +308,34 @@ angular
                          $ocLazyLoad.load(
                          {
                             name:'toggle-switch',
-                            files:["/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
-                                   "/apollo/ui/bower_components/angular-toggle-switch/angular-toggle-switch.css"
+                            files:["bower_components/angular-toggle-switch/angular-toggle-switch.min.js",
+                                   "bower_components/angular-toggle-switch/angular-toggle-switch.css"
                                ]
                          }),
                          $ocLazyLoad.load(
                          {
                            name:'ngAnimate',
-                           files:['/apollo/ui/bower_components/angular-animate/angular-animate.js']
-                         })
+                           files:['bower_components/angular-animate/angular-animate.js']
+                         }),
                          $ocLazyLoad.load(
                          {
                            name:'ngCookies',
-                           files:['/apollo/ui/bower_components/angular-cookies/angular-cookies.js']
-                         })
+                           files:['bower_components/angular-cookies/angular-cookies.js']
+                         }),
                          $ocLazyLoad.load(
                          {
                            name:'ngResource',
-                           files:['/apollo/ui/bower_components/angular-resource/angular-resource.js']
-                         })
+                           files:['bower_components/angular-resource/angular-resource.js']
+                         }),
                          $ocLazyLoad.load(
                          {
                            name:'ngSanitize',
-                           files:['/apollo/ui/bower_components/angular-sanitize/angular-sanitize.js']
-                         })
+                           files:['bower_components/angular-sanitize/angular-sanitize.js']
+                         }),
                          $ocLazyLoad.load(
                          {
                            name:'ngTouch',
-                           files:['/apollo/ui/bower_components/angular-touch/angular-touch.js']
+                           files:['bower_components/angular-touch/angular-touch.js']
                          })
                      }
                  }

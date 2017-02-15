@@ -32,12 +32,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Created by roiravhon on 11/22/16.
  */
-public class AuthTests {
+public class AuthTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthTests.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthTest.class);
     private final StandaloneApollo standaloneApollo;
 
-    public AuthTests() throws ScriptException, IOException, SQLException {
+    public AuthTest() throws ScriptException, IOException, SQLException {
 
         standaloneApollo = StandaloneApollo.getOrCreateServer();
     }
