@@ -28,7 +28,8 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
                 .put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService))
                 .build();
 
-        Map<String, String> labelsFromDeployment = deployment.getSpec().getTemplate().getMetadata().getLabels();
+        // Get the deployment labels
+        Map<String, String> labelsFromDeployment = deployment.getMetadata().getLabels();
 
         // Just make sure we are not overriding any label explicitly provided by the user
         desiredLabels.forEach((key, value) -> {
@@ -38,7 +39,12 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
         });
 
         // And add all back to the deployment
-        deployment.getSpec().getTemplate().getMetadata().setLabels(labelsFromDeployment);
+        deployment.getMetadata().setLabels(labelsFromDeployment);
+
+        // We also need to tag the pod
+        Map<String, String> labelsFromDeploymentPod = deployment.getSpec().getTemplate().getMetadata().getLabels();
+        labelsFromDeploymentPod.put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(apolloEnvironment, apolloService));
+        deployment.getSpec().getTemplate().getMetadata().setLabels(labelsFromDeploymentPod);
 
         return deployment;
     }

@@ -17,10 +17,13 @@ public class ApolloConfiguration {
     private String apiListen;
     private int apiPort;
     private int monitorThreadFrequencySeconds;
+    private String githubLogin;
+    private String githubOauthToken;
 
     @VisibleForTesting
     public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword,
-                               String dbSchema, String apiListen, int apiPort, int monitorThreadFrequencySeconds) {
+                               String dbSchema, String apiListen, int apiPort,
+                               int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
@@ -29,6 +32,8 @@ public class ApolloConfiguration {
         this.apiListen = apiListen;
         this.apiPort = apiPort;
         this.monitorThreadFrequencySeconds = monitorThreadFrequencySeconds;
+        this.githubLogin = githubLogin;
+        this.githubOauthToken = githubOauthToken;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
@@ -49,7 +54,12 @@ public class ApolloConfiguration {
         // Kubernetes related
         int monitorThreadFrequencySeconds = config.getInt("apollo.kubernetes.monitoringFrequencySeconds");
 
-        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort, monitorThreadFrequencySeconds);
+        // SCM related
+        String githubLogin = config.getString("apollo.scm.githubLogin");
+        String githubOauthToken = config.getString("apollo.scm.githubOauthToken");
+
+        return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort,
+                monitorThreadFrequencySeconds, githubLogin, githubOauthToken);
     }
 
     public int getDbPort() {
@@ -82,6 +92,14 @@ public class ApolloConfiguration {
 
     public int getMonitorThreadFrequencySeconds() {
         return monitorThreadFrequencySeconds;
+    }
+
+    public String getGithubLogin() {
+        return githubLogin;
+    }
+
+    public String getGithubOauthToken() {
+        return githubOauthToken;
     }
 
     @VisibleForTesting
@@ -122,5 +140,15 @@ public class ApolloConfiguration {
     @VisibleForTesting
     public void setMonitorThreadFrequencySeconds(int monitorThreadFrequencySeconds) {
         this.monitorThreadFrequencySeconds = monitorThreadFrequencySeconds;
+    }
+
+    @VisibleForTesting
+    public void setGithubLogin(String githubLogin) {
+        this.githubLogin = githubLogin;
+    }
+
+    @VisibleForTesting
+    public void setGithubOauthToken(String githubOauthToken) {
+        this.githubOauthToken = githubOauthToken;
     }
 }

@@ -2,6 +2,7 @@ package io.logz.apollo.controllers;
 
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
@@ -18,38 +19,37 @@ import java.util.List;
 @Controller
 public class ServiceController extends BaseController {
 
-    private final ServiceDao serviceDao;
-
-    public ServiceController() {
-        serviceDao = ApolloMyBatis.getDao(ServiceDao.class);
-    }
-
     @LoggedIn
     @GET("/service")
     public List<Service> getAllServices() {
-        return serviceDao.getAllServices();
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+            return serviceDao.getAllServices();
+        }
     }
 
     @LoggedIn
     @GET("/service/{id}")
     public Service getService(int id) {
-        return serviceDao.getService(id);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+            return serviceDao.getService(id);
+        }
     }
 
     @LoggedIn
     @POST("/service")
     public void addService(String name, String deploymentYaml, String serviceYaml, Req req) {
-        Service newService = new Service();
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+            Service newService = new Service();
 
-        newService.setName(name);
-        newService.setDeploymentYaml(deploymentYaml);
-        newService.setServiceYaml(serviceYaml);
+            newService.setName(name);
+            newService.setDeploymentYaml(deploymentYaml);
+            newService.setServiceYaml(serviceYaml);
 
-        serviceDao.addService(newService);
-        assignJsonResponseToReq(req, 201, newService);
-
-        req.response().code(201);
-        req.response().contentType(MediaType.APPLICATION_JSON);
-        req.response().json(newService);
+            serviceDao.addService(newService);
+            assignJsonResponseToReq(req, 201, newService);
+        }
     }
 }

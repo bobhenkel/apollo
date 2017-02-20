@@ -9,6 +9,7 @@ import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.excpetions.ApolloParseException;
 import io.logz.apollo.transformers.LabelsNormalizer;
 import io.logz.apollo.transformers.deployment.BaseDeploymentTransformer;
@@ -34,36 +35,36 @@ public class ApolloToKubernetes {
     private final io.logz.apollo.models.Service apolloService;
     private final io.logz.apollo.models.Environment apolloEnvironment;
     private final io.logz.apollo.models.DeployableVersion apolloDeployableVersion;
-    private final ServiceDao serviceDao;
-    private final EnvironmentDao environmentDao;
-    private final DeployableVersionDao deployableVersionDao;
     private final ObjectMapper mapper;
 
     private final Set<BaseDeploymentTransformer> deploymentTransformers;
     private final Set<BaseServiceTransformer> serviceTransformers;
 
     public ApolloToKubernetes(io.logz.apollo.models.Deployment apolloDeployment) {
-        this.apolloDeployment = apolloDeployment;
-        serviceDao = ApolloMyBatis.getDao(ServiceDao.class);
-        environmentDao = ApolloMyBatis.getDao(EnvironmentDao.class);
-        deployableVersionDao = ApolloMyBatis.getDao(DeployableVersionDao.class);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
 
-        mapper = new ObjectMapper(new YAMLFactory());
+            this.apolloDeployment = apolloDeployment;
 
-        apolloService = serviceDao.getService(apolloDeployment.getServiceId());
-        apolloEnvironment = environmentDao.getEnvironment(apolloDeployment.getEnvironmentId());
-        apolloDeployableVersion = deployableVersionDao.getDeployableVersion(apolloDeployment.getDeployableVersionId());
+            mapper = new ObjectMapper(new YAMLFactory());
 
-        // Define the set of transformers the deployment object will go through
-        deploymentTransformers = Sets.newHashSet(Arrays.asList(
-                new DeploymentImageNameTransformer(),
-                new DeploymentLabelsTransformer()
-        ));
+            apolloService = serviceDao.getService(apolloDeployment.getServiceId());
+            apolloEnvironment = environmentDao.getEnvironment(apolloDeployment.getEnvironmentId());
+            apolloDeployableVersion = deployableVersionDao.getDeployableVersion(apolloDeployment.getDeployableVersionId());
 
-        // Define the set of transformers the service object will go through
-        serviceTransformers = Sets.newHashSet(Arrays.asList(
-                new ServiceLabelTransformer()
-        ));
+            // Define the set of transformers the deployment object will go through
+            deploymentTransformers = Sets.newHashSet(Arrays.asList(
+                    new DeploymentImageNameTransformer(),
+                    new DeploymentLabelsTransformer()
+            ));
+
+            // Define the set of transformers the service object will go through
+            serviceTransformers = Sets.newHashSet(Arrays.asList(
+                    new ServiceLabelTransformer()
+            ));
+        }
     }
 
     public Deployment getKubernetesDeployment() throws ApolloParseException {
@@ -106,6 +107,10 @@ public class ApolloToKubernetes {
         return getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService);
     }
 
+    public String getApolloDeploymentPodUniqueIdentifierValue() {
+        return getApolloPodUniqueIdentifier(apolloEnvironment, apolloService);
+    }
+
     public static String getApolloDeploymentUniqueIdentifierKey() {
         return APOLLO_UNIQUE_IDENTIFIER_KEY;
     }
@@ -119,6 +124,11 @@ public class ApolloToKubernetes {
     public static String getApolloServiceUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
                                                            io.logz.apollo.models.Service apolloService) {
         return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "service");
+    }
+
+    public static String getApolloPodUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
+                                                          io.logz.apollo.models.Service apolloService) {
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "pod");
     }
 
     private static String getApolloUniqueIdentifierWithPrefix(io.logz.apollo.models.Environment apolloEnvironment,

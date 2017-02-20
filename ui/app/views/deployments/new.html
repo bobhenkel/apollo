@@ -25,7 +25,7 @@
                                 <th>Name</th>
                                 <th>Region</th>
                                 <th>Availability</th>
-                                <th>Mesos Master</th>
+                                <th>Kubernetes Master</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -33,9 +33,9 @@
                                 ng-click="setSelectedEnvironment(environment)"
                                 ng-class="{'active':environment.id == environmentSelected.id}">
                                 <td>{{environment.name}}</td>
-                                <td>{{environment.geo_region}}</td>
+                                <td>{{environment.geoRegion}}</td>
                                 <td>{{environment.availability}}</td>
-                                <td>{{environment.marathon_master}}</td>
+                                <td>{{environment.kubernetesMaster}}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -57,7 +57,7 @@
                             <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Image Name</th>
+                                <th>YAMLs</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -65,7 +65,16 @@
                                 ng-click="setSelectedService(service)"
                                 ng-class="{'active':service.id == serviceSelected.id}">
                                 <td>{{service.name}}</td>
-                                <td>{{service.image_name}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" uib-tooltip="See kubernetes deployment YAML"
+                                        data-toggle="modal" data-target="#show-kubernetes-deployment-yaml">
+                                        Deployment
+                                    </button>
+                                    <button type="button" class="btn btn-primary" uib-tooltip="See kubernetes deployment YAML"
+                                        data-toggle="modal" data-target="#show-kubernetes-service-yaml">
+                                        Service
+                                    </button>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -92,13 +101,13 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="version in allVersions | filter:globalSearch | orderBy:'version.commit.author.date'"
-                                ng-click="setSelectedVersion(version)"
-                                ng-class="{'active':version.sha == versionSelected.sha}">
-                                <td>{{version.commit.author.date | date:'dd/MM/yy H:mm:ss'}}</td>
-                                <td><a href="{{version.html_url}}">{{version.sha | limitTo: 7}}</a></td>
-                                <td>{{version.commit.message}}</td>
-                                <td><span><img class="apollo-committer-image" ng-src="{{version.author.avatar_url}}">{{version.author.login}}</span></td>
+                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter:globalSearch | orderBy:'deployableVersion.commitDate':true"
+                                ng-click="setSelectedVersion(deployableVersion)"
+                                ng-class="{'active':deployableVersion.gitCommitSha == versionSelected.gitCommitSha}">
+                                <td>{{deployableVersion.commitDate | date:'dd/MM/yy H:mm:ss'}}</td>
+                                <td><a target="_blank" href="{{deployableVersion.commitUrl}}">{{deployableVersion.gitCommitSha | limitTo: 7}}</a></td>
+                                <td>{{deployableVersion.commitMessage}}</td>
+                                <td><span><img class="apollo-committer-image" ng-src="{{deployableVersion.committerAvatarUrl}}">{{deployableVersion.committerName}}</span></td>
                             </tr>
                             </tbody>
                         </table>
@@ -111,7 +120,7 @@
 
             <div class="well">
                 <h4>So just making sure</h4>
-                <p> You are going to deploy commit <b>{{versionSelected.sha}}</b><br>
+                <p> You are going to deploy commit <b>{{versionSelected.gitCommitSha}}</b><br>
                     to service <b>{{serviceSelected.name}}</b><br>
                     on environment <b>{{environmentSelected.name}}</b></p>
                 <br>
@@ -144,6 +153,44 @@
         <button type="button" ng-if="showNextStep" class="btn btn-success btn-circle btn-lg apollo-flow-button" ng-click="nextStep()">
             <i class="fa fa-arrow-right"></i>
         </button>
+    </div>
+
+    <div class="modal fade" id="show-kubernetes-deployment-yaml" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Kubernetes Deployment YAML</h4>
+                </div>
+                <div class="modal-body">
+                    <pre class="apollo-logs">
+{{serviceSelected.deploymentYaml}}
+                    </pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="modal fade" id="show-kubernetes-service-yaml" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Kubernetes Service YAML</h4>
+                </div>
+                <div class="modal-body">
+                    <pre class="apollo-logs">
+{{serviceSelected.serviceYaml}}
+                    </pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

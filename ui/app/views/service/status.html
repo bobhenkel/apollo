@@ -50,11 +50,11 @@
                                 </thead>
                                 <tbody>
                                 <tr ng-repeat="deployment in filteredResults">
-                                    <td>{{deployment.last_updated | date:'dd/MM/yy H:mm:ss'}}</td>
-                                    <td>{{allServices[deployment.deployed_service].name}}</td>
-                                    <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
-                                    <td><a href="{{githubData[deployment.target_version].html_url}}">{{deployment.target_version | limitTo: 7}}</a></td>
-                                    <td>{{allUsers[deployment.initiated_by].email}}</td>
+                                    <td>{{deployment.lastUpdate | date:'dd/MM/yy H:mm:ss'}}</td>
+                                    <td>{{allServices[deployment.serviceId].name}}</td>
+                                    <td>{{allEnvironments[deployment.environmentId].name}}</td>
+                                    <td><a href="{{githubData[deployment.deployableVersionId].html_url}}">{{githubData[deployment.deployableVersionId].sha | limitTo: 7}}</a></td>
+                                    <td>{{allUsers[deployment.userEmail].userEmail}}</td>
                                 </tr>
                                 </tbody>
                             </table>

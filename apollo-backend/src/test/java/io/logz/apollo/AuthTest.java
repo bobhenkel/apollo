@@ -119,7 +119,7 @@ public class AuthTest {
         DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
-        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(testDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
@@ -143,10 +143,10 @@ public class AuthTest {
         // Create the permission
         createAndSubmitPermissions(apolloTestClient, Optional.of(firstTestEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
 
-        Deployment okDeployment = ModelsGenerator.createDeployment(testService, firstTestEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment okDeployment = ModelsGenerator.createDeployment(testService, firstTestEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(okDeployment);
 
-        Deployment failDeployment = ModelsGenerator.createDeployment(testService, secondTestEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment failDeployment = ModelsGenerator.createDeployment(testService, secondTestEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
@@ -170,10 +170,10 @@ public class AuthTest {
         // Associate user with group, and permission to the first service
         createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(firstTestService), DeploymentPermission.PermissionType.ALLOW);
 
-        Deployment okDeployment = ModelsGenerator.createDeployment(firstTestService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment okDeployment = ModelsGenerator.createDeployment(firstTestService, testEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(okDeployment);
 
-        Deployment failDeployment = ModelsGenerator.createDeployment(secondTestService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment failDeployment = ModelsGenerator.createDeployment(secondTestService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
@@ -198,7 +198,7 @@ public class AuthTest {
         // And block the specific service
         createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
 
-        Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 
@@ -222,7 +222,7 @@ public class AuthTest {
         // And allow the specific service
         createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.ALLOW);
 
-        Deployment successfulDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment successfulDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(successfulDeployment);
     }
 
@@ -246,7 +246,7 @@ public class AuthTest {
         // Set broad deny permission
         createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
 
-        Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
     }
 

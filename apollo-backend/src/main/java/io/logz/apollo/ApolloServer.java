@@ -2,6 +2,7 @@ package io.logz.apollo;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.scm.GithubConnector;
 import org.rapidoid.setup.App;
 import org.rapidoid.setup.On;
 
@@ -18,6 +19,7 @@ public class ApolloServer {
 
     public void start() {
         ApolloMyBatis.initialize(configuration);
+        GithubConnector.initialize(configuration);
 
         // Initialize the REST API server
         On.address(configuration.getApiListen()).port(configuration.getApiPort());
@@ -25,6 +27,6 @@ public class ApolloServer {
     }
 
     public void stop() {
-        ApolloMyBatis.close();
+        // Future cleanups..
     }
 }

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.Closeable;
+import java.util.function.Consumer;
 
 /**
  * Created by roiravhon on 11/20/16.
@@ -19,8 +21,26 @@ import javax.sql.DataSource;
 public class ApolloMyBatis {
 
     private static ApolloMyBatis instance;
-    private SqlSession session;
+    private static SqlSessionFactory sqlSessionFactory;
     private static final Logger logger = LoggerFactory.getLogger(ApolloMyBatis.class);
+
+    public static class ApolloMyBatisSession implements Closeable {
+
+        private SqlSession session;
+
+        ApolloMyBatisSession(SqlSessionFactory sqlSessionFactory) {
+            session = sqlSessionFactory.openSession(true);
+        }
+
+        @Override
+        public void close() {
+            session.close();
+        }
+
+        public <T> T getDao(Class<T> clazz) {
+            return session.getMapper(clazz);
+        }
+    }
 
     private ApolloMyBatis(ApolloConfiguration configuration) {
         try {
@@ -32,10 +52,8 @@ public class ApolloMyBatis {
             Configuration myBatisConfiguration = new Configuration(environment);
             myBatisConfiguration.addMappers("io.logz.apollo.dao");
             myBatisConfiguration.setMapUnderscoreToCamelCase(true);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(myBatisConfiguration);
 
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(myBatisConfiguration);
-
-            session = sqlSessionFactory.openSession(true);
         } catch (Exception e) {
             throw new RuntimeException("Could not create MyBatis instance!", e);
         }
@@ -47,25 +65,11 @@ public class ApolloMyBatis {
         instance = new ApolloMyBatis(configuration);
     }
 
-    public static void close() {
-
-        if (instance == null) {
-            logger.info("Could not close MyBatis, as it was not initialized");
-
-        } else if (instance.session == null) {
-            logger.info("Could not close MyBatis, as the session is null");
-        } else {
-            logger.info("Closing MyBatis session");
-            instance.session.close();
-        }
-    }
-
-    public static <T> T getDao(Class<T> clazz) {
+    public static ApolloMyBatisSession getSession() {
         if (instance == null) {
             throw new RuntimeException("You must first initialize ApolloMyBatis before getting a Dao!");
         }
 
-        logger.debug("Returning DAO for {}", clazz.getName());
-        return instance.session.getMapper(clazz);
+        return new ApolloMyBatisSession(sqlSessionFactory);
     }
 }

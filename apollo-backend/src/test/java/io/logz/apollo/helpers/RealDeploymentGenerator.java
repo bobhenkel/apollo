@@ -7,6 +7,7 @@ import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
@@ -26,36 +27,37 @@ public class RealDeploymentGenerator {
     private final User user;
     private final Deployment deployment;
 
-    private final DeploymentDao deploymentDao;
-
-
     public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue) {
 
-        // Get DAOs
-        deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
-        EnvironmentDao environmentDao = ApolloMyBatis.getDao(EnvironmentDao.class);
-        ServiceDao serviceDao = ApolloMyBatis.getDao(ServiceDao.class);
-        DeployableVersionDao deployableVersionDao = ApolloMyBatis.getDao(DeployableVersionDao.class);
-        UserDao userDao = ApolloMyBatis.getDao(UserDao.class);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
 
-        // Create all models in DB
-        environment = ModelsGenerator.createEnvironment();
-        environmentDao.addEnvironment(environment);
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
+            UserDao userDao = apolloMyBatisSession.getDao(UserDao.class);
 
-        service = ModelsGenerator.createService();
-        service.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
-        service.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
-        serviceDao.addService(service);
+            // Create all models in DB
+            environment = ModelsGenerator.createEnvironment();
+            environmentDao.addEnvironment(environment);
 
-        deployableVersion = ModelsGenerator.createDeployableVersion(service);
-        deployableVersionDao.addDeployableVersion(deployableVersion);
+            service = ModelsGenerator.createService();
+            service.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
+            service.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
+            serviceDao.addService(service);
 
-        user = ModelsGenerator.createRegularUser();
-        userDao.addUser(user);
+            deployableVersion = ModelsGenerator.createDeployableVersion(service);
+            deployableVersionDao.addDeployableVersion(deployableVersion);
 
-        deployment = ModelsGenerator.createDeployment(service, environment, deployableVersion, user);
-        deployment.setStatus(Deployment.DeploymentStatus.PENDING);
-        deploymentDao.addDeployment(deployment);
+            user = ModelsGenerator.createRegularUser();
+            userDao.addUser(user);
+
+            deployment = ModelsGenerator.createDeployment(service, environment, deployableVersion);
+            deployment.setStatus(Deployment.DeploymentStatus.PENDING);
+            deployment.setSourceVersion("abc" + Common.randomStr(5));
+            deployment.setUserEmail(user.getUserEmail());
+            deploymentDao.addDeployment(deployment);
+        }
     }
 
     public String getDefaultLabelKey() {
@@ -87,7 +89,10 @@ public class RealDeploymentGenerator {
     }
 
     public void updateDeploymentStatus(Deployment.DeploymentStatus deploymentStatus) {
-        deploymentDao.updateDeploymentStatus(deployment.getId(), deploymentStatus);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            deploymentDao.updateDeploymentStatus(deployment.getId(), deploymentStatus);
+        }
     }
 
     private String getDeploymentKubernetesYaml(String imageName, String extraLabelKey, String extraLabelValue) {
@@ -97,6 +102,8 @@ public class RealDeploymentGenerator {
                 "metadata:\n" +
                 "  labels:\n" +
                 "    tahat: nginx\n" +
+                "    " + DEFAULT_LABEL_KEY + ": " + DEFAULT_LABEL_VALUE + "\n" +
+                "    " + extraLabelKey + ": " + extraLabelValue + "\n" +
                 "  name: nginx\n" +
                 "  namespace: default\n" +
                 "spec:\n" +
@@ -109,8 +116,7 @@ public class RealDeploymentGenerator {
                 "  template:\n" +
                 "    metadata:\n" +
                 "      labels:\n" +
-                "        " + DEFAULT_LABEL_KEY + ": " + DEFAULT_LABEL_VALUE + "\n" +
-                "        " + extraLabelKey + ": " + extraLabelValue + "\n" +
+                "        pod: label\n" +
                 "    spec:\n" +
                 "      containers:\n" +
                 "      - image: " + imageName + "\n" +

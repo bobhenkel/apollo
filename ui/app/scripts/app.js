@@ -119,7 +119,6 @@ angular
               name:'apollo',
               files:[
               'scripts/services/apolloApiService.js',
-              'scripts/services/githubApiService.js',
               'scripts/controllers/newDeploymentCtrl.js'
               ]
             })
@@ -136,7 +135,6 @@ angular
                       name:'apollo',
                       files:[
                       'scripts/services/apolloApiService.js',
-                      'scripts/services/githubApiService.js',
                       'scripts/controllers/ongoingDeploymentCtrl.js'
                       ]
                     })
@@ -153,7 +151,6 @@ angular
                           name:'apollo',
                           files:[
                           'scripts/services/apolloApiService.js',
-                          'scripts/services/githubApiService.js',
                           'scripts/controllers/deploymentHistoryCtrl.js'
                           ]
                         })
@@ -222,7 +219,6 @@ angular
                           name:'apollo',
                           files:[
                           'scripts/services/apolloApiService.js',
-                          'scripts/services/githubApiService.js',
                           'scripts/controllers/serviceVersionStatusCtrl.js'
                           ]
                         })
