@@ -6,6 +6,7 @@ import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
 import io.logz.apollo.kubernetes.ApolloToKubernetesFactory;
 import io.logz.apollo.kubernetes.KubernetesHandler;
@@ -31,102 +32,143 @@ import java.util.Optional;
 @Controller
 public class DeploymentController extends BaseController {
 
-    private final DeploymentDao deploymentDao;
-    private final EnvironmentDao environmentDao;
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
-    private final DeploymentPermissionDao deploymentPermissionDao;
-
-    public DeploymentController() {
-        this.deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
-        this.environmentDao = ApolloMyBatis.getDao(EnvironmentDao.class);
-        this.deploymentPermissionDao = ApolloMyBatis.getDao(DeploymentPermissionDao.class);
-    }
 
     @LoggedIn
     @GET("/deployment")
     public List<Deployment> getAllDeployments() {
-        return deploymentDao.getAllDeployments();
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            return deploymentDao.getAllDeployments();
+
+        }
     }
 
     @LoggedIn
     @GET("/deployment/{id}")
     public Deployment getDeployment(int id) {
-        return deploymentDao.getDeployment(id);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            return deploymentDao.getDeployment(id);
+        }
     }
 
     @LoggedIn
     @GET("/deployment/{id}/logs")
     public String getDeploymentLogs(int id) {
 
-        // TODO: ideally i would not need a KubernetesHandler here, but since no DI and desired simplicity - i can live with this for now
-        Deployment deployment = deploymentDao.getDeployment(id);
-        Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
-        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
 
-        return kubernetesHandler.getDeploymentLogs(deployment);
+            // TODO: ideally i would not need a KubernetesHandler here, but since no DI and desired simplicity - i can live with this for now
+            Deployment deployment = deploymentDao.getDeployment(id);
+            Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
+            KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+
+            return kubernetesHandler.getDeploymentLogs(deployment);
+        }
+    }
+
+    @LoggedIn
+    @GET("/latest-deployments")
+    public List<Deployment> getLatestDeployments() {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            return deploymentDao.getLatestDeployments();
+        }
+    }
+
+    @LoggedIn
+    @GET("/running-deployments")
+    public List<Deployment> getRunningDeployments() {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            return deploymentDao.getAllRunningDeployments();
+        }
+    }
+
+    @LoggedIn
+    @GET("/running-and-just-finished-deployments")
+    public List<Deployment> getRunningAndJustFinishedDeployments() {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            return deploymentDao.getRunningAndJustFinishedDeployments();
+        }
     }
 
     @LoggedIn
     @POST("/deployment")
-    public void addDeployment(int environmentId, int serviceId, int deployableVersionId,
-                              String userEmail, String sourceVersion, Req req) {
+    public void addDeployment(int environmentId, int serviceId, int deployableVersionId, Req req) {
 
-        MDC.put("environmentId", String.valueOf(environmentId));
-        MDC.put("serviceId", String.valueOf(serviceId));
-        MDC.put("deployableVersionId", String.valueOf(deployableVersionId));
-        MDC.put("userEmail", userEmail);
-        MDC.put("sourceVersion", sourceVersion);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+            DeploymentPermissionDao deploymentPermissionDao = apolloMyBatisSession.getDao(DeploymentPermissionDao.class);
 
-        logger.info("Got request for a new deployment");
+            // Get the username from the token
+            String userEmail = req.token().get("_user").toString();
 
-        if (! PermissionsValidator.isAllowedToDeploy(serviceId, environmentId,
-                deploymentPermissionDao.getPermissionsByUser(userEmail))) {
+            // And get the current commit from the DB
+            String sourceVersion = deploymentDao.getCurrentGitCommitSha(serviceId, environmentId);
 
-            logger.info("User is not authorized to perform this deployment!");
-            assignJsonResponseToReq(req, 403, "Not Authorized!");
+            MDC.put("environmentId", String.valueOf(environmentId));
+            MDC.put("serviceId", String.valueOf(serviceId));
+            MDC.put("deployableVersionId", String.valueOf(deployableVersionId));
+            MDC.put("userEmail", userEmail);
+            MDC.put("sourceVersion", sourceVersion);
 
-        } else {
+            logger.info("Got request for a new deployment");
 
-            String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
-            if (!LockService.getAndObtainLock(lockName)) {
-                logger.warn("A deployment request of this sort is currently being running");
-                assignJsonResponseToReq(req, 429, "A deployment request is currently running for this service and environment! Wait until its done");
-                return;
-            }
+            if (!PermissionsValidator.isAllowedToDeploy(serviceId, environmentId,
+                    deploymentPermissionDao.getPermissionsByUser(userEmail))) {
 
-            try {
-                logger.info("Permissions verified, Checking that no other deployment is currently running");
+                logger.info("User is not authorized to perform this deployment!");
+                assignJsonResponseToReq(req, 403, "Not Authorized!");
 
-                DeploymentDao deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
-                Optional<Deployment> runningDeployment = deploymentDao.getAllRunningDeployments()
-                        .stream()
-                        .filter(deployment ->
-                                deployment.getServiceId() == serviceId &&
-                                        deployment.getEnvironmentId() == environmentId)
-                        .findAny();
+            } else {
 
-                if (runningDeployment.isPresent()) {
-                    logger.warn("There is already a running deployment that initiated by {}. Can't start a new one",
-                            runningDeployment.get().getUserEmail());
-
-                    assignJsonResponseToReq(req, 409, "There is an on-going deployment for this service in this environment");;
+                String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
+                if (!LockService.getAndObtainLock(lockName)) {
+                    logger.warn("A deployment request of this sort is currently being running");
+                    assignJsonResponseToReq(req, 429, "A deployment request is currently running for this service and environment! Wait until its done");
                     return;
                 }
 
-                logger.info("All checks passed. Running deployment");
+                try {
+                    logger.info("Permissions verified, Checking that no other deployment is currently running");
 
-                Deployment newDeployment = new Deployment();
-                newDeployment.setEnvironmentId(environmentId);
-                newDeployment.setServiceId(serviceId);
-                newDeployment.setDeployableVersionId(deployableVersionId);
-                newDeployment.setUserEmail(userEmail);
-                newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
-                newDeployment.setSourceVersion(sourceVersion);
 
-                deploymentDao.addDeployment(newDeployment);
-                assignJsonResponseToReq(req, 201, newDeployment);
-            } finally {
-                LockService.releaseLock(lockName);
+                    Optional<Deployment> runningDeployment = deploymentDao.getAllRunningDeployments()
+                            .stream()
+                            .filter(deployment ->
+                                    deployment.getServiceId() == serviceId &&
+                                            deployment.getEnvironmentId() == environmentId)
+                            .findAny();
+
+                    if (runningDeployment.isPresent()) {
+                        logger.warn("There is already a running deployment that initiated by {}. Can't start a new one",
+                                runningDeployment.get().getUserEmail());
+
+                        assignJsonResponseToReq(req, 409, "There is an on-going deployment for this service in this environment");
+                        ;
+                        return;
+                    }
+
+                    logger.info("All checks passed. Running deployment");
+
+                    Deployment newDeployment = new Deployment();
+                    newDeployment.setEnvironmentId(environmentId);
+                    newDeployment.setServiceId(serviceId);
+                    newDeployment.setDeployableVersionId(deployableVersionId);
+                    newDeployment.setUserEmail(userEmail);
+                    newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
+                    newDeployment.setSourceVersion(sourceVersion);
+
+                    deploymentDao.addDeployment(newDeployment);
+                    assignJsonResponseToReq(req, 201, newDeployment);
+                } finally {
+                    LockService.releaseLock(lockName);
+                }
             }
         }
     }

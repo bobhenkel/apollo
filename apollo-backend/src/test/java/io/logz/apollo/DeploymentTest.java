@@ -35,9 +35,8 @@ public class DeploymentTest {
         assertThat(returnedDeployment.getEnvironmentId()).isEqualTo(testDeployment.getEnvironmentId());
         assertThat(returnedDeployment.getServiceId()).isEqualTo(testDeployment.getServiceId());
         assertThat(returnedDeployment.getDeployableVersionId()).isEqualTo(testDeployment.getDeployableVersionId());
-        assertThat(returnedDeployment.getUserEmail()).isEqualTo(testDeployment.getUserEmail());
+        assertThat(returnedDeployment.getUserEmail()).isEqualTo(apolloTestClient.getClientUser().getUserEmail());
         assertThat(returnedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.PENDING);
-        assertThat(returnedDeployment.getSourceVersion()).isEqualTo(testDeployment.getSourceVersion());
     }
 
     @Test
@@ -56,8 +55,7 @@ public class DeploymentTest {
             if (deploymentFromApi.get().getEnvironmentId() == testDeployment.getEnvironmentId() &&
                     deploymentFromApi.get().getServiceId() == testDeployment.getServiceId() &&
                     deploymentFromApi.get().getDeployableVersionId() == testDeployment.getDeployableVersionId() &&
-                    deploymentFromApi.get().getStatus().toString().equals(Deployment.DeploymentStatus.PENDING.toString()) &&
-                    deploymentFromApi.get().getSourceVersion().equals(testDeployment.getSourceVersion())) {
+                    deploymentFromApi.get().getStatus().toString().equals(Deployment.DeploymentStatus.PENDING.toString())) {
                 found = true;
             }
         }
@@ -76,7 +74,28 @@ public class DeploymentTest {
         assertThatThrownBy(() -> apolloTestClient.addDeployment(deployment1)).isInstanceOf(ApolloClientException.class);
 
         // Just to make sure we are not blocking different deployments to run on the same time
-        Deployment deployment2 = createAndSubmitDeployment(apolloTestClient);
+        createAndSubmitDeployment(apolloTestClient);
+    }
+
+    @Test
+    public void testGitCommitShaCorrectlyPlaced() throws Exception {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        Deployment firstDeployment = createAndSubmitDeployment(apolloTestClient);
+        DeployableVersion createdDeployableVersionFromFirstDeployment = apolloTestClient.getDeployableVersion(firstDeployment.getDeployableVersionId());
+        Service createdServiceFromFirstDeployment = apolloTestClient.getService(firstDeployment.getServiceId());
+        Environment createdEnvironmentFromFirstDeployment = apolloTestClient.getEnvironment(firstDeployment.getEnvironmentId());
+
+        DeployableVersion secondDeployableVersion = ModelsGenerator.createDeployableVersion(createdServiceFromFirstDeployment);
+        secondDeployableVersion.setId(apolloTestClient.addDeployableVersion(secondDeployableVersion).getId());
+
+        Common.markDeploymentAsCompletedViaDB(firstDeployment);
+
+        Deployment secondDeployment = ModelsGenerator.createDeployment(createdServiceFromFirstDeployment, createdEnvironmentFromFirstDeployment, secondDeployableVersion);
+        Deployment returnedSecondDeployment = apolloTestClient.addDeployment(secondDeployment);
+
+        assertThat(returnedSecondDeployment.getSourceVersion()).isEqualTo(createdDeployableVersionFromFirstDeployment.getGitCommitSha());
     }
 
     private Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient) throws Exception {
@@ -95,7 +114,7 @@ public class DeploymentTest {
         grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
 
         // Now we have enough to create a deployment
-        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion, apolloTestClient.getClientUser());
+        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         testDeployment.setId(apolloTestClient.addDeployment(testDeployment).getId());
 
         return testDeployment;

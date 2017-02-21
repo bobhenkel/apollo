@@ -4,9 +4,12 @@ import com.google.gson.Gson;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
+import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
+import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -36,7 +39,10 @@ public class Common {
     }
 
     public static void registerUserInDb(User user) {
-        ApolloMyBatis.getDao(UserDao.class).addUser(user);
+        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            UserDao userDao = apolloMyBatisSession.getDao(UserDao.class);
+            userDao.addUser(user);
+        }
     }
 
     public static String generateJson(String... keyValuePairs ) {
@@ -94,6 +100,15 @@ public class Common {
             Thread.sleep(seconds * 1000);
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while waiting..");
+        }
+    }
+
+    public static void markDeploymentAsCompletedViaDB(Deployment deployment) {
+        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+
+            // This endpoint is not open on REST, so in case we need to make 2 deployments on the same service and env, this is the only way.
+            deploymentDao.updateDeploymentStatus(deployment.getId(), Deployment.DeploymentStatus.DONE);
         }
     }
 }

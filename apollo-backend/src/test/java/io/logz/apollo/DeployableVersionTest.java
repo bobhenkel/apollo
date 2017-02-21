@@ -6,7 +6,9 @@ import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Service;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.rapidoid.serialize.Ser;
 
 import java.util.Optional;
 
@@ -31,6 +33,28 @@ public class DeployableVersionTest {
         assertThat(returnedDeployableVersion.getGitCommitSha()).isEqualTo(testDeployableVersion.getGitCommitSha());
         assertThat(returnedDeployableVersion.getGithubRepositoryUrl()).isEqualTo(testDeployableVersion.getGithubRepositoryUrl());
         assertThat(returnedDeployableVersion.getServiceId()).isEqualTo(testDeployableVersion.getServiceId());
+    }
+
+    @Test
+    public void populateRealCommitDetails() throws ApolloClientException {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        Service createdService = createAndSubmitService(apolloTestClient);
+
+        DeployableVersion deployableVersion = new DeployableVersion();
+        deployableVersion.setGithubRepositoryUrl("https://github.com/kubernetes/kubernetes");
+        deployableVersion.setGitCommitSha("b3d627c2e2a801e442b7a75ee8cddc33c7663812"); // Just a random commit in k8s repo
+        deployableVersion.setServiceId(createdService.getId());
+
+        deployableVersion.setId(apolloTestClient.addDeployableVersion(deployableVersion).getId());
+
+        DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersion(deployableVersion.getId());
+
+        assertThat(returnedDeployableVersion.getCommitMessage()).contains("Improved code coverage");
+        assertThat(returnedDeployableVersion.getCommitUrl()).isEqualTo("https://github.com/kubernetes/kubernetes/commit/b3d627c2e2a801e442b7a75ee8cddc33c7663812");
+        assertThat(returnedDeployableVersion.getCommitterName()).isEqualTo("GitHub Web Flow");
+        assertThat(returnedDeployableVersion.getCommitterAvatarUrl()).isEqualTo("https://avatars.githubusercontent.com/u/19864447?v=3");
     }
 
     @Test
@@ -61,13 +85,19 @@ public class DeployableVersionTest {
     private DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {
 
         // Needed for FK
-        Service testService = ModelsGenerator.createService();
-        testService.setId(apolloTestClient.addService(testService).getId());
+        Service testService = createAndSubmitService(apolloTestClient);
 
         // Add deployable version
         DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         return testDeployableVersion;
+    }
+
+    @NotNull
+    private Service createAndSubmitService(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        Service testService = ModelsGenerator.createService();
+        testService.setId(apolloTestClient.addService(testService).getId());
+        return testService;
     }
 }

@@ -28,14 +28,20 @@ public class KubernetesHandler {
     }
 
     KubernetesHandler(Environment environment) {
-        this.environment = environment;
+        try {
+            this.environment = environment;
 
-        Config config = new ConfigBuilder()
-                .withMasterUrl(environment.getKubernetesMaster())
-                .withOauthToken(environment.getKubernetesToken())
-                .build();
+            Config config = new ConfigBuilder()
+                    .withMasterUrl(environment.getKubernetesMaster())
+                    .withOauthToken(environment.getKubernetesToken())
+                    .build();
 
-        kubernetesClient = new DefaultKubernetesClient(config);
+            kubernetesClient = new DefaultKubernetesClient(config);
+
+        } catch (Exception e) {
+            logger.error("Could not create kubernetes client for environment {}", environment.getId(), e);
+            throw new RuntimeException();
+        }
     }
 
     Deployment startDeployment(Deployment deployment) {
@@ -137,7 +143,7 @@ public class KubernetesHandler {
             kubernetesClient
                     .pods()
                     .inNamespace(environment.getKubernetesNamespace())
-                    .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), apolloToKubernetes.getApolloDeploymentUniqueIdentifierValue())
+                    .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), apolloToKubernetes.getApolloDeploymentPodUniqueIdentifierValue())
                     .list()
                     .getItems()
                     .stream()

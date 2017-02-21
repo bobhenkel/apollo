@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('apollo')
-  .controller('newDeploymentCtrl', ['apolloApiService', 'githubApiService', '$scope',
+  .controller('newDeploymentCtrl', ['apolloApiService', '$scope',
                                     '$timeout' , '$state', 'growl', 'usSpinnerService',
-            function (apolloApiService, githubApiService, $scope, $timeout, $state, growl, usSpinnerService) {
+            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService) {
 
         // Define the flow steps
         var deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
@@ -42,7 +42,7 @@ angular.module('apollo')
                 var currIndex = deploymentSteps.indexOf($scope.currentStep);
 
                 // Increment the index
-                currIndex++
+                currIndex++;
 
                 // Choose the next step
                 $scope.currentStep = deploymentSteps[currIndex];
@@ -52,14 +52,12 @@ angular.module('apollo')
 
                 // Finish flow if in last step
                 if (currIndex == deploymentSteps.length - 1) {
-
                     $scope.showNextStep = false;
                 }
             }
             else {
                 growl.error("You must select one!");
             }
-
         };
 
         $scope.deploy = function() {
@@ -71,54 +69,50 @@ angular.module('apollo')
                     growl.error("Something unexpected has occurred! Try again.")
                     return;
                   }
-             })
+             });
 
             // Set spinner
-            usSpinnerService.spin('deployment-spinner')
+            usSpinnerService.spin('deployment-spinner');
 
             // Now we can deploy
-            apolloApiService.createNewDeployment($scope.versionSelected.sha, getDeployableVersionFromCommit($scope.versionSelected.sha),
+            apolloApiService.createNewDeployment(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
                     $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
 
-                        // End spinner
-                        usSpinnerService.stop('deployment-spinner');
+                        // Wait a bit to let the deployment be in the DB
+                        setTimeout(function () {
+                            usSpinnerService.stop('deployment-spinner');
 
-                        // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
-                        // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
-                        $('#confirm-modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
+                            // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
+                            // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
+                            $('#confirm-modal').modal('hide');
+                            $('body').removeClass('modal-open');
+                            $('.modal-backdrop').remove();
 
-                        // Redirect user to ongoing deployments
-                        $state.go('deployments.ongoing', {deploymentId: response.data});
+                            // Redirect user to ongoing deployments
+                            $state.go('deployments.ongoing', {deploymentId: response.data.id});
+                        }, 500);
 
                     }, function(error) {
-
                         // End spinner
                         usSpinnerService.stop('deployment-spinner');
-                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
+
+                        // 403 are handled generically on the interceptor
+                        if (error.status != 403) {
+                            growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
+                        }
                     });
-        }
+        };
 
         // Validators
         function validateEnvironment() {
-
-            if ($scope.environmentSelected == null) {
-                return false;
-            }
-            return true;
+            return $scope.environmentSelected != null;
         }
 
         function validateService() {
-
-            if ($scope.serviceSelected == null) {
-                return false;
-            }
-            return true;
+            return $scope.serviceSelected != null;
         }
 
         function validateVersion() {
-
             if ($scope.versionSelected == null) {
                 return false;
             }
@@ -127,10 +121,8 @@ angular.module('apollo')
         }
 
         function getDeployableVersionFromCommit(sha) {
-
-            return $scope.allDeployableVersions.filter(function(a){return a.git_commit_sha == sha})[0].id
+            return $scope.allDeployableVersions.filter(function(a){return a.gitCommitSha == sha})[0].id
         }
-
 
         // Data fetching
 		apolloApiService.getAllEnvironments().then(function(response) {
@@ -142,19 +134,7 @@ angular.module('apollo')
         });
 
         apolloApiService.getAllDeployableVersions().then(function(response) {
-
             // Save it aside for later data matching
             $scope.allDeployableVersions = response.data;
-
-            $scope.allVersions = [];
-
-            // Get commit data from github
-            for(var i=0; i < response.data.length; i++) {
-                githubApiService.getCommitDetails(response.data[i].github_repository_url,
-                                                  response.data[i].git_commit_sha).then(function(gitResponse){
-                                                    $scope.allVersions.push(gitResponse.data);
-                                                    $scope.allVersions.sort(function(a, b) { return new Date(b.commit.author.date) - new Date(a.commit.author.date) });
-                                                  });
-            }
         });
 }]);

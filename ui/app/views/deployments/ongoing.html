@@ -16,7 +16,6 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>Marathon ID</th>
                             <th>Last Updated</th>
                             <th>Service</th>
                             <th>Environment</th>
@@ -26,29 +25,24 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="deployment in allRunningDeployments | filter:globalSearch"
+                        <tr ng-repeat="deployment in runningAndJustFinishedDeployments | filter:globalSearch | orderBy: 'deployment.lastUpdate': true"
                             ng-class="{'my-deployment':deployment.id == deploymentId}">
-                            <td>{{deployment.marathon_id}}</td>
-                            <td>{{deployment.last_updated | date:'H:mm:ss'}}</td>
-                            <td>{{allServices[deployment.deployed_service].name}}</td>
-                            <td>{{allEnvironments[deployment.deployed_environment].name}}</td>
-                            <td>{{allUsers[deployment.initiated_by].email}}</td>
-                            <td><span class="label" ng-class="getLabel(deployment.deployment_status)">{{deployment.deployment_status}}</span></td>
+                            <td>{{deployment.lastUpdate | date:'H:mm:ss'}}</td>
+                            <td>{{allServices[deployment.serviceId].name}}</td>
+                            <td>{{allEnvironments[deployment.environmentId].name}}</td>
+                            <td>{{allUsers[deployment.userEmail].userEmail}}</td>
+                            <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
                             <td>
                                 <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
                                         ng-click="setSelectedDeployment(deployment) ; getLogs()"
                                         data-toggle="modal" data-target="#show-logs">
-                                    <i class="fa fa-file-text-o"></i>
-                                </button>
-                                <button type="button" class="btn btn-info btn-circle" uib-tooltip="View In Marathon"
-                                        ng-click="setSelectedDeployment(deployment)">
                                     <i class="fa fa-binoculars"></i>
                                 </button>
                                 <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
                                         ng-click="setSelectedDeployment(deployment)"
                                         data-toggle="modal" data-target="#confirm-revert"
-                                        ng-class="getRevertClass(deployment.deployment_status)"
-                                        ng-disabled="isRevertDisabledBasedOnStatus(deployment.deployment_status)">
+                                        ng-class="getRevertClass(deployment.status)"
+                                        ng-disabled="isRevertDisabledBasedOnStatus(deployment.status)">
                                     <i class="fa fa-undo"></i>
                                 </button>
                             </td>
@@ -91,7 +85,7 @@
                 <div class="modal-body">
                     <div>
                         <pre class="apollo-logs">
-<!-- Not identing since it will also ident what inside the code block-->
+<!-- Not indenting since it will also idents what inside the code block-->
 <code ng-bind-html="dockerLogs">
 </code>
                         </pre>

@@ -29,6 +29,10 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'running-deployments/');
     };
 
+    var getRunningAndJustFinishedDeployments = function() {
+        return $http.get(CONFIG.appUrl + 'running-and-just-finished-deployments/');
+    };
+
     var getAllDeployments = function() {
         return $http.get(CONFIG.appUrl + 'deployment/');
     };
@@ -50,97 +54,78 @@ function ApiService($q, $http){
     };
 
     var getLatestDeployments = function() {
-
         return $http.get(CONFIG.appUrl + 'latest-deployments/');
-    }
+    };
 
-    var createNewDeployment = function(targetVersion, deployableVersionId, deployedService, deployedEnvironment) {
-
+    var createNewDeployment = function(deployableVersionId, deployedService, deployedEnvironment) {
         return $http.post(CONFIG.appUrl + "deployment/", {
-
-            target_version: targetVersion,
-            deployed_service: deployedService,
-            deployed_environment: deployedEnvironment,
-            deployable_version: deployableVersionId
+            serviceId: deployedService,
+            environmentId: deployedEnvironment,
+            deployableVersionId: deployableVersionId
         })
     };
 
     var revertDeployment = function(deploymentId) {
-
         return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId + "/");
     };
 
     var getDeploymentLogs = function(deploymentId) {
-
         return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs/");
     };
 
 
     var matchLabelToDeploymentStatus = function(deploymentStatus) {
-
         var statusToLabel = {
-
-            "pending": "label-default",
-            "restart": "label-primary",
-            "scale": "label-primary",
-            "reverting": "label-warning",
-            "done-success": "label-success",
-            "done-failed": "label-danger"
-        }
+            "PENDING": "label-default",
+            "PENDING_CANCELLATION": "label-default",
+            "STARTED": "label-primary",
+            "CANCELING": "label-warning",
+            "DONE": "label-success",
+            "CANCELED": "label-danger"
+        };
 
         return statusToLabel[deploymentStatus]
     };
 
     var isRevertDisabledBasedOnStatus = function(deploymentStatus) {
+        return deploymentStatus == "DONE" || deploymentStatus == "CANCELED";
+    };
 
-        if (deploymentStatus == "done-success" || deploymentStatus == "done-failed") {
-
-            return true;
-        }
-
-        return false;
-    }
-
-    var signup = function(email, first_name, last_name, password) {
-
+    var signup = function(userEmail, firstName, lastName, password) {
         return $http.post(CONFIG.appUrl + "signup/", {
-
-            email: emailAddress,
-            first_name: first_name,
-            last_name: last_name,
+            userEmail: userEmail,
+            firstName: firstName,
+            lastName: lastName,
             password: password
         })
-    }
+    };
 
     var login = function(email, password) {
-
-
-        return $http.post(CONFIG.appUrl + "login/", {
-
+        return $http.post(CONFIG.appUrl + "_login/", {
             username: email,
             password: password
         })
-    }
-
+    };
 
     return {
-      getAllUsers: getAllUsers,
-      getAllEnvironments: getAllEnvironments,
-      getAllServices: getAllServices,
-      getAllDeployableVersions: getAllDeployableVersions,
-      createNewDeployment: createNewDeployment,
-      getAllRunningDeployments: getAllRunningDeployments,
-      getAllDeployments: getAllDeployments,
-      getService: getService,
-      getEnvironment: getEnvironment,
-      getUser: getUser,
-      getDeployableVersion: getDeployableVersion,
-      getLatestDeployments: getLatestDeployments,
-      revertDeployment: revertDeployment,
-      getDeploymentLogs: getDeploymentLogs,
-      matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
-      isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus,
-      signup: signup,
-      login: login
+        getAllUsers: getAllUsers,
+        getAllEnvironments: getAllEnvironments,
+        getAllServices: getAllServices,
+        getAllDeployableVersions: getAllDeployableVersions,
+        createNewDeployment: createNewDeployment,
+        getAllRunningDeployments: getAllRunningDeployments,
+        getRunningAndJustFinishedDeployments: getRunningAndJustFinishedDeployments,
+        getAllDeployments: getAllDeployments,
+        getService: getService,
+        getEnvironment: getEnvironment,
+        getUser: getUser,
+        getDeployableVersion: getDeployableVersion,
+        getLatestDeployments: getLatestDeployments,
+        revertDeployment: revertDeployment,
+        getDeploymentLogs: getDeploymentLogs,
+        matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
+        isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus,
+        signup: signup,
+        login: login
     };
 }

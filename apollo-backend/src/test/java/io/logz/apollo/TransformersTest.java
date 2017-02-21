@@ -124,7 +124,7 @@ public class TransformersTest {
     }
 
     private void assertDeploymentLabelExists(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String labelKey, String labelValue) {
-        assertThat(deployment.getSpec().getTemplate().getMetadata().getLabels().get(labelKey)).isEqualTo(labelValue);
+        assertThat(deployment.getMetadata().getLabels().get(labelKey)).isEqualTo(labelValue);
     }
 
     private void assertServiceLabelExists(io.fabric8.kubernetes.api.model.Service service, String labelKey, String labelValue) {

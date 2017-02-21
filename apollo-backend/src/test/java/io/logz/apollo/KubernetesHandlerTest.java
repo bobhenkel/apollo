@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.database.ApolloMyBatis;
+import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
@@ -32,7 +33,6 @@ public class KubernetesHandlerTest {
 
     private final String LOG_MESSAGE_IN_POD = "test log message to search..";
 
-    private final DeploymentDao deploymentDao;
     private final KubernetesMockClient kubernetesMockClient;
     private final RealDeploymentGenerator notFinishedDeployment;
     private final RealDeploymentGenerator finishedDeployment;
@@ -47,7 +47,6 @@ public class KubernetesHandlerTest {
         StandaloneApollo.getOrCreateServer();
 
         kubernetesMockClient = new KubernetesMockClient();
-        deploymentDao = ApolloMyBatis.getDao(DeploymentDao.class);
 
         // Create deployments
         notFinishedDeployment = new RealDeploymentGenerator("image", "key", "value");
@@ -86,18 +85,22 @@ public class KubernetesHandlerTest {
     @Test
     public void testDeploymentMonitor() {
 
-        // We need to wait at least 2 iterations of the monitoring thread + 1 buffer
-        Common.waitABit(3);
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
 
-        Deployment currentNotFinishedDeployment = deploymentDao.getDeployment(notFinishedDeployment.getDeployment().getId());
-        Deployment currentFinishedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
-        Deployment currentNotFinishedCanceledDeployment = deploymentDao.getDeployment(notFinishedCanceledDeployment.getDeployment().getId());
-        Deployment currentFinishedCanceledDeployment = deploymentDao.getDeployment(finishedCanceledDeployment.getDeployment().getId());
+            // We need to wait at least 2 iterations of the monitoring thread + 1 buffer
+            Common.waitABit(3);
 
-        assertThat(currentNotFinishedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.STARTED);
-        assertThat(currentFinishedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.DONE);
-        assertThat(currentNotFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELING);
-        assertThat(currentFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELED);
+            Deployment currentNotFinishedDeployment = deploymentDao.getDeployment(notFinishedDeployment.getDeployment().getId());
+            Deployment currentFinishedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
+            Deployment currentNotFinishedCanceledDeployment = deploymentDao.getDeployment(notFinishedCanceledDeployment.getDeployment().getId());
+            Deployment currentFinishedCanceledDeployment = deploymentDao.getDeployment(finishedCanceledDeployment.getDeployment().getId());
+
+            assertThat(currentNotFinishedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.STARTED);
+            assertThat(currentFinishedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.DONE);
+            assertThat(currentNotFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELING);
+            assertThat(currentFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELED);
+        }
     }
 
     @Test
@@ -139,7 +142,7 @@ public class KubernetesHandlerTest {
         kubernetesMockClient
                 .pods()
                 .inNamespace(realDeploymentGenerator.getEnvironment().getKubernetesNamespace())
-                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), apolloToKubernetes.getApolloDeploymentUniqueIdentifierValue())
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), apolloToKubernetes.getApolloDeploymentPodUniqueIdentifierValue())
                 .list()
                 .andReturn(
                         new PodListBuilder()

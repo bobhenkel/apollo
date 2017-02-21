@@ -89,9 +89,7 @@ public class ApolloClient {
     public Deployment addDeployment(Deployment deployment) throws ApolloClientException {
         String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
                 "serviceId", String.valueOf(deployment.getServiceId()),
-                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
-                "userEmail", deployment.getUserEmail(),
-                "sourceVersion", deployment.getSourceVersion());
+                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()));
 
         return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
     }

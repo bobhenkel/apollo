@@ -47,15 +47,12 @@ public class ModelsGenerator {
     }
 
     public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
-                                              DeployableVersion relatedDeployableVersion, User relatedUser) {
+                                              DeployableVersion relatedDeployableVersion) {
 
         Deployment testDeployment = new Deployment();
         testDeployment.setEnvironmentId(relatedEnvironment.getId());
         testDeployment.setServiceId(relatedService.getId());
         testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
-        testDeployment.setUserEmail(relatedUser.getUserEmail());
-        testDeployment.setSourceVersion("abc1234" + Common.randomStr(10));
-
         return testDeployment;
     }
 
