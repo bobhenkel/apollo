@@ -73,25 +73,25 @@
                                                                           filter:{environmentId: environmentSearch.id} |
                                                                           filter:{userEmail: userSearch.id} |
                                                                           orderBy: 'deploymentLastUpdate': true">
-                            <td>{{deployment.id}}</td>
-                            <td>{{deployment.lastUpdate | date:'dd/MM/yy H:mm:ss'}}</td>
-                            <td>{{allServices[deployment.serviceId].name}}</td>
-                            <td>{{allEnvironments[deployment.environmentId].name}}</td>
-                            <td>{{allUsers[deployment.userEmail].userEmail}}</td>
-                            <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-circle" uib-tooltip="Details"
-                                        ng-click="setSelectedDeployment(deployment); showDetails()"
-                                        data-toggle="modal" data-target="#show-details">
-                                    <i class="fa fa-info"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Back to this version"
-                                        ng-click="setSelectedDeployment(deployment)"
-                                        data-toggle="modal" data-target="#confirm-revert">
-                                    <i class="fa fa-undo"></i>
-                                </button>
-                            </td>
-                        </tr>
+                                <td>{{deployment.id}}</td>
+                                <td>{{deployment.lastUpdate | utcToLocal:'dd/MM/yy H:mm:ss':'UTC'}}</td>
+                                <td>{{allServices[deployment.serviceId].name}}</td>
+                                <td>{{allEnvironments[deployment.environmentId].name}}</td>
+                                <td>{{allUsers[deployment.userEmail].userEmail}}</td>
+                                <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-circle" uib-tooltip="Details"
+                                            ng-click="setSelectedDeployment(deployment); showDetails()"
+                                            data-toggle="modal" data-target="#show-details">
+                                        <i class="fa fa-info"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Back to this version"
+                                            ng-click="setSelectedDeployment(deployment)"
+                                            data-toggle="modal" data-target="#confirm-revert">
+                                        <i class="fa fa-undo"></i>
+                                    </button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

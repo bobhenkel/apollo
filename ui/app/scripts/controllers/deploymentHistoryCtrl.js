@@ -45,12 +45,6 @@ angular.module('apollo')
                         setTimeout(function () {
                             usSpinnerService.stop('revert-spinner');
 
-                            // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
-                            // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
-                            $('#confirm-modal').modal('hide');
-                            $('body').removeClass('modal-open');
-                            $('.modal-backdrop').remove();
-
                             // Redirect user to ongoing deployments
                             $state.go('deployments.ongoing', {deploymentId: response.data.id});
                         }, 500);
