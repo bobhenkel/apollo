@@ -7,18 +7,23 @@ import io.fabric8.kubernetes.api.model.extensions.DeploymentListBuilder;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
+import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.helpers.Common;
+import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
 import io.logz.apollo.kubernetes.ApolloToKubernetesFactory;
 import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -31,17 +36,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class KubernetesHandlerTest {
 
-    private final String LOG_MESSAGE_IN_POD = "test log message to search..";
+    private static final String LOG_MESSAGE_IN_POD = "test log message to search..";
 
-    private final KubernetesMockClient kubernetesMockClient;
-    private final RealDeploymentGenerator notFinishedDeployment;
-    private final RealDeploymentGenerator finishedDeployment;
-    private final RealDeploymentGenerator notFinishedCanceledDeployment;
-    private final RealDeploymentGenerator finishedCanceledDeployment;
+    private static KubernetesMockClient kubernetesMockClient;
+    private static RealDeploymentGenerator notFinishedDeployment;
+    private static RealDeploymentGenerator finishedDeployment;
+    private static RealDeploymentGenerator notFinishedCanceledDeployment;
+    private static RealDeploymentGenerator finishedCanceledDeployment;
+    private static RealDeploymentGenerator statusDeployment;
 
-    private final KubernetesHandler notFinishedDeploymentHandler;
+    private static KubernetesHandler notFinishedDeploymentHandler;
 
-    public KubernetesHandlerTest() throws ScriptException, IOException, SQLException {
+    @BeforeClass
+    public static void initialize() throws ScriptException, IOException, SQLException {
 
         // We need a server here
         StandaloneApollo.getOrCreateServer();
@@ -53,12 +60,14 @@ public class KubernetesHandlerTest {
         finishedDeployment = new RealDeploymentGenerator("image", "key", "value");
         notFinishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value");
         finishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value");
+        statusDeployment = new RealDeploymentGenerator("image", "key", "value");
 
         // Set mock endpoints
         setMockDeploymentStatus(notFinishedDeployment, false, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
         setMockDeploymentStatus(finishedDeployment, true, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(finishedDeployment.getDeployment()));
         setMockDeploymentStatus(notFinishedCanceledDeployment, false, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
         setMockDeploymentStatus(finishedCanceledDeployment, true, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
+        setMockDeploymentStatus(statusDeployment, true, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
         // Set the logs mock on arbitrary one
         setMockPodLogs(notFinishedDeployment, LOG_MESSAGE_IN_POD, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
@@ -71,12 +80,14 @@ public class KubernetesHandlerTest {
         KubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(finishedDeployment.getEnvironment(), kubernetesClient);
         KubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedCanceledDeployment.getEnvironment(), kubernetesClient);
         KubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(finishedCanceledDeployment.getEnvironment(), kubernetesClient);
+        KubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(statusDeployment.getEnvironment(), kubernetesClient);
 
         // Since the mock library does not support "createOrReplace" we can't mock this phase (and its fine to neglect it since its fabric8 code)
         notFinishedDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.STARTED);
         finishedDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.STARTED);
         notFinishedCanceledDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
         finishedCanceledDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
+        statusDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.DONE);
 
         // TODO: This can cause test concurrency issues in case we will want to run this in parallel. In the current singleton nature of those tests, no other way unfortunately
         StandaloneApollo.getOrCreateServer().startKubernetesMonitor();
@@ -110,7 +121,26 @@ public class KubernetesHandlerTest {
         assertThat(logs).contains(LOG_MESSAGE_IN_POD);
     }
 
-    private void setMockDeploymentStatus(RealDeploymentGenerator realDeploymentGenerator, boolean finished, ApolloToKubernetes apolloToKubernetes) {
+    @Test
+    public void testNewDeploymentGetLatestStatus() throws Exception {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+        Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, statusDeployment.getEnvironment());
+
+        DeployableVersion deployableVersion = ModelsGenerator.createDeployableVersion(statusDeployment.getService());
+        deployableVersion.setId(apolloTestClient.addDeployableVersion(deployableVersion).getId());
+
+        Deployment restDeployment = ModelsGenerator.createDeployment(statusDeployment.getService(),
+                                                                     statusDeployment.getEnvironment(),
+                                                                     deployableVersion);
+
+        restDeployment.setId(apolloTestClient.addDeployment(restDeployment).getId());
+
+        assertThat(apolloTestClient.getDeployment(restDeployment.getId()).getSourceVersion())
+                .isEqualTo(statusDeployment.getDeployableVersion().getGitCommitSha());
+    }
+
+    private static void setMockDeploymentStatus(RealDeploymentGenerator realDeploymentGenerator, boolean finished, ApolloToKubernetes apolloToKubernetes) {
 
         DeploymentStatus deploymentStatus;
         if (finished) {
@@ -130,12 +160,18 @@ public class KubernetesHandlerTest {
                                 .withItems(
                                         new DeploymentBuilder()
                                                 .withStatus(deploymentStatus)
+                                                .withNewMetadata()
+                                                .withLabels(
+                                                        ImmutableMap.of(ApolloToKubernetes.getApolloCommitShaKey(),
+                                                                realDeploymentGenerator.getDeployableVersion().getGitCommitSha())
+                                                )
+                                                .endMetadata()
                                                 .build()
                                 ).build()
                 ).anyTimes();
     }
 
-    private void setMockPodLogs(RealDeploymentGenerator realDeploymentGenerator, String log, ApolloToKubernetes apolloToKubernetes) {
+    private static void setMockPodLogs(RealDeploymentGenerator realDeploymentGenerator, String log, ApolloToKubernetes apolloToKubernetes) {
 
         String podName = "mavet-pod-" + Common.randomStr(5);
 

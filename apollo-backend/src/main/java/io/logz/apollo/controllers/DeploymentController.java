@@ -1,22 +1,24 @@
 package io.logz.apollo.controllers;
 
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.logz.apollo.LockService;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
-import io.logz.apollo.kubernetes.ApolloToKubernetes;
-import io.logz.apollo.kubernetes.ApolloToKubernetesFactory;
 import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
+import io.logz.apollo.models.Status;
 import org.rapidoid.annotation.Controller;
+import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;
@@ -104,12 +106,26 @@ public class DeploymentController extends BaseController {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
             DeploymentPermissionDao deploymentPermissionDao = apolloMyBatisSession.getDao(DeploymentPermissionDao.class);
+            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
 
             // Get the username from the token
             String userEmail = req.token().get("_user").toString();
 
-            // And get the current commit from the DB
-            String sourceVersion = deploymentDao.getCurrentGitCommitSha(serviceId, environmentId);
+            String sourceVersion = null;
+
+            try {
+                // Get the current commit sha from kubernetes so we can revert if necessary
+                Environment environment = environmentDao.getEnvironment(environmentId);
+                Service service = serviceDao.getService(serviceId);
+                Status status = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+
+                if (status != null)
+                    sourceVersion = status.getGitCommitSha();
+
+            } catch (Exception e) {
+                logger.error("Got exception while getting the current gitCommitSha from kubernetes. That means no revert.", e);
+            }
 
             MDC.put("environmentId", String.valueOf(environmentId));
             MDC.put("serviceId", String.valueOf(serviceId));
@@ -129,7 +145,7 @@ public class DeploymentController extends BaseController {
 
                 String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
                 if (!LockService.getAndObtainLock(lockName)) {
-                    logger.warn("A deployment request of this sort is currently being running");
+                    logger.warn("A deployment request of this sort is currently being run");
                     assignJsonResponseToReq(req, 429, "A deployment request is currently running for this service and environment! Wait until its done");
                     return;
                 }
@@ -169,6 +185,45 @@ public class DeploymentController extends BaseController {
                 } finally {
                     LockService.releaseLock(lockName);
                 }
+            }
+        }
+    }
+
+    @LoggedIn
+    @DELETE("/deployment/{id}")
+    public void cancelDeployment(int id, Req req) {
+
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+
+            // Get the username from the token
+            String userEmail = req.token().get("_user").toString();
+
+            MDC.put("userEmail", userEmail);
+            MDC.put("deploymentId", String.valueOf(id));
+
+            logger.info("Got request for a deployment cancellation");
+
+            String lockName = LockService.getDeploymentCancelationName(id);
+            if (!LockService.getAndObtainLock(lockName)) {
+                logger.warn("A deployment cancel request of this sort is currently being run");
+                assignJsonResponseToReq(req, 429, "A deployment cancel request is currently running for this deployment! Wait until its done");
+                return;
+            }
+            try {
+                Deployment deployment = deploymentDao.getDeployment(id);
+
+                // Check that the deployment is not already done, or canceled
+                if (!deployment.getStatus().equals(Deployment.DeploymentStatus.DONE) && !deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELED)) {
+                    logger.info("Setting deployment to status PENDING_CANCELLATION");
+                    deploymentDao.updateDeploymentStatus(id, Deployment.DeploymentStatus.PENDING_CANCELLATION);
+                    assignJsonResponseToReq(req, 202, "Deployment Canceled!");
+                } else {
+                    logger.warn("Deployment is in status {}, can't cancel it now!", deployment.getStatus());
+                    assignJsonResponseToReq(req, 400, "Can't cancel the deployment as it is not in a state that's allows canceling");
+                }
+            } finally {
+                LockService.releaseLock(lockName);
             }
         }
     }

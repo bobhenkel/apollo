@@ -7,9 +7,12 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
+import io.logz.apollo.models.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -159,5 +162,33 @@ public class KubernetesHandler {
             logger.error("Got exception while getting logs for deployment {}", deployment.getId());
             return "Can't get logs!";
         }
+    }
+
+    public Status getCurrentStatus(Service service) {
+
+        String commitSha = kubernetesClient
+                .extensions()
+                .deployments()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(environment, service))
+                .list()
+                .getItems()
+                .stream()
+                .findFirst()
+                .orElse(null)
+                .getMetadata()
+                .getLabels()
+                .get(ApolloToKubernetes.getApolloCommitShaKey());
+
+        if (commitSha == null) {
+            return null;
+        }
+
+        Status status = new Status();
+        status.setServiceId(service.getId());
+        status.setEnvironmentId(environment.getId());
+        status.setGitCommitSha(commitSha);
+
+        return status;
     }
 }

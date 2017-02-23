@@ -25,6 +25,10 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'deployable-version/');
     };
 
+    var getDeployableVersionBasedOnSha = function (sha) {
+        return $http.get(CONFIG.appUrl + "deployable-version/sha/" + sha + "/")
+    };
+
     var getAllRunningDeployments = function() {
         return $http.get(CONFIG.appUrl + 'running-deployments/');
     };
@@ -107,11 +111,20 @@ function ApiService($q, $http){
         })
     };
 
+    var serviceStatus = function (serviceId) {
+        return $http.get("/status/service/" + serviceId + "/");
+    };
+
+    var environmentStatus = function (environmentId) {
+        return $http.get("/status/environment/" + environmentId + "/");
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
         getAllServices: getAllServices,
         getAllDeployableVersions: getAllDeployableVersions,
+        getDeployableVersionBasedOnSha: getDeployableVersionBasedOnSha,
         createNewDeployment: createNewDeployment,
         getAllRunningDeployments: getAllRunningDeployments,
         getRunningAndJustFinishedDeployments: getRunningAndJustFinishedDeployments,
@@ -126,6 +139,8 @@ function ApiService($q, $http){
         matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
         isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus,
         signup: signup,
-        login: login
+        login: login,
+        serviceStatus: serviceStatus,
+        environmentStatus: environmentStatus
     };
 }

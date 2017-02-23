@@ -9,6 +9,7 @@ import io.logz.apollo.scm.GithubConnector;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
+import org.rapidoid.commons.Str;
 import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
@@ -36,6 +37,15 @@ public class DeployableVersionController extends BaseController {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
             return deployableVersionDao.getDeployableVersion(id);
+        }
+    }
+
+    @LoggedIn
+    @GET("/deployable-version/sha/{sha}")
+    public DeployableVersion getDeployableVersionFromSha(String sha) {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()){
+            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
+            return deployableVersionDao.getDeployableVersionFromSha(sha);
         }
     }
 

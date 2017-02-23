@@ -37,7 +37,7 @@
         SELECT ver.git_commit_sha
         FROM deployment as dep
         JOIN deployable_version as ver ON dep.deployable_version_id = ver.id
-        WHERE dep.service_id = #{serviceId} AND dep.environment_id = #{environmentId}
+        WHERE dep.service_id = #{serviceId} AND dep.environment_id = #{environmentId} AND dep.status = "DONE"
         ORDER BY dep.last_update DESC
         LIMIT 1
     </select>

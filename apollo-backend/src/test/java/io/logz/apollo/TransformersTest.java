@@ -67,12 +67,13 @@ public class TransformersTest {
         assertImageName(apolloToKubernetes.getKubernetesDeployment(), imageNameWithNoRepoAndNoVersion + ":" + realDeploymentGenerator.getDeployableVersion().getGitCommitSha());
 
         realDeploymentGenerator = new RealDeploymentGenerator(imageNameWithNoRepoAndNoVersion, "key", "value");
-        realDeploymentGenerator.getDeployment().setStatus(Deployment.DeploymentStatus.PENDING_CANCELLATION);
+        realDeploymentGenerator.updateDeploymentStatus(Deployment.DeploymentStatus.PENDING_CANCELLATION);
         apolloToKubernetes = new ApolloToKubernetes(realDeploymentGenerator.getDeployment());
         assertImageName(apolloToKubernetes.getKubernetesDeployment(), imageNameWithNoRepoAndNoVersion + ":" + realDeploymentGenerator.getDeployment().getSourceVersion());
 
         realDeploymentGenerator = new RealDeploymentGenerator(imageNameWithNoRepoAndNoVersion, "key", "value");
-        realDeploymentGenerator.getDeployment().setStatus(Deployment.DeploymentStatus.CANCELING);
+        realDeploymentGenerator.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
+        realDeploymentGenerator.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
         apolloToKubernetes = new ApolloToKubernetes(realDeploymentGenerator.getDeployment());
         assertImageName(apolloToKubernetes.getKubernetesDeployment(), imageNameWithNoRepoAndNoVersion + ":" + realDeploymentGenerator.getDeployment().getSourceVersion());
     }

@@ -1,5 +1,6 @@
 package io.logz.apollo;
 
+import io.logz.apollo.clients.ApolloClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
@@ -80,6 +81,17 @@ public class DeployableVersionTest {
             }
         }
         assertThat(found).isTrue();
+    }
+
+    @Test
+    public void testGetDeployableVersionFromSha() throws ApolloClientException {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        DeployableVersion testDeployableVersion = createAndSubmitDeployableVersion(apolloTestClient);
+        DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersionFromSha(testDeployableVersion.getGitCommitSha());
+
+        assertThat(testDeployableVersion.getId()).isEqualTo(returnedDeployableVersion.getId());
     }
 
     private DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {

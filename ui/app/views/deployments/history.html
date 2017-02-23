@@ -74,7 +74,7 @@
                                                                           filter:{userEmail: userSearch.id} |
                                                                           orderBy: 'deploymentLastUpdate': true">
                                 <td>{{deployment.id}}</td>
-                                <td>{{deployment.lastUpdate | utcToLocal:'dd/MM/yy H:mm:ss':'UTC'}}</td>
+                                <td>{{deployment.lastUpdate | date:'dd/MM/yy H:mm:ss'}}</td>
                                 <td>{{allServices[deployment.serviceId].name}}</td>
                                 <td>{{allEnvironments[deployment.environmentId].name}}</td>
                                 <td>{{allUsers[deployment.userEmail].userEmail}}</td>
