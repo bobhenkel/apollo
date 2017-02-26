@@ -134,7 +134,7 @@
                     <span us-spinner="{radius:30, width:8, length: 16}" spinner-key="details-spinner"></span>
                     <table class="table">
                         <tr>
-                            <td>Commit Sha</td><td><a href="{{deployableVersion.commitUrl}}">{{deployableVersion.gitCommitSha | limitTo: 7}}</a></td>
+                            <td>Commit Sha</td><td><a target="_blank" href="{{deployableVersion.commitUrl}}">{{deployableVersion.gitCommitSha | limitTo: 7}}</a></td>
                         </tr>
                         <tr>
                             <td>Commit Author</td><td><img class="apollo-committer-image" ng-src="{{deployableVersion.committerAvatarUrl}}">{{deployableVersion.committerName}}</td>

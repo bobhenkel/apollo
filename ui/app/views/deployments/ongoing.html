@@ -27,7 +27,7 @@
                         <tbody>
                         <tr ng-repeat="deployment in runningAndJustFinishedDeployments | filter:globalSearch | orderBy: 'deployment.lastUpdate': true"
                             ng-class="{'my-deployment':deployment.id == deploymentId}">
-                            <td>{{deployment.lastUpdate | date:'H:mm:ss'}}</td>
+                            <td>{{deployment.lastUpdate | date:'dd/MM/yy H:mm:ss'}}</td>
                             <td>{{allServices[deployment.serviceId].name}}</td>
                             <td>{{allEnvironments[deployment.environmentId].name}}</td>
                             <td>{{allUsers[deployment.userEmail].userEmail}}</td>
