@@ -7,7 +7,7 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import io.logz.apollo.models.Status;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 
@@ -23,39 +23,39 @@ import static io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 public class StatusController {
 
     @GET("/status/service/{id}")
-    public List<Status> getCurrentServiceStatus(int id) {
+    public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int id) {
 
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
 
             ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
 
-            List<Status> statusList = new LinkedList<>();
+            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new LinkedList<>();
             Service service = serviceDao.getService(id);
 
             environmentDao.getAllEnvironments().forEach(environment ->
-                    statusList.add(KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service)));
+                    kubernetesDeploymentStatusList.add(KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service)));
 
-            return statusList;
+            return kubernetesDeploymentStatusList;
         }
     }
 
     @GET("/status/environment/{id}")
-    public List<Status> getCurrentEnvironmentStatus(int id) {
+    public List<KubernetesDeploymentStatus> getCurrentEnvironmentStatus(int id) {
 
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
 
             ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
 
-            List<Status> statusList = new LinkedList<>();
+            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new LinkedList<>();
             Environment environment = environmentDao.getEnvironment(id);
             KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
             serviceDao.getAllServices().forEach(service ->
-                    statusList.add(kubernetesHandler.getCurrentStatus(service)));
+                    kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service)));
 
-            return statusList;
+            return kubernetesDeploymentStatusList;
         }
     }
 }

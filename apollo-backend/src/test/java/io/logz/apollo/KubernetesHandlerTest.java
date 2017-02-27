@@ -1,5 +1,6 @@
 package io.logz.apollo;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodListBuilder;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
@@ -21,6 +22,8 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
+import io.logz.apollo.models.PodStatus;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -44,6 +47,7 @@ public class KubernetesHandlerTest {
     private static RealDeploymentGenerator notFinishedCanceledDeployment;
     private static RealDeploymentGenerator finishedCanceledDeployment;
     private static RealDeploymentGenerator statusDeployment;
+    private static PodStatus podStatus;
 
     private static KubernetesHandler notFinishedDeploymentHandler;
 
@@ -69,8 +73,21 @@ public class KubernetesHandlerTest {
         setMockDeploymentStatus(finishedCanceledDeployment, true, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
         setMockDeploymentStatus(statusDeployment, true, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
-        // Set the logs mock on arbitrary one
-        setMockPodLogs(notFinishedDeployment, LOG_MESSAGE_IN_POD, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
+        // Setting a mock pod status
+        podStatus = new PodStatus();
+        podStatus.setName("mavet-pod-" + Common.randomStr(5));
+        podStatus.setHostIp("1.1.1.1");
+        podStatus.setPodIp("2.2.2.2");
+        podStatus.setPhase("Dying");
+        podStatus.setReason("Kaha");
+        podStatus.setStartTime("Beginning of humanity");
+
+
+        // Set the logs and status mock on arbitrary one
+        setMockPodLogsAndStatus(notFinishedDeployment, LOG_MESSAGE_IN_POD, podStatus, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
+
+        // And we need the mocks on the pod level again on the status check mock
+        setMockPodLogsAndStatus(statusDeployment, LOG_MESSAGE_IN_POD, podStatus, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
         // Get an instance of the client
         KubernetesClient kubernetesClient = kubernetesMockClient.replay();
@@ -122,7 +139,27 @@ public class KubernetesHandlerTest {
     }
 
     @Test
-    public void testNewDeploymentGetLatestStatus() throws Exception {
+    public void testGetStatus() {
+
+        KubernetesDeploymentStatus returnedDeploymentStatus = notFinishedDeploymentHandler.getCurrentStatus(notFinishedDeployment.getService());
+        PodStatus returnedPodStatus = returnedDeploymentStatus.getPodStatuses().stream().findFirst().orElse(null);
+
+        assertThat(returnedPodStatus).isNotNull();
+
+        assertThat(returnedDeploymentStatus.getAvailableReplicas()).isEqualTo(1);
+        assertThat(returnedDeploymentStatus.getReplicas()).isEqualTo(1);
+        assertThat(returnedDeploymentStatus.getUnavailableReplicas()).isEqualTo(0);
+        assertThat(returnedDeploymentStatus.getUpdatedReplicas()).isEqualTo(0);
+        assertThat(returnedPodStatus.getName()).isEqualTo(podStatus.getName());
+        assertThat(returnedPodStatus.getHostIp()).isEqualTo(podStatus.getHostIp());
+        assertThat(returnedPodStatus.getPodIp()).isEqualTo(podStatus.getPodIp());
+        assertThat(returnedPodStatus.getPhase()).isEqualTo(podStatus.getPhase());
+        assertThat(returnedPodStatus.getReason()).isEqualTo(podStatus.getReason());
+        assertThat(returnedPodStatus.getStartTime()).isEqualTo(podStatus.getStartTime());
+    }
+
+    @Test
+    public void testNewDeploymentGetLatestShaOnNewDeployment() throws Exception {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
         Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, statusDeployment.getEnvironment());
@@ -171,9 +208,21 @@ public class KubernetesHandlerTest {
                 ).anyTimes();
     }
 
-    private static void setMockPodLogs(RealDeploymentGenerator realDeploymentGenerator, String log, ApolloToKubernetes apolloToKubernetes) {
+    private static void setMockPodLogsAndStatus(RealDeploymentGenerator realDeploymentGenerator,
+                                                String log, PodStatus podStatus, ApolloToKubernetes apolloToKubernetes) {
 
-        String podName = "mavet-pod-" + Common.randomStr(5);
+        Pod pod = new PodBuilder()
+                        .withNewMetadata()
+                            .withName(podStatus.getName())
+                        .endMetadata()
+                        .withNewStatus()
+                            .withHostIP(podStatus.getHostIp())
+                            .withPodIP(podStatus.getPodIp())
+                            .withPhase(podStatus.getPhase())
+                            .withReason(podStatus.getReason())
+                            .withStartTime(podStatus.getStartTime())
+                        .endStatus()
+                        .build();
 
         kubernetesMockClient
                 .pods()
@@ -182,23 +231,24 @@ public class KubernetesHandlerTest {
                 .list()
                 .andReturn(
                         new PodListBuilder()
-                                .withItems(
-                                        new PodBuilder()
-                                                .withNewMetadata()
-                                                    .withName(podName)
-                                                .endMetadata()
-                                        .build()
-
-                                )
+                                .withItems(pod)
                         .build()
                 ).anyTimes();
 
         kubernetesMockClient
                 .pods()
                 .inNamespace(realDeploymentGenerator.getEnvironment().getKubernetesNamespace())
-                .withName(podName)
+                .withName(podStatus.getName())
                 .getLog(true)
                 .andReturn(log)
+                .anyTimes();
+
+        kubernetesMockClient
+                .pods()
+                .inNamespace(realDeploymentGenerator.getEnvironment().getKubernetesNamespace())
+                .withName(podStatus.getName())
+                .get()
+                .andReturn(pod)
                 .anyTimes();
     }
 }

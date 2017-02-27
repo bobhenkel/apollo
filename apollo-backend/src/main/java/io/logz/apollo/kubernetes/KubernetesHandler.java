@@ -7,13 +7,15 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.PodStatus;
 import io.logz.apollo.models.Service;
-import io.logz.apollo.models.Status;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by roiravhon on 2/2/17.
@@ -164,9 +166,9 @@ public class KubernetesHandler {
         }
     }
 
-    public Status getCurrentStatus(Service service) {
+    public KubernetesDeploymentStatus getCurrentStatus(Service service) {
 
-        String commitSha = kubernetesClient
+        io.fabric8.kubernetes.api.model.extensions.Deployment deployment = kubernetesClient
                 .extensions()
                 .deployments()
                 .inNamespace(environment.getKubernetesNamespace())
@@ -175,20 +177,51 @@ public class KubernetesHandler {
                 .getItems()
                 .stream()
                 .findFirst()
-                .orElse(null)
-                .getMetadata()
-                .getLabels()
-                .get(ApolloToKubernetes.getApolloCommitShaKey());
+                .orElse(null);
 
-        if (commitSha == null) {
+        if (deployment == null) {
+            logger.warn("Could not find deployment for environment {} and service {}, can't return the status!", environment.getId(), service.getId());
             return null;
         }
 
-        Status status = new Status();
-        status.setServiceId(service.getId());
-        status.setEnvironmentId(environment.getId());
-        status.setGitCommitSha(commitSha);
+        List<PodStatus> podStatusList = kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
+                .list()
+                .getItems()
+                .stream()
+                .map(pod -> pod.getMetadata().getName())
+                .map(name -> {
+                    io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
+                            .pods()
+                            .inNamespace(environment.getKubernetesNamespace())
+                            .withName(name)
+                            .get()
+                            .getStatus();
 
-        return status;
+                    PodStatus podStatus = new PodStatus();
+                    podStatus.setName(name);
+                    podStatus.setHostIp(kubernetesPodStatus.getHostIP());
+                    podStatus.setPodIp(kubernetesPodStatus.getPodIP());
+                    podStatus.setPhase(kubernetesPodStatus.getPhase());
+                    podStatus.setReason(kubernetesPodStatus.getReason());
+                    podStatus.setStartTime(kubernetesPodStatus.getStartTime());
+
+                    return podStatus;
+
+                }).collect(Collectors.toList());
+
+        KubernetesDeploymentStatus kubernetesDeploymentStatus = new KubernetesDeploymentStatus();
+        kubernetesDeploymentStatus.setServiceId(service.getId());
+        kubernetesDeploymentStatus.setEnvironmentId(environment.getId());
+        kubernetesDeploymentStatus.setGitCommitSha(deployment.getMetadata().getLabels().get(ApolloToKubernetes.getApolloCommitShaKey()));
+        kubernetesDeploymentStatus.setReplicas(deployment.getStatus().getReplicas());
+        kubernetesDeploymentStatus.setAvailableReplicas(deployment.getStatus().getAvailableReplicas());
+        kubernetesDeploymentStatus.setUpdatedReplicas(deployment.getStatus().getUpdatedReplicas());
+        kubernetesDeploymentStatus.setUnavailableReplicas(deployment.getStatus().getUnavailableReplicas());
+        kubernetesDeploymentStatus.setPodStatuses(podStatusList);
+
+        return kubernetesDeploymentStatus;
     }
 }

@@ -1,6 +1,5 @@
 package io.logz.apollo.controllers;
 
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.logz.apollo.LockService;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.dao.DeploymentDao;
@@ -14,7 +13,7 @@ import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import io.logz.apollo.models.Status;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
@@ -118,10 +117,10 @@ public class DeploymentController extends BaseController {
                 // Get the current commit sha from kubernetes so we can revert if necessary
                 Environment environment = environmentDao.getEnvironment(environmentId);
                 Service service = serviceDao.getService(serviceId);
-                Status status = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+                KubernetesDeploymentStatus kubernetesDeploymentStatus = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
 
-                if (status != null)
-                    sourceVersion = status.getGitCommitSha();
+                if (kubernetesDeploymentStatus != null)
+                    sourceVersion = kubernetesDeploymentStatus.getGitCommitSha();
 
             } catch (Exception e) {
                 logger.error("Got exception while getting the current gitCommitSha from kubernetes. That means no revert.", e);

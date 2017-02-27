@@ -1,21 +1,10 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.User;
-import io.logz.apollo.dao.DeployableVersionDao;
-import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.dao.ServiceDao;
-import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.excpetions.ApolloParseException;
-import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
-import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
-import io.logz.apollo.models.Environment;
-import io.logz.apollo.models.Service;
 import org.junit.Test;
 
 import javax.script.ScriptException;
