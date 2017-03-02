@@ -24,8 +24,11 @@ public class ApolloMain {
             apolloServer = new ApolloServer(apolloConfiguration);
             apolloServer.start();
 
-            kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
-            kubernetesMonitor.start();
+            // Not touching kubernetes on local run
+            if (!System.getenv("localrun").equals("true")) {
+                kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
+                kubernetesMonitor.start();
+            }
 
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {

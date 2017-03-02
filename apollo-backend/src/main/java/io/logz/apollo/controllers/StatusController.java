@@ -20,7 +20,7 @@ import static io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
  * Created by roiravhon on 2/22/17.
  */
 @Controller
-public class StatusController {
+public class StatusController extends BaseController {
 
     @GET("/status/service/{id}")
     public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int id) {
