@@ -39,6 +39,8 @@ public class DeployableVersionTest {
     @Test
     public void populateRealCommitDetails() throws ApolloClientException {
 
+        //TODO: when apollo goes open source, change the commit here to one of apollos commits
+
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         Service createdService = createAndSubmitService(apolloTestClient);

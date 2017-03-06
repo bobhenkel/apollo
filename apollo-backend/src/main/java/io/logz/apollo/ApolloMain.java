@@ -25,7 +25,8 @@ public class ApolloMain {
             apolloServer.start();
 
             // Not touching kubernetes on local run
-            if (!System.getenv("localrun").equals("true")) {
+            String localrun = System.getenv("localrun");
+            if (localrun != null && !localrun.equals("true")) {
                 kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
                 kubernetesMonitor.start();
             }
