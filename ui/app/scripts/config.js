@@ -1,5 +1,5 @@
 
     var CONFIG = {
-        appUrl: 'http://apollo.internal.logz.io/api/'
+        appUrl: $location.protocol() + "://" + $location.host() + "/api"
         //appUrl: 'http://localhost:8081/'
     };
