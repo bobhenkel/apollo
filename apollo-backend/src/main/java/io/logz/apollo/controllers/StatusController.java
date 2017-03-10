@@ -10,6 +10,8 @@ import io.logz.apollo.models.Service;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +24,8 @@ import static io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 @Controller
 public class StatusController extends BaseController {
 
+    private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
+
     @GET("/status/service/{id}")
     public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int id) {
 
@@ -33,8 +37,13 @@ public class StatusController extends BaseController {
             List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new LinkedList<>();
             Service service = serviceDao.getService(id);
 
-            environmentDao.getAllEnvironments().forEach(environment ->
-                    kubernetesDeploymentStatusList.add(KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service)));
+            environmentDao.getAllEnvironments().forEach(environment -> {
+                try {
+                    kubernetesDeploymentStatusList.add(KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
+                } catch (Exception e) {
+                    logger.warn("Could not get status of service {} on environment {}! trying others..", id, environment.getId(), e);
+                }
+            });
 
             return kubernetesDeploymentStatusList;
         }
@@ -52,8 +61,13 @@ public class StatusController extends BaseController {
             Environment environment = environmentDao.getEnvironment(id);
             KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
-            serviceDao.getAllServices().forEach(service ->
-                    kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service)));
+            serviceDao.getAllServices().forEach(service -> {
+                try {
+                    kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service));
+                } catch (Exception e) {
+                    logger.warn("Could not get status of service {} on environment {}! trying others..", service.getId(), id, e);
+                }
+            });
 
             return kubernetesDeploymentStatusList;
         }

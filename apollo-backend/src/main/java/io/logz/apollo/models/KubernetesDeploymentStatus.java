@@ -10,10 +10,10 @@ public class KubernetesDeploymentStatus {
     private int serviceId;
     private int environmentId;
     private String gitCommitSha;
-    private int replicas;
-    private int availableReplicas;
-    private int updatedReplicas;
-    private int unavailableReplicas;
+    private Integer replicas;
+    private Integer availableReplicas;
+    private Integer updatedReplicas;
+    private Integer unavailableReplicas;
     private List<PodStatus> podStatuses;
 
     public KubernetesDeploymentStatus() {
@@ -43,35 +43,35 @@ public class KubernetesDeploymentStatus {
         this.gitCommitSha = gitCommitSha;
     }
 
-    public int getReplicas() {
+    public Integer getReplicas() {
         return replicas;
     }
 
-    public void setReplicas(int replicas) {
+    public void setReplicas(Integer replicas) {
         this.replicas = replicas;
     }
 
-    public int getAvailableReplicas() {
+    public Integer getAvailableReplicas() {
         return availableReplicas;
     }
 
-    public void setAvailableReplicas(int availableReplicas) {
+    public void setAvailableReplicas(Integer availableReplicas) {
         this.availableReplicas = availableReplicas;
     }
 
-    public int getUpdatedReplicas() {
+    public Integer getUpdatedReplicas() {
         return updatedReplicas;
     }
 
-    public void setUpdatedReplicas(int updatedReplicas) {
+    public void setUpdatedReplicas(Integer updatedReplicas) {
         this.updatedReplicas = updatedReplicas;
     }
 
-    public int getUnavailableReplicas() {
+    public Integer getUnavailableReplicas() {
         return unavailableReplicas;
     }
 
-    public void setUnavailableReplicas(int unavailableReplicas) {
+    public void setUnavailableReplicas(Integer unavailableReplicas) {
         this.unavailableReplicas = unavailableReplicas;
     }
 
