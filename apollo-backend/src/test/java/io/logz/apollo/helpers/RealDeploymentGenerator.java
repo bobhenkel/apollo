@@ -21,6 +21,9 @@ public class RealDeploymentGenerator {
     private final String DEFAULT_LABEL_KEY = "app";
     private final String DEFAULT_LABEL_VALUE = "nginx";
 
+    private final String DEFAULT_ENVIRONMENT_VARIABLE_NAME = "ENV";
+    private final String DEFAULT_ENVIRONMENT_VARIABLE_VALUE = "enval";
+
     private final Environment environment;
     private final Service service;
     private final DeployableVersion deployableVersion;
@@ -66,6 +69,14 @@ public class RealDeploymentGenerator {
 
     public String getDefaultLabelValue() {
         return DEFAULT_LABEL_VALUE;
+    }
+
+    public String getDefaulrEnvironmentVariableName() {
+        return DEFAULT_ENVIRONMENT_VARIABLE_NAME;
+    }
+
+    public String getDefaulrEnvironmentVariableValue() {
+        return DEFAULT_ENVIRONMENT_VARIABLE_VALUE;
     }
 
     public Environment getEnvironment() {
@@ -122,6 +133,9 @@ public class RealDeploymentGenerator {
                 "      - image: " + imageName + "\n" +
                 "        imagePullPolicy: Always\n" +
                 "        name: roi-apollo-test\n" +
+                "        env:\n" +
+                "        -  name: " + DEFAULT_ENVIRONMENT_VARIABLE_NAME + "\n" +
+                "           value: " + DEFAULT_ENVIRONMENT_VARIABLE_VALUE + "\n" +
                 "        ports:\n" +
                 "        - containerPort: 80\n" +
                 "          protocol: TCP\n" +
