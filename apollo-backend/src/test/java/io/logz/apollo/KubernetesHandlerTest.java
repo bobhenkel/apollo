@@ -134,7 +134,7 @@ public class KubernetesHandlerTest {
     @Test
     public void testGetLogs() {
 
-        String logs = notFinishedDeploymentHandler.getDeploymentLogs(notFinishedDeployment.getDeployment());
+        String logs = notFinishedDeploymentHandler.getDeploymentLogs(notFinishedDeployment.getEnvironment(), notFinishedDeployment.getService());
         assertThat(logs).contains(LOG_MESSAGE_IN_POD);
     }
 

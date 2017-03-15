@@ -107,7 +107,8 @@ background-color: #eee;
 
 .apollo-logs {
 
-  height: 200px;
+  height: 100%;
+  max-height: 70vh;
 }
 
 .apollo-clear-filter {
@@ -175,6 +176,12 @@ background-color: #eee;
 
 .my-deployment {
   background-color: rgba(255, 255, 153, 0.25);
+}
+
+.modal-dialog {
+    width: 80%;
+    height: 100%;
+    max-height: 90vh;
 }
 
 /* Pretty logs block */

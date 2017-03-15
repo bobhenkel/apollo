@@ -1,10 +1,10 @@
 <div>
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">Services Version Status</h1>
+            <h1 class="page-header">Live Status From Kubernetes</h1>
         </div>
-
     </div>
+    <span us-spinner="{radius:30, width:8, length: 16}" spinner-key="result-spinner"></span>
 
     <div ng-switch on="currentScreen">
         <div class="col-lg-12 col-sm-12" ng-switch-when="filters">
@@ -31,43 +31,121 @@
         </div>
 
         <div class="col-lg-12 col-sm-12" ng-switch-when="results">
-            <div class="col-lg-12 col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading apollo-form-headline">
-                        Current status
-                    </div>
-                    <div class="panel-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th>Since</th>
-                                    <th>Service</th>
-                                    <th>Environment</th>
-                                    <th>Commit</th>
-                                    <th>Initiated By</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat="deployment in filteredResults">
-                                    <td>{{deployment.lastUpdate | date:'dd/MM/yy H:mm:ss'}}</td>
-                                    <td>{{allServices[deployment.serviceId].name}}</td>
-                                    <td>{{allEnvironments[deployment.environmentId].name}}</td>
-                                    <td><a href="{{githubData[deployment.deployableVersionId].html_url}}">{{githubData[deployment.deployableVersionId].sha | limitTo: 7}}</a></td>
-                                    <td>{{allUsers[deployment.userEmail].userEmail}}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <p ng-show="!filteredResults.length"><b>No results found!</b></p>
+            <div class="row">
+                <div ng-repeat="status in filteredResults | filter:{serviceId: ''}">
+                    <div class="col-lg-6 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tasks fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text right">
+                                        <div class="huge">{{allServices[status.serviceId].name}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr><td colspan="2">Environment</td><td colspan="2">{{allEnvironments[status.environmentId].name}}</td></tr>
+                                    <tr><td colspan="2">Commit</td><td colspan="2"><a target="_blank" href="{{deployableVersions[status.gitCommitSha].commitUrl}}">{{status.gitCommitSha | limitTo: 7}}</a></td></tr>
+                                    <tr><td>Replicas</td><td>{{status.replicas || 0}}</td><td>Available Replicas</td><td>{{status.availableReplicas || 0}}</td></tr>
+                                    <tr><td>Updated Replicas</td><td>{{status.updatedReplicas || 0}}</td><td>Unavailable Replicas</td><td>{{status.unavailableReplicas || 0}}</td></tr>
+                                </table>
+                            </div>
+                            <div>
+                                <div class="panel-footer">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <a ng-click="setSelectedStatus(status)" data-toggle="modal" data-target="#view-pods">
+                                                <span class="pull-left">View Pods</span>
+                                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                            </a>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <a ng-click="setSelectedStatus(status) ; getLogs()" data-toggle="modal" data-target="#show-logs">
+                                                <span class="pull-left">View Logs</span>
+                                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="pull-right">
+            <p ng-show="!filteredResults.length"><b>No results found!</b></p>
+        </div>
+        <div class="pull-right">
                 <button type="button" class="btn btn-primary btn-circle btn-lg apollo-flow-button" ng-click="backToFilter()" tooltip="back to filters">
                     <i class="fa fa-arrow-left"></i>
                 </button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="view-pods" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Pods Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Host IP</th>
+                                    <th>Pod IP</th>
+                                    <th>Phase</th>
+                                    <th>Reason</th>
+                                    <th>Start Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="podStatus in selectedStatus.podStatuses">
+                                    <td>{{podStatus.name}}</td>
+                                    <td>{{podStatus.hostIp}}</td>
+                                    <td>{{podStatus.podIp}}</td>
+                                    <td>{{podStatus.phase}}</td>
+                                    <td>{{podStatus.reason || "None"}}</td>
+                                    <td>{{podStatus.startTime | date:'dd/MM/yy H:mm:ss'}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="show-logs" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" ng-click="stopLogs()" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Logs from container</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <pre class="apollo-logs">
+<!-- Not indenting since it will also idents what inside the code block-->
+<code ng-bind-html="dockerLogs">
+</code>
+                        </pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogs()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

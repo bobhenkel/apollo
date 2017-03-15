@@ -61,13 +61,15 @@ public class DeploymentController extends BaseController {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
 
             // TODO: ideally i would not need a KubernetesHandler here, but since no DI and desired simplicity - i can live with this for now
             Deployment deployment = deploymentDao.getDeployment(id);
             Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
+            Service service = serviceDao.getService(deployment.getServiceId());
             KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
-            return kubernetesHandler.getDeploymentLogs(deployment);
+            return kubernetesHandler.getDeploymentLogs(environment, service);
         }
     }
 
