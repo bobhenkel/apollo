@@ -23,7 +23,8 @@
     "angular-spinner": "0.8.1",
     "angular-filter": "0.5.8",
     "angular-local-storage": "0.2.7",
-    "angular-gravatar": "0.4.2"
+    "angular-gravatar": "0.4.2",
+    "angular-datatables": "0.6.1"
   },
   "devDependencies": {
     "angular-mocks": "1.4.8",
