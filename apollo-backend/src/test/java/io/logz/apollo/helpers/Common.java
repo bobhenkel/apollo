@@ -1,6 +1,8 @@
 package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
+import io.logz.apollo.auth.DeploymentGroup;
+import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
@@ -10,6 +12,7 @@ import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.Environment;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -17,6 +20,7 @@ import java.net.ServerSocket;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -103,12 +107,17 @@ public class Common {
         }
     }
 
-    public static void markDeploymentAsCompletedViaDB(Deployment deployment) {
-        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+    public static void grantUserFullPermissionsOnEnvironment(ApolloTestClient apolloTestClient, Environment environment) throws Exception {
 
-            // This endpoint is not open on REST, so in case we need to make 2 deployments on the same service and env, this is the only way.
-            deploymentDao.updateDeploymentStatus(deployment.getId(), Deployment.DeploymentStatus.DONE);
-        }
+        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
+
+        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
+        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
+
+        DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
+        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
+
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

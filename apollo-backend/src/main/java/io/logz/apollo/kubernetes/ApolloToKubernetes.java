@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.logz.apollo.dao.DeployableVersionDao;
+import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
@@ -31,11 +32,12 @@ public class ApolloToKubernetes {
 
     private static final Logger logger = LoggerFactory.getLogger(ApolloToKubernetes.class);
     private static final String APOLLO_UNIQUE_IDENTIFIER_KEY = "apollo_unique_identifier";
-    private final io.logz.apollo.models.Deployment apolloDeployment;
+    private static final String APOLLO_COMMIT_SHA_KEY = "current_commit_sha";
     private final io.logz.apollo.models.Service apolloService;
     private final io.logz.apollo.models.Environment apolloEnvironment;
     private final io.logz.apollo.models.DeployableVersion apolloDeployableVersion;
     private final ObjectMapper mapper;
+    private io.logz.apollo.models.Deployment apolloDeployment;
 
     private final Set<BaseDeploymentTransformer> deploymentTransformers;
     private final Set<BaseServiceTransformer> serviceTransformers;
@@ -69,6 +71,12 @@ public class ApolloToKubernetes {
 
     public Deployment getKubernetesDeployment() throws ApolloParseException {
         try {
+            // Update the deployment, as it could have changed since (Status)
+            try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+                DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+                apolloDeployment = deploymentDao.getDeployment(apolloDeployment.getId());
+            }
+
             // Convert the deployment object to fabric8 model
             Deployment deployment = mapper.readValue(apolloService.getDeploymentYaml(), Deployment.class);
 
@@ -87,6 +95,12 @@ public class ApolloToKubernetes {
 
     public Service getKubernetesService() throws ApolloParseException {
         try {
+            // Update the deployment, as it could have changed since (Status)
+            try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+                DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+                apolloDeployment = deploymentDao.getDeployment(apolloDeployment.getId());
+            }
+
             // Convert the service object to fabric8 model
             Service service = mapper.readValue(apolloService.getServiceYaml(), Service.class);
 
@@ -113,6 +127,10 @@ public class ApolloToKubernetes {
 
     public static String getApolloDeploymentUniqueIdentifierKey() {
         return APOLLO_UNIQUE_IDENTIFIER_KEY;
+    }
+
+    public static String getApolloCommitShaKey() {
+        return APOLLO_COMMIT_SHA_KEY;
     }
 
     public static String getApolloDeploymentUniqueIdentifierValue(io.logz.apollo.models.Environment apolloEnvironment,

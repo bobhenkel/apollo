@@ -1,6 +1,7 @@
 package io.logz.apollo.dao;
 
 import io.logz.apollo.models.DeployableVersion;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -11,5 +12,6 @@ public interface DeployableVersionDao {
 
     DeployableVersion getDeployableVersion(int id);
     List<DeployableVersion> getAllDeployableVersions();
+    DeployableVersion getDeployableVersionFromSha(@Param("gitCommitSha") String gitCommitSha);
     void addDeployableVersion(DeployableVersion deployableVersion);
 }

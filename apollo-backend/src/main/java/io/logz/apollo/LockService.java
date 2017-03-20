@@ -54,4 +54,8 @@ public class LockService {
     public static String getDeploymentLockName(int serviceId, int environmentId) {
         return "lock-service-" + serviceId + "-environment-" + environmentId;
     }
+
+    public static String getDeploymentCancelationName(int deploymentId) {
+        return "lock-deployment-cancelation-id-" + deploymentId;
+    }
 }

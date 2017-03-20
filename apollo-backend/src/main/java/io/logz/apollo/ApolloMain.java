@@ -24,14 +24,20 @@ public class ApolloMain {
             apolloServer = new ApolloServer(apolloConfiguration);
             apolloServer.start();
 
-            kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
-            kubernetesMonitor.start();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    ApolloMain.shutdown();
+            // Not touching kubernetes on local run
+            String localrun = System.getenv("localrun");
+            if (localrun != null && localrun.equals("true")) {
+                logger.info("Running in local-mode, kubernetes monitor thread is not up.");
+            } else {
+                try {
+                    kubernetesMonitor = new KubernetesMonitor(apolloConfiguration);
+                    kubernetesMonitor.start();
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not start kubernetes monitor thread! Bailing..", e);
                 }
-            });
+            }
+
+            Runtime.getRuntime().addShutdownHook(new Thread(ApolloMain::shutdown));
 
         } catch (RuntimeException e) {
             logger.error(e.getMessage(), e);

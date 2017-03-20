@@ -77,27 +77,6 @@ public class DeploymentTest {
         createAndSubmitDeployment(apolloTestClient);
     }
 
-    @Test
-    public void testGitCommitShaCorrectlyPlaced() throws Exception {
-
-        ApolloTestClient apolloTestClient = Common.signupAndLogin();
-
-        Deployment firstDeployment = createAndSubmitDeployment(apolloTestClient);
-        DeployableVersion createdDeployableVersionFromFirstDeployment = apolloTestClient.getDeployableVersion(firstDeployment.getDeployableVersionId());
-        Service createdServiceFromFirstDeployment = apolloTestClient.getService(firstDeployment.getServiceId());
-        Environment createdEnvironmentFromFirstDeployment = apolloTestClient.getEnvironment(firstDeployment.getEnvironmentId());
-
-        DeployableVersion secondDeployableVersion = ModelsGenerator.createDeployableVersion(createdServiceFromFirstDeployment);
-        secondDeployableVersion.setId(apolloTestClient.addDeployableVersion(secondDeployableVersion).getId());
-
-        Common.markDeploymentAsCompletedViaDB(firstDeployment);
-
-        Deployment secondDeployment = ModelsGenerator.createDeployment(createdServiceFromFirstDeployment, createdEnvironmentFromFirstDeployment, secondDeployableVersion);
-        Deployment returnedSecondDeployment = apolloTestClient.addDeployment(secondDeployment);
-
-        assertThat(returnedSecondDeployment.getSourceVersion()).isEqualTo(createdDeployableVersionFromFirstDeployment.getGitCommitSha());
-    }
-
     private Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient) throws Exception {
 
         // Add all foreign keys
@@ -111,7 +90,7 @@ public class DeploymentTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Give the user permissions to deploy
-        grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
+        Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
 
         // Now we have enough to create a deployment
         Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
@@ -120,17 +99,5 @@ public class DeploymentTest {
         return testDeployment;
     }
 
-    private void grantUserFullPermissionsOnEnvironment(ApolloTestClient apolloTestClient, Environment environment) throws Exception {
 
-        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
-
-        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
-        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
-
-        DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
-        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
-
-        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
-    }
 }

@@ -14,7 +14,7 @@ angular.module('apollo')
 
                 $scope.revert = function(deploymentId) {
                     usSpinnerService.spin('ongoing-spinner');
-                    apolloApiService.revertDeployment($scope.selectedDeployment).then(function(response) {
+                    apolloApiService.revertDeployment($scope.selectedDeployment.id).then(function(response) {
                         usSpinnerService.stop('ongoing-spinner');
                         growl.success("Successfully reverted deployment!", {ttl: 7000})
 

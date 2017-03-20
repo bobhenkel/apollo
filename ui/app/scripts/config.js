@@ -1,5 +1,5 @@
 
     var CONFIG = {
-        appUrl: 'http://localhost/api/'
+        appUrl: document.location.protocol + "//" + document.location.host + "/api/"
         //appUrl: 'http://localhost:8081/'
     };

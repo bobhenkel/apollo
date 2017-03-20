@@ -23,8 +23,8 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
                 .put("environment", LabelsNormalizer.normalize(apolloEnvironment.getName()))
                 .put("geo_region", LabelsNormalizer.normalize(apolloEnvironment.getGeoRegion()))
                 .put("service", LabelsNormalizer.normalize(apolloService.getName()))
-                .put("current_commit_sha", LabelsNormalizer.normalize(apolloDeployableVersion.getGitCommitSha()))
                 .put("availability", LabelsNormalizer.normalize(apolloEnvironment.getAvailability()))
+                .put(ApolloToKubernetes.getApolloCommitShaKey(), LabelsNormalizer.normalize(apolloDeployableVersion.getGitCommitSha()))
                 .put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService))
                 .build();
 

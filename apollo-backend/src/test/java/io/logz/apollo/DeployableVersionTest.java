@@ -1,5 +1,6 @@
 package io.logz.apollo;
 
+import io.logz.apollo.clients.ApolloClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
@@ -38,6 +39,8 @@ public class DeployableVersionTest {
     @Test
     public void populateRealCommitDetails() throws ApolloClientException {
 
+        //TODO: when apollo goes open source, change the commit here to one of apollos commits
+
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         Service createdService = createAndSubmitService(apolloTestClient);
@@ -54,7 +57,7 @@ public class DeployableVersionTest {
         assertThat(returnedDeployableVersion.getCommitMessage()).contains("Improved code coverage");
         assertThat(returnedDeployableVersion.getCommitUrl()).isEqualTo("https://github.com/kubernetes/kubernetes/commit/b3d627c2e2a801e442b7a75ee8cddc33c7663812");
         assertThat(returnedDeployableVersion.getCommitterName()).isEqualTo("GitHub Web Flow");
-        assertThat(returnedDeployableVersion.getCommitterAvatarUrl()).isEqualTo("https://avatars.githubusercontent.com/u/19864447?v=3");
+        assertThat(returnedDeployableVersion.getCommitterAvatarUrl()).contains("avatars");
     }
 
     @Test
@@ -80,6 +83,17 @@ public class DeployableVersionTest {
             }
         }
         assertThat(found).isTrue();
+    }
+
+    @Test
+    public void testGetDeployableVersionFromSha() throws ApolloClientException {
+
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        DeployableVersion testDeployableVersion = createAndSubmitDeployableVersion(apolloTestClient);
+        DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersionFromSha(testDeployableVersion.getGitCommitSha());
+
+        assertThat(testDeployableVersion.getId()).isEqualTo(returnedDeployableVersion.getId());
     }
 
     private DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {

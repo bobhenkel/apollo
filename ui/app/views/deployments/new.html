@@ -101,7 +101,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter:globalSearch | orderBy:'deployableVersion.commitDate':true"
+                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter:globalSearch | filter: {serviceId: serviceSelected.id} | orderBy:'deployableVersion.commitDate':true"
                                 ng-click="setSelectedVersion(deployableVersion)"
                                 ng-class="{'active':deployableVersion.gitCommitSha == versionSelected.gitCommitSha}">
                                 <td>{{deployableVersion.commitDate | date:'dd/MM/yy H:mm:ss'}}</td>

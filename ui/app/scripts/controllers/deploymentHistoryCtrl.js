@@ -33,8 +33,31 @@ angular.module('apollo')
                 };
 
                 $scope.revert = function() {
-                    // TODO: revert to deployemnt
-                    growl.error("Not implemented yet!")
+
+                    // Set spinner
+                    usSpinnerService.spin('revert-spinner');
+
+                    // Now we can deploy
+                    apolloApiService.createNewDeployment($scope.selectedDeployment.deployableVersionId,
+                        $scope.selectedDeployment.serviceId, $scope.selectedDeployment.environmentId).then(function (response) {
+
+                        // Wait a bit to let the deployment be in the DB
+                        setTimeout(function () {
+                            usSpinnerService.stop('revert-spinner');
+
+                            // Redirect user to ongoing deployments
+                            $state.go('deployments.ongoing', {deploymentId: response.data.id});
+                        }, 500);
+
+                    }, function(error) {
+                        // End spinner
+                        usSpinnerService.stop('revert-spinner');
+
+                        // 403 are handled generically on the interceptor
+                        if (error.status != 403) {
+                            growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
+                        }
+                    });
                 };
 
                 $scope.clearFilters = function() {
