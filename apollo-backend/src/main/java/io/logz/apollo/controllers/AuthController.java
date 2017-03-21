@@ -1,9 +1,10 @@
 package io.logz.apollo.controllers;
 
 import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeploymentGroupDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.UserDao;
@@ -12,7 +13,6 @@ import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.Role;
 import org.rapidoid.security.annotation.Administrator;
@@ -22,15 +22,16 @@ import org.rapidoid.u.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jws.soap.SOAPBinding;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
 
 /**
  * Created by roiravhon on 11/21/16.
  */
 @Controller
-public class AuthController extends BaseController {
+public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -98,7 +99,7 @@ public class AuthController extends BaseController {
             newDeploymentGroup.setName(name);
 
             deploymentGroupDao.addDeploymentGroup(newDeploymentGroup);
-            assignJsonResponseToReq(req, 201, newDeploymentGroup);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, newDeploymentGroup);
         }
     }
 
@@ -130,7 +131,7 @@ public class AuthController extends BaseController {
 
             // This is how rapidoid represent nulls. also has to be string to not have a NumberFormatException
             if (serviceId.equals("null") && environmentId.equals("null")) {
-                req.response().code(400);
+                req.response().code(HttpStatus.BAD_REQUEST);
                 req.response().json("One of serviceId or environmentId must be present!");
             } else {
                 if (!serviceId.equals("null")) {
@@ -144,7 +145,7 @@ public class AuthController extends BaseController {
             newDeploymentPermission.setPermissionType(permissionType);
 
             deploymentPermissionDao.addDeploymentPermission(newDeploymentPermission);
-            assignJsonResponseToReq(req, 201, newDeploymentPermission);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, newDeploymentPermission);
         }
     }
 
@@ -154,7 +155,7 @@ public class AuthController extends BaseController {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             DeploymentGroupDao deploymentGroupDao = apolloMyBatisSession.getDao(DeploymentGroupDao.class);
             deploymentGroupDao.addUserToDeploymentGroup(userEmail, deploymentGroupId);
-            assignJsonResponseToReq(req, 201, "ok");
+            assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
         }
     }
 
@@ -164,7 +165,7 @@ public class AuthController extends BaseController {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             DeploymentGroupDao deploymentGroupDao = apolloMyBatisSession.getDao(DeploymentGroupDao.class);
             deploymentGroupDao.addDeploymentPermissionToDeploymentGroup(deploymentGroupId, deploymentPermissionId);
-            assignJsonResponseToReq(req, 201, "ok");
+            assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
         }
     }
 

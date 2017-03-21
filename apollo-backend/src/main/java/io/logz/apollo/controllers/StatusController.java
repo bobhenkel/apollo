@@ -14,6 +14,7 @@ import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ import static io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
  * Created by roiravhon on 2/22/17.
  */
 @Controller
-public class StatusController extends BaseController {
+public class StatusController {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
@@ -35,7 +36,7 @@ public class StatusController extends BaseController {
             ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
 
-            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new LinkedList<>();
+            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
             Service service = serviceDao.getService(id);
 
             environmentDao.getAllEnvironments().forEach(environment -> {
@@ -58,7 +59,7 @@ public class StatusController extends BaseController {
             ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
 
-            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new LinkedList<>();
+            List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
             Environment environment = environmentDao.getEnvironment(id);
             KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 

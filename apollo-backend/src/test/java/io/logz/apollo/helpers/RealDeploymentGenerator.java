@@ -71,11 +71,11 @@ public class RealDeploymentGenerator {
         return DEFAULT_LABEL_VALUE;
     }
 
-    public String getDefaulrEnvironmentVariableName() {
+    public String getDefaultEnvironmentVariableName() {
         return DEFAULT_ENVIRONMENT_VARIABLE_NAME;
     }
 
-    public String getDefaulrEnvironmentVariableValue() {
+    public String getDefaultEnvironmentVariableValue() {
         return DEFAULT_ENVIRONMENT_VARIABLE_VALUE;
     }
 

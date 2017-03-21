@@ -1,5 +1,6 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
@@ -9,18 +10,18 @@ import io.logz.apollo.scm.GithubConnector;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.commons.Str;
-import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 
 import java.util.List;
 
+import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
+
 /**
  * Created by roiravhon on 12/20/16.
  */
 @Controller
-public class DeployableVersionController extends BaseController {
+public class DeployableVersionController {
 
     @LoggedIn
     @GET("/deployable-version")
@@ -73,7 +74,7 @@ public class DeployableVersionController extends BaseController {
             }
 
             deployableVersionDao.addDeployableVersion(newDeployableVersion);
-            assignJsonResponseToReq(req, 201, newDeployableVersion);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
         }
     }
 }

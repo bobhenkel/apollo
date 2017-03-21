@@ -1,5 +1,6 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
@@ -7,17 +8,18 @@ import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 
 import java.util.List;
 
+import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
+
 /**
  * Created by roiravhon on 12/20/16.
  */
 @Controller
-public class ServiceController extends BaseController {
+public class ServiceController {
 
     @LoggedIn
     @GET("/service")
@@ -49,7 +51,7 @@ public class ServiceController extends BaseController {
             newService.setServiceYaml(serviceYaml);
 
             serviceDao.addService(newService);
-            assignJsonResponseToReq(req, 201, newService);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, newService);
         }
     }
 }

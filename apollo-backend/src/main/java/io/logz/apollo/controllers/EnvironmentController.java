@@ -1,5 +1,6 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
@@ -7,18 +8,19 @@ import io.logz.apollo.models.Environment;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.http.MediaType;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
+
 /**
  * Created by roiravhon on 12/19/16.
  */
 @Controller
-public class EnvironmentController extends BaseController {
+public class EnvironmentController {
 
     @LoggedIn
     @GET("/environment")
@@ -60,7 +62,7 @@ public class EnvironmentController extends BaseController {
             newEnvironment.setKubernetesNamespace(kubernetesNamespace);
 
             environmentDao.addEnvironment(newEnvironment);
-            assignJsonResponseToReq(req, 201, newEnvironment);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, newEnvironment);
         }
     }
 

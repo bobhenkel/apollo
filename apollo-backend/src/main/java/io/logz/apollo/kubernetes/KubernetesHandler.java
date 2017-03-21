@@ -191,25 +191,8 @@ public class KubernetesHandler {
                 .getItems()
                 .stream()
                 .map(pod -> pod.getMetadata().getName())
-                .map(name -> {
-                    io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
-                            .pods()
-                            .inNamespace(environment.getKubernetesNamespace())
-                            .withName(name)
-                            .get()
-                            .getStatus();
-
-                    PodStatus podStatus = new PodStatus();
-                    podStatus.setName(name);
-                    podStatus.setHostIp(kubernetesPodStatus.getHostIP());
-                    podStatus.setPodIp(kubernetesPodStatus.getPodIP());
-                    podStatus.setPhase(kubernetesPodStatus.getPhase());
-                    podStatus.setReason(kubernetesPodStatus.getReason());
-                    podStatus.setStartTime(kubernetesPodStatus.getStartTime());
-
-                    return podStatus;
-
-                }).collect(Collectors.toList());
+                .map(this::getPodStatus)
+                .collect(Collectors.toList());
 
         KubernetesDeploymentStatus kubernetesDeploymentStatus = new KubernetesDeploymentStatus();
         kubernetesDeploymentStatus.setServiceId(service.getId());
@@ -222,5 +205,24 @@ public class KubernetesHandler {
         kubernetesDeploymentStatus.setPodStatuses(podStatusList);
 
         return kubernetesDeploymentStatus;
+    }
+
+    private PodStatus getPodStatus(String name) {
+        io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(name)
+                .get()
+                .getStatus();
+
+        PodStatus podStatus = new PodStatus();
+        podStatus.setName(name);
+        podStatus.setHostIp(kubernetesPodStatus.getHostIP());
+        podStatus.setPodIp(kubernetesPodStatus.getPodIP());
+        podStatus.setPhase(kubernetesPodStatus.getPhase());
+        podStatus.setReason(kubernetesPodStatus.getReason());
+        podStatus.setStartTime(kubernetesPodStatus.getStartTime());
+
+        return podStatus;
     }
 }
