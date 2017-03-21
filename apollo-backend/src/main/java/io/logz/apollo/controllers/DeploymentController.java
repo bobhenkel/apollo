@@ -2,6 +2,7 @@ package io.logz.apollo.controllers;
 
 import io.logz.apollo.LockService;
 import io.logz.apollo.auth.PermissionsValidator;
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
@@ -12,8 +13,8 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
-import io.logz.apollo.models.Service;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
+import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
@@ -27,11 +28,13 @@ import org.slf4j.MDC;
 import java.util.List;
 import java.util.Optional;
 
+import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
+
 /**
  * Created by roiravhon on 1/5/17.
  */
 @Controller
-public class DeploymentController extends BaseController {
+public class DeploymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
 
@@ -140,14 +143,14 @@ public class DeploymentController extends BaseController {
                     deploymentPermissionDao.getPermissionsByUser(userEmail))) {
 
                 logger.info("User is not authorized to perform this deployment!");
-                assignJsonResponseToReq(req, 403, "Not Authorized!");
+                assignJsonResponseToReq(req, HttpStatus.FORBIDDEN, "Not Authorized!");
 
             } else {
 
                 String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
                 if (!LockService.getAndObtainLock(lockName)) {
                     logger.warn("A deployment request of this sort is currently being run");
-                    assignJsonResponseToReq(req, 429, "A deployment request is currently running for this service and environment! Wait until its done");
+                    assignJsonResponseToReq(req, HttpStatus.TOO_MANY_REQUESTS, "A deployment request is currently running for this service and environment! Wait until its done");
                     return;
                 }
 
@@ -166,7 +169,7 @@ public class DeploymentController extends BaseController {
                         logger.warn("There is already a running deployment that initiated by {}. Can't start a new one",
                                 runningDeployment.get().getUserEmail());
 
-                        assignJsonResponseToReq(req, 409, "There is an on-going deployment for this service in this environment");
+                        assignJsonResponseToReq(req, HttpStatus.CONFLICT, "There is an on-going deployment for this service in this environment");
                         ;
                         return;
                     }
@@ -182,7 +185,7 @@ public class DeploymentController extends BaseController {
                     newDeployment.setSourceVersion(sourceVersion);
 
                     deploymentDao.addDeployment(newDeployment);
-                    assignJsonResponseToReq(req, 201, newDeployment);
+                    assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployment);
                 } finally {
                     LockService.releaseLock(lockName);
                 }
@@ -194,38 +197,40 @@ public class DeploymentController extends BaseController {
     @DELETE("/deployment/{id}")
     public void cancelDeployment(int id, Req req) {
 
-        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
-
-            // Get the username from the token
-            String userEmail = req.token().get("_user").toString();
-
-            MDC.put("userEmail", userEmail);
-            MDC.put("deploymentId", String.valueOf(id));
-
-            logger.info("Got request for a deployment cancellation");
-
-            String lockName = LockService.getDeploymentCancelationName(id);
+        String lockName = LockService.getDeploymentCancelationName(id);
+        try {
             if (!LockService.getAndObtainLock(lockName)) {
-                logger.warn("A deployment cancel request of this sort is currently being run");
-                assignJsonResponseToReq(req, 429, "A deployment cancel request is currently running for this deployment! Wait until its done");
+                logger.warn("A deployment cancel request is currently running for this deployment! Wait until its done");
+                assignJsonResponseToReq(req, HttpStatus.TOO_MANY_REQUESTS, "A deployment cancel request is currently running for this deployment! Wait until its done");
                 return;
             }
-            try {
+
+            try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+                DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
+
+                // Get the username from the token
+                String userEmail = req.token().get("_user").toString();
+
+                MDC.put("userEmail", userEmail);
+                MDC.put("deploymentId", String.valueOf(id));
+
+                logger.info("Got request for a deployment cancellation");
+
                 Deployment deployment = deploymentDao.getDeployment(id);
 
                 // Check that the deployment is not already done, or canceled
                 if (!deployment.getStatus().equals(Deployment.DeploymentStatus.DONE) && !deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELED)) {
                     logger.info("Setting deployment to status PENDING_CANCELLATION");
                     deploymentDao.updateDeploymentStatus(id, Deployment.DeploymentStatus.PENDING_CANCELLATION);
-                    assignJsonResponseToReq(req, 202, "Deployment Canceled!");
+                    assignJsonResponseToReq(req, HttpStatus.ACCEPTED, "Deployment Canceled!");
                 } else {
                     logger.warn("Deployment is in status {}, can't cancel it now!", deployment.getStatus());
-                    assignJsonResponseToReq(req, 400, "Can't cancel the deployment as it is not in a state that's allows canceling");
+                    assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Can't cancel the deployment as it is not in a state that's allows canceling");
                 }
-            } finally {
-                LockService.releaseLock(lockName);
             }
+        }
+        finally {
+            LockService.releaseLock(lockName);
         }
     }
 }

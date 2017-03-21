@@ -26,7 +26,7 @@ public class ApolloMain {
 
             // Not touching kubernetes on local run
             String localrun = System.getenv("localrun");
-            if (localrun != null && localrun.equals("true")) {
+            if (localrun != null && localrun.toLowerCase().equals("true")) {
                 logger.info("Running in local-mode, kubernetes monitor thread is not up.");
             } else {
                 try {
