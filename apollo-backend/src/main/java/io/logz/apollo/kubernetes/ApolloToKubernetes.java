@@ -14,6 +14,7 @@ import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.excpetions.ApolloParseException;
 import io.logz.apollo.transformers.LabelsNormalizer;
 import io.logz.apollo.transformers.deployment.BaseDeploymentTransformer;
+import io.logz.apollo.transformers.deployment.DeploymentEnvironmentVariableTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentImageNameTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentLabelsTransformer;
 import io.logz.apollo.transformers.service.BaseServiceTransformer;
@@ -59,7 +60,8 @@ public class ApolloToKubernetes {
             // Define the set of transformers the deployment object will go through
             deploymentTransformers = Sets.newHashSet(Arrays.asList(
                     new DeploymentImageNameTransformer(),
-                    new DeploymentLabelsTransformer()
+                    new DeploymentLabelsTransformer(),
+                    new DeploymentEnvironmentVariableTransformer()
             ));
 
             // Define the set of transformers the service object will go through

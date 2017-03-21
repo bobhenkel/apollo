@@ -49,7 +49,7 @@ public class KubernetesHandler {
         }
     }
 
-    Deployment startDeployment(Deployment deployment) {
+    public Deployment startDeployment(Deployment deployment) {
         try {
             ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = apolloToKubernetes.getKubernetesDeployment();

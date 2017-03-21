@@ -97,7 +97,7 @@ public class TransformersTest {
         RealDeploymentGenerator realDeploymentGenerator;
         ApolloToKubernetes apolloToKubernetes;
 
-        String SampleLabelFromTransformer = "environment";
+        String sampleLabelFromTransformer = "environment";
 
         realDeploymentGenerator = new RealDeploymentGenerator("image", "key", "value");
         apolloToKubernetes = new ApolloToKubernetes(realDeploymentGenerator.getDeployment());
@@ -106,7 +106,22 @@ public class TransformersTest {
         realDeploymentGenerator = new RealDeploymentGenerator("image", "key", "value");
         apolloToKubernetes = new ApolloToKubernetes(realDeploymentGenerator.getDeployment());
         assertServiceLabelExists(apolloToKubernetes.getKubernetesService(),
-                SampleLabelFromTransformer, realDeploymentGenerator.getEnvironment().getName());
+                sampleLabelFromTransformer, realDeploymentGenerator.getEnvironment().getName());
+    }
+
+    @Test
+    public void testDeploymentEnvironmentVariablesTransformer() throws ApolloParseException {
+
+        RealDeploymentGenerator realDeploymentGenerator;
+        ApolloToKubernetes apolloToKubernetes;
+
+        String regionEnvNameFromTransformer = "REGION";
+
+        realDeploymentGenerator = new RealDeploymentGenerator("image", "key", "value");
+        apolloToKubernetes = new ApolloToKubernetes(realDeploymentGenerator.getDeployment());
+
+        assertDeploymentEnvironmentVariableExists(apolloToKubernetes.getKubernetesDeployment(), regionEnvNameFromTransformer, realDeploymentGenerator.getEnvironment().getGeoRegion());
+        assertDeploymentEnvironmentVariableExists(apolloToKubernetes.getKubernetesDeployment(), realDeploymentGenerator.getDefaulrEnvironmentVariableName(), realDeploymentGenerator.getDefaulrEnvironmentVariableValue());
     }
 
     private void assertImageName(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String imageName) {
@@ -121,5 +136,19 @@ public class TransformersTest {
         assertThat(service.getMetadata().getLabels().get(labelKey)).isEqualTo(labelValue);
     }
 
+    private void assertDeploymentEnvironmentVariableExists(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String envName, String envValue) {
+        assertThat(
+                deployment.getSpec().getTemplate().getSpec().getContainers()
+                        .stream()
+                        .findFirst()
+                        .get()
+                        .getEnv()
+                            .stream()
+                            .filter(envVar -> envVar.getName().equals(envName))
+                            .findFirst()
+                            .orElse(null)
+                            .getValue()
+        ).isEqualTo(envValue);
+    }
 
 }
