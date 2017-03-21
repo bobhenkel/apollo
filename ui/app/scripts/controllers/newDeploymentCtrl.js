@@ -103,6 +103,20 @@ angular.module('apollo')
                     });
         };
 
+        $scope.dtOptions = {
+            paginationType: 'simple_numbers',
+            displayLength: 20,
+            dom: '<"top"i>rt<"bottom"p>',
+            order: [[ 0, "asc" ]]
+        };
+
+        $scope.dtOptionsDeployableVersion = {
+            paginationType: 'simple_numbers',
+            displayLength: 10,
+            dom: '<"top"i>rt<"bottom"p>',
+            order: [[ 0, "desc" ]]
+        };
+
         // Validators
         function validateEnvironment() {
             return $scope.environmentSelected != null;

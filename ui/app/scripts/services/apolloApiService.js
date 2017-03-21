@@ -112,11 +112,15 @@ function ApiService($q, $http){
     };
 
     var serviceStatus = function (serviceId) {
-        return $http.get("/status/service/" + serviceId + "/");
+        return $http.get(CONFIG.appUrl + "status/service/" + serviceId + "/");
     };
 
     var environmentStatus = function (environmentId) {
-        return $http.get("/status/environment/" + environmentId + "/");
+        return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/");
+    };
+
+    var logsFromStatus = function (environmentId, serviceId) {
+        return $http.get(CONFIG.appUrl + "status/logs/environment/" + environmentId + "/service/" + serviceId);
     };
 
     return {
@@ -141,6 +145,7 @@ function ApiService($q, $http){
         signup: signup,
         login: login,
         serviceStatus: serviceStatus,
-        environmentStatus: environmentStatus
+        environmentStatus: environmentStatus,
+        logsFromStatus: logsFromStatus
     };
 }

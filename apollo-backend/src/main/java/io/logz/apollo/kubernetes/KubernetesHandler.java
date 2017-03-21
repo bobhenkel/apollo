@@ -140,15 +140,14 @@ public class KubernetesHandler {
         }
     }
 
-    public String getDeploymentLogs(Deployment deployment) {
+    public String getDeploymentLogs(Environment environment, Service service) {
 
         try {
-            ApolloToKubernetes apolloToKubernetes = ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
             StringBuilder sb = new StringBuilder();
             kubernetesClient
                     .pods()
                     .inNamespace(environment.getKubernetesNamespace())
-                    .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), apolloToKubernetes.getApolloDeploymentPodUniqueIdentifierValue())
+                    .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
                     .list()
                     .getItems()
                     .stream()
@@ -161,7 +160,7 @@ public class KubernetesHandler {
 
             return sb.toString();
         } catch (Exception e) {
-            logger.error("Got exception while getting logs for deployment {}", deployment.getId());
+            logger.error("Got exception while getting logs for service {} on environment {}", service.getId(), environment.getId());
             return "Can't get logs!";
         }
     }

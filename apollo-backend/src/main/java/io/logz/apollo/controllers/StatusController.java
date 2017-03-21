@@ -10,6 +10,7 @@ import io.logz.apollo.models.Service;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
+import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +71,22 @@ public class StatusController extends BaseController {
             });
 
             return kubernetesDeploymentStatusList;
+        }
+    }
+
+    @LoggedIn
+    @GET("/status/logs/environment/{environmentId}/service/{serviceId}")
+    public String getLogs(int environmentId, int serviceId) {
+
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+
+            Environment environment = environmentDao.getEnvironment(environmentId);
+            Service service = serviceDao.getService(serviceId);
+            KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+
+            return kubernetesHandler.getDeploymentLogs(environment, service);
         }
     }
 }

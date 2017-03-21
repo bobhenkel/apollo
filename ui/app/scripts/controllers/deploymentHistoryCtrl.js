@@ -2,8 +2,8 @@
 
 angular.module('apollo')
   .controller('deploymentHistoryCtrl', ['apolloApiService', '$scope',
-                                    '$timeout' , '$state', 'growl', 'usSpinnerService',
-            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService) {
+                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder',
+            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder) {
 
                 $scope.selectedDeployment = null;
 
@@ -67,6 +67,17 @@ angular.module('apollo')
                     $scope.statusSearch = "";
                 };
 
+                $scope.dtOptions = {
+                    paginationType: 'simple_numbers',
+                    displayLength: 10,
+                    dom: '<"top"i>rt<"bottom"p>',
+                    order: [[1, "asc" ]]
+                };
+
+                $scope.dtColumnDefs = [
+                    DTColumnDefBuilder.newColumnDef([1]).withOption('type', 'date')
+                ];
+
                 // Data fetching
                 apolloApiService.getAllEnvironments().then(function(response) {
                     var tempEnvironment = {};
@@ -97,4 +108,5 @@ angular.module('apollo')
                 apolloApiService.getAllDeployments().then(function(response) {
                    $scope.allDeployments = response.data;
                 });
+
             }]);

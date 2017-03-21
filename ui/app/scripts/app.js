@@ -19,7 +19,8 @@ angular
     'ngSanitize',
     'angular.filter',
     'LocalStorageModule',
-    'ui.gravatar'
+    'ui.gravatar',
+    'datatables'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     
@@ -156,7 +157,7 @@ angular
                         })
                       }
                     }
-    })
+    });
 
     $stateProvider
           .state('service', {
@@ -228,7 +229,7 @@ angular
       .state('service.configure',{
             templateUrl:'views/service/configure.html',
             url:'/configure'
-    })
+    });
 
      $stateProvider
            .state('blocker', {
@@ -284,7 +285,7 @@ angular
       .state('blocker.configure',{
             templateUrl:'views/blocker/configure.html',
             url:'/configure'
-    })
+    });
     $stateProvider
                .state('auth', {
                  url:'/auth',

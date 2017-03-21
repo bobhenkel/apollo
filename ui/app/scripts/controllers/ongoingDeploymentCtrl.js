@@ -55,6 +55,13 @@ angular.module('apollo')
                     return apolloApiService.isRevertDisabledBasedOnStatus(deploymentStatus);
                 };
 
+                $scope.dtOptions = {
+                    paginationType: 'simple_numbers',
+                    displayLength: 20,
+                    dom: '<"top"i>rt<"bottom"p>',
+                    order: [[ 0, "desc" ]]
+                };
+
                 // Data fetching
                 apolloApiService.getAllEnvironments().then(function(response) {
                     var tempEnvironment = {};
