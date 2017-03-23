@@ -27,7 +27,7 @@ angular.module('apollo')
 
                 $scope.getLogs = function() {
                     fetchLatestLogs();
-                    $scope.logsInterval = $interval(fetchLatestLogs, 3000);
+                    $scope.logsInterval = $interval(fetchLatestLogs, 8000);
                 };
 
                 $scope.stopLogs = function() {

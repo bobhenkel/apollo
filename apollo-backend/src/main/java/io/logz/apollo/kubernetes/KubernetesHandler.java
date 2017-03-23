@@ -24,6 +24,7 @@ public class KubernetesHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesHandler.class);
     private final Environment environment;
+    private static final int NUMBER_OF_LOG_LINES_TO_FETCH = 500;
     private final KubernetesClient kubernetesClient;
 
     @VisibleForTesting
@@ -152,15 +153,27 @@ public class KubernetesHandler {
                     .getItems()
                     .stream()
                     .map(pod -> pod.getMetadata().getName())
-                    .forEach(name -> {
-                        sb.append("Logs from ").append(name).append(":\n")
-                                .append(kubernetesClient.pods().inNamespace(environment.getKubernetesNamespace()).withName(name).getLog(true))
-                                .append("\n");
-                    });
+                    .forEach(podName -> kubernetesClient
+                            .pods()
+                            .inNamespace(environment.getKubernetesNamespace())
+                            .withName(podName)
+                            .get()
+                            .getSpec()
+                            .getContainers()
+                            .forEach(container ->
+                                    sb.append("Logs from container ").append(container.getName()).append(" on pod ").append(podName).append(": \n").append(
+                                            kubernetesClient
+                                            .pods()
+                                            .inNamespace(environment.getKubernetesNamespace())
+                                            .withName(podName)
+                                            .inContainer(container.getName())
+                                            .tailingLines(NUMBER_OF_LOG_LINES_TO_FETCH)
+                                            .getLog(true)
+                                    ).append("\n")));
 
             return sb.toString();
         } catch (Exception e) {
-            logger.error("Got exception while getting logs for service {} on environment {}", service.getId(), environment.getId());
+            logger.error("Got exception while getting logs for service {} on environment {}", service.getId(), environment.getId(), e);
             return "Can't get logs!";
         }
     }
