@@ -1,6 +1,5 @@
 package io.logz.apollo;
 
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
@@ -26,7 +25,6 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.PodStatus;
-import org.easymock.EasyMock;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -64,11 +62,11 @@ public class KubernetesHandlerTest {
         kubernetesMockClient = new KubernetesMockClient();
 
         // Create deployments
-        notFinishedDeployment = new RealDeploymentGenerator("image", "key", "value");
-        finishedDeployment = new RealDeploymentGenerator("image", "key", "value");
-        notFinishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value");
-        finishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value");
-        statusDeployment = new RealDeploymentGenerator("image", "key", "value");
+        notFinishedDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
+        finishedDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
+        notFinishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
+        finishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
+        statusDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
 
         // Set mock endpoints
         setMockDeploymentStatus(notFinishedDeployment, false, ApolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));

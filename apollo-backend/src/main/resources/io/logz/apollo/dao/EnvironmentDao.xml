@@ -16,7 +16,7 @@
     </select>
 
     <insert id="addEnvironment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO environment (name, geo_region, availability, kubernetes_master, kubernetes_token, kubernetes_namespace)
-        VALUES (#{name}, #{geoRegion}, #{availability}, #{kubernetesMaster}, #{kubernetesToken}, #{kubernetesNamespace})
+        INSERT INTO environment (name, geo_region, availability, kubernetes_master, kubernetes_token, kubernetes_namespace, service_port_coefficient)
+        VALUES (#{name}, #{geoRegion}, #{availability}, #{kubernetesMaster}, #{kubernetesToken}, #{kubernetesNamespace}, #{servicePortCoefficient})
     </insert>
 </mapper>
