@@ -18,7 +18,7 @@ CREATE TABLE `environment` (
   `kubernetes_master` varchar(1000) NOT NULL,
   `kubernetes_token` varchar(1000) NOT NULL,
   `kubernetes_namespace` varchar(1000) NOT NULL,
-  `service_port_coefficient` int(11) unsigned DEFAULT '0',
+  `service_port_coefficient` int(11) unsigned NOT NULL DEFAULT '0',
    PRIMARY KEY (`id`),
    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
