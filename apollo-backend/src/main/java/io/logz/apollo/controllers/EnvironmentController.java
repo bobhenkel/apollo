@@ -48,7 +48,7 @@ public class EnvironmentController {
     @LoggedIn
     @POST("/environment")
     public void addEnvironment(String name, String geoRegion, String availability, String kubernetesMaster,
-                               String kubernetesToken, String kubernetesNamespace, Req req) {
+                               String kubernetesToken, String kubernetesNamespace, int servicePortCoefficient, Req req) {
 
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
             EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
@@ -60,6 +60,7 @@ public class EnvironmentController {
             newEnvironment.setKubernetesMaster(kubernetesMaster);
             newEnvironment.setKubernetesToken(kubernetesToken);
             newEnvironment.setKubernetesNamespace(kubernetesNamespace);
+            newEnvironment.setServicePortCoefficient(servicePortCoefficient);
 
             environmentDao.addEnvironment(newEnvironment);
             assignJsonResponseToReq(req, HttpStatus.CREATED, newEnvironment);

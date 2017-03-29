@@ -18,6 +18,7 @@ import io.logz.apollo.models.Service;
  */
 public class RealDeploymentGenerator {
 
+    private static final int NODE_PORT = 30002;
     private final String DEFAULT_LABEL_KEY = "app";
     private final String DEFAULT_LABEL_VALUE = "nginx";
 
@@ -30,7 +31,7 @@ public class RealDeploymentGenerator {
     private final User user;
     private final Deployment deployment;
 
-    public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue) {
+    public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient) {
 
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
 
@@ -42,6 +43,7 @@ public class RealDeploymentGenerator {
 
             // Create all models in DB
             environment = ModelsGenerator.createEnvironment();
+            environment.setServicePortCoefficient(servicePortCoefficient);
             environmentDao.addEnvironment(environment);
 
             service = ModelsGenerator.createService();
@@ -77,6 +79,10 @@ public class RealDeploymentGenerator {
 
     public String getDefaultEnvironmentVariableValue() {
         return DEFAULT_ENVIRONMENT_VARIABLE_VALUE;
+    }
+
+    public int getDefaultNodePort() {
+        return NODE_PORT;
     }
 
     public Environment getEnvironment() {
@@ -157,7 +163,7 @@ public class RealDeploymentGenerator {
                 "  namespace: default\n" +
                 "spec:  \n" +
                 "  ports:\n" +
-                "  - nodePort: 30002\n" +
+                "  - nodePort: " + NODE_PORT + "\n" +
                 "    port: 80\n" +
                 "    protocol: TCP\n" +
                 "    targetPort: 80\n" +

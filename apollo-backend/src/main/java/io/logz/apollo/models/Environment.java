@@ -12,6 +12,7 @@ public class Environment {
     private String kubernetesMaster;
     private String kubernetesToken;
     private String kubernetesNamespace;
+    private int servicePortCoefficient;
 
     public Environment() {
 
@@ -71,5 +72,13 @@ public class Environment {
 
     public void setKubernetesNamespace(String kubernetesNamespace) {
         this.kubernetesNamespace = kubernetesNamespace;
+    }
+
+    public int getServicePortCoefficient() {
+        return servicePortCoefficient;
+    }
+
+    public void setServicePortCoefficient(int servicePortCoefficient) {
+        this.servicePortCoefficient = servicePortCoefficient;
     }
 }

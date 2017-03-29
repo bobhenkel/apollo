@@ -18,6 +18,7 @@ import io.logz.apollo.transformers.deployment.DeploymentEnvironmentVariableTrans
 import io.logz.apollo.transformers.deployment.DeploymentImageNameTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentLabelsTransformer;
 import io.logz.apollo.transformers.service.BaseServiceTransformer;
+import io.logz.apollo.transformers.service.ServiceNodePortCoefficientTransformer;
 import io.logz.apollo.transformers.service.ServiceLabelTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,8 @@ public class ApolloToKubernetes {
 
             // Define the set of transformers the service object will go through
             serviceTransformers = Sets.newHashSet(Arrays.asList(
-                    new ServiceLabelTransformer()
+                    new ServiceLabelTransformer(),
+                    new ServiceNodePortCoefficientTransformer()
             ));
         }
     }
