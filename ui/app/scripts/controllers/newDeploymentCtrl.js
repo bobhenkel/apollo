@@ -117,6 +117,10 @@ angular.module('apollo')
             order: [[ 0, "desc" ]]
         };
 
+         $scope.dtColumnDefsDeployableVersion = [
+             {"type": "date", targets: 0}
+         ];
+
         // Validators
         function validateEnvironment() {
             return $scope.environmentSelected != null;
@@ -151,4 +155,6 @@ angular.module('apollo')
             // Save it aside for later data matching
             $scope.allDeployableVersions = response.data;
         });
+
+        jQuery.fn.dataTable.moment('DD/MM/YYYY HH:mm:SS');
 }]);

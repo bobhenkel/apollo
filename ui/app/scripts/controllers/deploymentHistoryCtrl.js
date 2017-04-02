@@ -109,4 +109,6 @@ angular.module('apollo')
                    $scope.allDeployments = response.data;
                 });
 
+
+                jQuery.fn.dataTable.moment('DD/MM/YYYY HH:mm:SS');
             }]);
