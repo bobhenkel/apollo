@@ -372,7 +372,6 @@ angular
 
   }]);
 
-
 angular
   .module('apollo')
   .config(['growlProvider', function(growlProvider) {

@@ -2,8 +2,21 @@
 
 angular.module('apollo')
   .controller('newDeploymentCtrl', ['apolloApiService', '$scope',
-                                    '$timeout' , '$state', 'growl', 'usSpinnerService',
-            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService) {
+                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder',
+            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder) {
+
+        // Kinda ugly custom sorting for datatables
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-time-pre": function ( date ) {
+                return moment(date, 'DD/MM/YY HH:mm:ss');
+            },
+            "date-time-asc": function ( a, b ) {
+                return (a.isBefore(b) ? -1 : (a.isAfter(b) ? 1 : 0));
+            },
+            "date-time-desc": function ( a, b ) {
+                return (a.isBefore(b) ? 1 : (a.isAfter(b) ? -1 : 0));
+            }
+        });
 
         // Define the flow steps
         var deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
@@ -118,7 +131,7 @@ angular.module('apollo')
         };
 
          $scope.dtColumnDefsDeployableVersion = [
-             {"type": "date", targets: 0}
+             DTColumnDefBuilder.newColumnDef([0]).withOption('type', 'date-time')
          ];
 
         // Validators
@@ -155,6 +168,4 @@ angular.module('apollo')
             // Save it aside for later data matching
             $scope.allDeployableVersions = response.data;
         });
-
-        jQuery.fn.dataTable.moment('DD/MM/YYYY HH:mm:SS');
 }]);

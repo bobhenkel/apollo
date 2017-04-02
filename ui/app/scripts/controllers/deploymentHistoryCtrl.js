@@ -5,6 +5,19 @@ angular.module('apollo')
                                     '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder',
             function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder) {
 
+                // Kinda ugly custom sorting for datatables
+                jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+                    "date-time-pre": function ( date ) {
+                        return moment(date, 'DD/MM/YY HH:mm:ss');
+                    },
+                    "date-time-asc": function ( a, b ) {
+                        return (a.isBefore(b) ? -1 : (a.isAfter(b) ? 1 : 0));
+                    },
+                    "date-time-desc": function ( a, b ) {
+                        return (a.isBefore(b) ? 1 : (a.isAfter(b) ? -1 : 0));
+                    }
+                });
+
                 $scope.selectedDeployment = null;
 
                 $scope.setSelectedDeployment = function(selectedDeployment) {
@@ -71,11 +84,11 @@ angular.module('apollo')
                     paginationType: 'simple_numbers',
                     displayLength: 10,
                     dom: '<"top"i>rt<"bottom"p>',
-                    order: [[1, "asc" ]]
+                    order: [[1, "desc" ]]
                 };
 
                 $scope.dtColumnDefs = [
-                    DTColumnDefBuilder.newColumnDef([1]).withOption('type', 'date')
+                    DTColumnDefBuilder.newColumnDef([1]).withOption('type', 'date-time')
                 ];
 
                 // Data fetching
@@ -108,7 +121,4 @@ angular.module('apollo')
                 apolloApiService.getAllDeployments().then(function(response) {
                    $scope.allDeployments = response.data;
                 });
-
-
-                jQuery.fn.dataTable.moment('DD/MM/YYYY HH:mm:SS');
             }]);
