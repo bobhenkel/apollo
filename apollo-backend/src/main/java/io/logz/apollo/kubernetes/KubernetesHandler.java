@@ -62,10 +62,13 @@ public class KubernetesHandler {
                     .inNamespace(environment.getKubernetesNamespace())
                     .createOrReplace(kubernetesDeployment);
 
-            kubernetesClient
-                    .services()
-                    .inNamespace(environment.getKubernetesNamespace())
-                    .createOrReplace(kubernetesService);
+            // Services are allowed to be null
+            if (kubernetesService != null) {
+                kubernetesClient
+                        .services()
+                        .inNamespace(environment.getKubernetesNamespace())
+                        .createOrReplace(kubernetesService);
+            }
 
             logger.info("Started deployment id {}", deployment.getId());
             deployment.setStatus(Deployment.DeploymentStatus.STARTED);
