@@ -105,6 +105,11 @@ public class ApolloToKubernetes {
                 apolloDeployment = deploymentDao.getDeployment(apolloDeployment.getId());
             }
 
+            // Services are allowed to be null
+            if (apolloService.getServiceYaml() == null) {
+                return null;
+            }
+
             // Convert the service object to fabric8 model
             Service service = mapper.readValue(apolloService.getServiceYaml(), Service.class);
 
