@@ -2,8 +2,12 @@
 
 angular.module('apollo')
   .controller('newDeploymentCtrl', ['apolloApiService', '$scope',
-                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder',
-            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder) {
+                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder', 'localStorageService',
+            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder, localStorageService) {
+
+
+        var previouseEnvironmentLocalStorageKey = 'previous-run-environment-id';
+        var previouseServiceLocalStorageKey = 'previous-run-service-id';
 
         // Kinda ugly custom sorting for datatables
         jQuery.extend( jQuery.fn.dataTableExt.oSort, {
@@ -36,13 +40,13 @@ angular.module('apollo')
 
         // Scope setters
         $scope.setSelectedEnvironment = function (environmentSelected) {
-           $scope.environmentSelected = environmentSelected;
+            $scope.environmentSelected = environmentSelected;
         };
         $scope.setSelectedService = function (serviceSelected) {
-           $scope.serviceSelected = serviceSelected;
+            $scope.serviceSelected = serviceSelected;
         };
         $scope.setSelectedVersion = function (versionSelected) {
-                   $scope.versionSelected = versionSelected;
+            $scope.versionSelected = versionSelected;
         };
 
         // Visual change the next step
@@ -114,6 +118,10 @@ angular.module('apollo')
                             growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
                         }
                     });
+
+            // Set the current selection on local storage, for pre-selection on the next run
+            localStorageService.set(previouseEnvironmentLocalStorageKey, $scope.environmentSelected.id);
+            localStorageService.set(previouseServiceLocalStorageKey, $scope.serviceSelected.id);
         };
 
         $scope.dtOptions = {
@@ -158,10 +166,22 @@ angular.module('apollo')
         // Data fetching
 		apolloApiService.getAllEnvironments().then(function(response) {
 			$scope.allEnvironments = response.data;
+
+			// Get selection from local storage
+            var previousEnvironmentId = localStorageService.get(previouseEnvironmentLocalStorageKey);
+            if (previousEnvironmentId !== undefined) {
+                $scope.setSelectedEnvironment($scope.allEnvironments.filter(function(a){return a.id === previousEnvironmentId})[0]);
+            }
 		});
 
 		apolloApiService.getAllServices().then(function(response) {
         	$scope.allServices = response.data;
+
+        	// Get selection from local storage
+            var previousServiceId = localStorageService.get(previouseServiceLocalStorageKey);
+            if (previousServiceId !== undefined) {
+                $scope.setSelectedService($scope.allServices.filter(function(a){return a.id === previousServiceId})[0]);
+            }
         });
 
         apolloApiService.getAllDeployableVersions().then(function(response) {
