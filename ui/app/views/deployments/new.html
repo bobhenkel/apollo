@@ -28,6 +28,7 @@
                             <tbody>
                             <tr ng-repeat="environment in allEnvironments | filter:globalSearch"
                                 ng-click="setSelectedEnvironment(environment)"
+                                ng-dblclick="nextStep()"
                                 ng-class="{'active':environment.id == environmentSelected.id}">
                                 <td>{{environment.name}}</td>
                                 <td>{{environment.geoRegion}}</td>
@@ -60,6 +61,7 @@
                             <tbody>
                             <tr ng-repeat="service in allServices | filter:globalSearch"
                                 ng-click="setSelectedService(service)"
+                                ng-dblclick="nextStep()"
                                 ng-class="{'active':service.id == serviceSelected.id}">
                                 <td>{{service.name}}</td>
                                 <td>
@@ -98,8 +100,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter:globalSearch | filter: {serviceId: serviceSelected.id}"
+                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter: {serviceId: serviceSelected.id} : true"
                                 ng-click="setSelectedVersion(deployableVersion)"
+                                ng-dblclick="nextStep()"
                                 ng-class="{'active':deployableVersion.gitCommitSha == versionSelected.gitCommitSha}">
                                 <td>{{deployableVersion.commitDate | date:'dd/MM/yy HH:mm:ss'}}</td>
                                 <td><a target="_blank" href="{{deployableVersion.commitUrl}}">{{deployableVersion.gitCommitSha | limitTo: 7}}</a></td>
