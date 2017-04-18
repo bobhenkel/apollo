@@ -12,8 +12,11 @@ public class ServiceNodePortCoefficientTransformer implements BaseServiceTransfo
     @Override
     public Service transform(Service service, Deployment apolloDeployment, io.logz.apollo.models.Service apolloService, Environment apolloEnvironment, DeployableVersion apolloDeployableVersion) {
 
-        service.getSpec().getPorts().forEach(servicePort ->
-                servicePort.setNodePort(servicePort.getNodePort() + apolloEnvironment.getServicePortCoefficient()));
+        service.getSpec().getPorts().forEach(servicePort -> {
+            if (servicePort.getNodePort() != null) {
+                servicePort.setNodePort(servicePort.getNodePort() + apolloEnvironment.getServicePortCoefficient());
+            }
+        });
 
         return service;
     }
