@@ -123,6 +123,13 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + "status/logs/environment/" + environmentId + "/service/" + serviceId);
     };
 
+    var restartPod = function (environmentId, podName) {
+        return $http.post(CONFIG.appUrl + "k8s/pod/restart", {
+            environmentId: environmentId,
+            podName: podName
+        });
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
@@ -146,6 +153,7 @@ function ApiService($q, $http){
         login: login,
         serviceStatus: serviceStatus,
         environmentStatus: environmentStatus,
-        logsFromStatus: logsFromStatus
+        logsFromStatus: logsFromStatus,
+        restartPod: restartPod
     };
 }

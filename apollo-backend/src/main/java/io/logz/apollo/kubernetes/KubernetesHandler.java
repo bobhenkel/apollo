@@ -223,6 +223,16 @@ public class KubernetesHandler {
         return kubernetesDeploymentStatus;
     }
 
+    public void restartPod(String podName) {
+
+        // Deleting a pod, which created with a deployment is basically restarting since the replica set will create a new one immediately
+        kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(podName)
+                .delete();
+    }
+
     private PodStatus getPodStatus(String name) {
         io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
                 .pods()
