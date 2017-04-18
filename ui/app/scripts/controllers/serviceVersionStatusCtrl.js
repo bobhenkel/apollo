@@ -8,6 +8,8 @@ angular.module('apollo')
             $scope.filteredResults = [];
             $scope.selectedStatus = null;
             $scope.currentScreen = "filters";
+            $scope.showingBy = null;
+            $scope.showingByValue = null;
 
             $scope.showByService = function(service) {
                 usSpinnerService.spin('result-spinner');
@@ -15,9 +17,12 @@ angular.module('apollo')
                 apolloApiService.serviceStatus(service).then(function (response) {
                     $scope.filteredResults = response.data;
                     populateDeployableVersions();
+                    refreshPreSelectedStatus();
                     usSpinnerService.stop('result-spinner');
                 });
                 $scope.currentScreen = "results";
+                $scope.showingBy = "service";
+                $scope.showingByValue = service;
             };
 
             $scope.showByEnvironment = function(environment) {
@@ -26,9 +31,12 @@ angular.module('apollo')
                 apolloApiService.environmentStatus(environment).then(function (response) {
                     $scope.filteredResults = response.data;
                     populateDeployableVersions();
+                    refreshPreSelectedStatus();
                     usSpinnerService.stop('result-spinner');
                 });
                 $scope.currentScreen = "results";
+                $scope.showingBy = "environment";
+                $scope.showingByValue = environment;
             };
 
             $scope.backToFilter = function() {
@@ -47,6 +55,39 @@ angular.module('apollo')
             $scope.stopLogs = function() {
                 $interval.cancel($scope.logsInterval);
             };
+
+            $scope.restartPod = function (podName) {
+
+                usSpinnerService.spin('result-spinner');
+
+                apolloApiService.restartPod($scope.selectedStatus.environmentId, podName).then(function (response) {
+                    usSpinnerService.stop('result-spinner');
+                    growl.success("Successfully restarted pod " + podName + "!");
+                }, function (error) {
+                    usSpinnerService.stop('result-spinner');
+                    growl.error("Could not restart pod! got: " + error.statusText)
+                });
+            };
+
+            $scope.refreshStatus = function () {
+                if ($scope.showingBy === "service") {
+                    $scope.showByService($scope.showingByValue);
+                } else {
+                    $scope.showByEnvironment($scope.showingByValue);
+                }
+            };
+
+            function refreshPreSelectedStatus() {
+                if ($scope.selectedStatus) {
+
+                    // Refresh the view for the user
+                    $scope.selectedStatus = $scope.filteredResults.filter(function (filtered) {
+                        if (filtered) {
+                            return (filtered.serviceId === $scope.selectedStatus.serviceId && filtered.environmentId === $scope.selectedStatus.environmentId)
+                        }
+                    })[0]
+                }
+            }
 
             function fetchLatestLogs() {
                 apolloApiService.logsFromStatus($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId).then(function(response) {

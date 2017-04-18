@@ -79,9 +79,12 @@
             <p ng-show="!filteredResults.length"><b>No results found!</b></p>
         </div>
         <div class="pull-right">
-                <button type="button" class="btn btn-primary btn-circle btn-lg apollo-flow-button" ng-click="backToFilter()" tooltip="back to filters">
-                    <i class="fa fa-arrow-left"></i>
-                </button>
+            <button type="button" ng-show="currentScreen === 'results'" class="btn btn-success btn-circle btn-lg apollo-flow-button" ng-click="refreshStatus()" tooltip="Refresh Live Data">
+                <i class="fa fa-refresh"></i>
+            </button>
+            <button type="button" class="btn btn-primary btn-circle btn-lg apollo-flow-button" ng-click="backToFilter()" tooltip="back to filters">
+                <i class="fa fa-arrow-left"></i>
+            </button>
         </div>
     </div>
 
@@ -103,6 +106,7 @@
                                     <th>Phase</th>
                                     <th>Reason</th>
                                     <th>Start Time</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,12 +117,19 @@
                                     <td>{{podStatus.phase}}</td>
                                     <td>{{podStatus.reason || "None"}}</td>
                                     <td>{{podStatus.startTime | date:'dd/MM/yy H:mm:ss'}}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Restart Pod"
+                                        ng-click="restartPod(podStatus.name)">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" ng-click="refreshStatus()">Refresh</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
