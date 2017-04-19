@@ -175,9 +175,15 @@ public class AuthController {
                 UserDao userDao = apolloMyBatisSession.getDao(UserDao.class);
                 User requestedUser = userDao.getUser(username);
                 if (requestedUser == null) {
+                    req.response().code(HttpStatus.UNAUTHORIZED);
                     return false;
                 }
-                return PasswordManager.checkPassword(password, requestedUser.getHashedPassword());
+                if (PasswordManager.checkPassword(password, requestedUser.getHashedPassword())) {
+                    return true;
+                } else {
+                    req.response().code(HttpStatus.UNAUTHORIZED);
+                    return false;
+                }
             }
         });
     }
