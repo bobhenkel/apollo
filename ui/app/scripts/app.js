@@ -20,7 +20,8 @@ angular
     'angular.filter',
     'LocalStorageModule',
     'ui.gravatar',
-    'datatables'
+    'datatables',
+    'cfp.hotkeys'
   ])
   .config(['$stateProvider','$urlRouterProvider','$ocLazyLoadProvider',function ($stateProvider,$urlRouterProvider,$ocLazyLoadProvider) {
     

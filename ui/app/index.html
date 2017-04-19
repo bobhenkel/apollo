@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="bower_components/angular-growl-v2/build/angular-growl.min.css">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/jq-2.2.4/dt-1.10.13/datatables.min.css"/>
         <link rel="stylesheet" href="bower_components/angular-datatables/dist/css/angular-datatables.css">
+        <link rel="stylesheet" href="bower_components/angular-hotkeys/build/hotkeys.min.css">
         <link href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet">
         <!-- endbower -->
         <!-- endbuild -->
@@ -47,6 +48,7 @@
         <script src="bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
         <script src="bower_components/angular-gravatar/build/angular-gravatar.min.js"></script>
         <script src="bower_components/angular-datatables/dist/angular-datatables.js"></script>
+        <script src="bower_components/angular-hotkeys/build/hotkeys.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
         <script src="//cdn.datatables.net/plug-ins/1.10.13/sorting/datetime-moment.js"></script>
         <!-- endbower -->
@@ -56,6 +58,7 @@
         <script src="scripts/config.js"></script>
         <script src="scripts/app.js"></script>
         <script src="scripts/interceptors/apolloApiInterceptor.js"></script>
+        <script src="scripts/controllers/apolloMainCtrl.js"></script>
         <script src="js/sb-admin-2.js"></script>
         <!-- endbuild -->
 
@@ -65,7 +68,7 @@
     </head>
 
     <body>
-        <div ng-app="apollo">
+        <div ng-app="apollo" ng-controller="apolloMainCtrl">
             <div ui-view></div>
             <div growl></div>
         </div>
