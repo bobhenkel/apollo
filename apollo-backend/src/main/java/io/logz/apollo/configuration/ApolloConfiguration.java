@@ -19,11 +19,12 @@ public class ApolloConfiguration {
     private int monitorThreadFrequencySeconds;
     private String githubLogin;
     private String githubOauthToken;
+    private String secret;
 
     @VisibleForTesting
     public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword,
                                String dbSchema, String apiListen, int apiPort,
-                               int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken) {
+                               int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken, String secret) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
@@ -34,6 +35,7 @@ public class ApolloConfiguration {
         this.monitorThreadFrequencySeconds = monitorThreadFrequencySeconds;
         this.githubLogin = githubLogin;
         this.githubOauthToken = githubOauthToken;
+        this.secret = secret;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
@@ -50,6 +52,7 @@ public class ApolloConfiguration {
         // API Related
         String apiListen = config.getString("apollo.api.listen");
         int apiPort = config.getInt("apollo.api.port");
+        String secret = config.getString("apollo.api.secret");
 
         // Kubernetes related
         int monitorThreadFrequencySeconds = config.getInt("apollo.kubernetes.monitoringFrequencySeconds");
@@ -59,7 +62,7 @@ public class ApolloConfiguration {
         String githubOauthToken = config.getString("apollo.scm.githubOauthToken");
 
         return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort,
-                monitorThreadFrequencySeconds, githubLogin, githubOauthToken);
+                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret);
     }
 
     public int getDbPort() {
@@ -100,6 +103,10 @@ public class ApolloConfiguration {
 
     public String getGithubOauthToken() {
         return githubOauthToken;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 
     @VisibleForTesting
@@ -150,5 +157,10 @@ public class ApolloConfiguration {
     @VisibleForTesting
     public void setGithubOauthToken(String githubOauthToken) {
         this.githubOauthToken = githubOauthToken;
+    }
+
+    @VisibleForTesting
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 }
