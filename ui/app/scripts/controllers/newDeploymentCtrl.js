@@ -2,8 +2,8 @@
 
 angular.module('apollo')
   .controller('newDeploymentCtrl', ['apolloApiService', '$scope',
-                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder', 'localStorageService',
-            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder, localStorageService) {
+                                    '$timeout' , '$state', 'growl', 'usSpinnerService', 'DTColumnDefBuilder', 'localStorageService', "hotkeys",
+            function (apolloApiService, $scope, $timeout, $state, growl, usSpinnerService, DTColumnDefBuilder, localStorageService, hotkeys) {
 
 
         var previouseEnvironmentLocalStorageKey = 'previous-run-environment-id';
@@ -42,6 +42,8 @@ angular.module('apollo')
         $scope.setSelectedEnvironment = function (environmentSelected) {
             $scope.environmentSelected = environmentSelected;
         };
+
+
         $scope.setSelectedService = function (serviceSelected) {
             $scope.serviceSelected = serviceSelected;
         };
@@ -188,4 +190,13 @@ angular.module('apollo')
             // Save it aside for later data matching
             $scope.allDeployableVersions = response.data;
         });
+
+        hotkeys.bindTo($scope)
+            .add({
+                combo: "enter",
+                description: "Next Step",
+                callback: function () {
+                    $scope.nextStep();
+                }
+            })
 }]);
