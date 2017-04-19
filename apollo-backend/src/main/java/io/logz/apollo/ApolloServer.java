@@ -23,7 +23,7 @@ public class ApolloServer {
 
         // Initialize the REST API server
         On.address(configuration.getApiListen()).port(configuration.getApiPort());
-        App.bootstrap("").auth();
+        App.bootstrap("secret=" + configuration.getSecret()).auth();
     }
 
     public void stop() {
