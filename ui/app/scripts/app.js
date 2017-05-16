@@ -229,7 +229,19 @@ angular
     })
       .state('service.configure',{
             templateUrl:'views/service/configure.html',
-            url:'/configure'
+            controller: 'configureServiceCtrl',
+            url:'/configure',
+            resolve: {
+              loadMyFiles:function($ocLazyLoad) {
+                  return $ocLazyLoad.load({
+                      name:'apollo',
+                      files:[
+                          'scripts/services/apolloApiService.js',
+                          'scripts/controllers/configureServiceCtrl.js'
+                      ]
+                  })
+              }
+          }
     });
 
      $stateProvider
