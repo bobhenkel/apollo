@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `user_email` varchar(100) NOT NULL,
   `first_name` varchar(100) NOT NULL,
@@ -9,7 +8,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `user_email` (`user_email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `environment`;
 CREATE TABLE `environment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
@@ -23,7 +21,6 @@ CREATE TABLE `environment` (
    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `service`;
 CREATE TABLE `service` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
@@ -33,7 +30,6 @@ CREATE TABLE `service` (
    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployable_version`;
 CREATE TABLE `deployable_version` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `git_commit_sha` varchar(1000) NOT NULL,
@@ -49,7 +45,6 @@ CREATE TABLE `deployable_version` (
    CONSTRAINT `deployable_version_service_fk` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployment`;
 CREATE TABLE `deployment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `environment_id` int(11) unsigned NOT NULL,
@@ -67,7 +62,6 @@ CREATE TABLE `deployment` (
    CONSTRAINT `deployment_user_fk` FOREIGN KEY (`user_email`) REFERENCES `users` (`user_email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployment_permissions`;
 CREATE TABLE `deployment_permissions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
@@ -80,14 +74,12 @@ CREATE TABLE `deployment_permissions` (
   CONSTRAINT `deployment_permission_environment_fk` FOREIGN KEY (`environment_id`) REFERENCES `environment` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployment_groups`;
 CREATE TABLE `deployment_groups` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployment_user_groups`;
 CREATE TABLE `deployment_user_groups` (
   `user_email` varchar(1000) NOT NULL,
   `deployment_group_id` int(11) unsigned NOT NULL,
@@ -96,7 +88,6 @@ CREATE TABLE `deployment_user_groups` (
   CONSTRAINT `deployment_user_groups_deployment_groups_id_fk` FOREIGN KEY (`deployment_group_id`) REFERENCES `deployment_groups` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `deployment_group_permissions`;
 CREATE TABLE `deployment_group_permissions` (
   `deployment_group_id` int(11) unsigned NOT NULL,
   `deployment_permission_id` int(11) unsigned NOT NULL,

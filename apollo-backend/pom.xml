@@ -46,24 +46,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>com.spotify</deploymentGroupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
-                <configuration>
-                    <imageName>registry.internal.logz.io:5000/elasticsearch-benchmark-tool</imageName>
-                    <dockerDirectory>docker</dockerDirectory>
-                    <resources>
-                        <resource>
-                            <targetPath>/packages</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}-jar-with-dependencies.jar</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
-            -->
         </plugins>
     </build>
     <dependencies>
@@ -78,11 +60,6 @@
             <version>1.1.7</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.1.7</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
@@ -90,7 +67,7 @@
         <dependency>
             <groupId>io.logz.logback</groupId>
             <artifactId>logzio-logback-appender</artifactId>
-            <version>1.0.11</version>
+            <version>1.0.16</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>
@@ -142,6 +119,11 @@
             <artifactId>github-api</artifactId>
             <version>1.84</version>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>4.2.0</version>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -153,7 +135,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

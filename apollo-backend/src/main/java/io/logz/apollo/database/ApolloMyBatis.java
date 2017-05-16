@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,8 @@ public class ApolloMyBatis {
         try {
             logger.info("Creating MyBatis instance");
             DataSource dataSource = new ApolloDataSource(configuration).getDataSource();
+            migrateDatabase(dataSource);
+
             TransactionFactory transactionFactory = new JdbcTransactionFactory();
             Environment environment = new Environment("apollo", transactionFactory, dataSource);
 
@@ -72,4 +75,11 @@ public class ApolloMyBatis {
 
         return new ApolloMyBatisSession(sqlSessionFactory);
     }
+
+    private void migrateDatabase(DataSource dataSource) {
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
+        flyway.migrate();
+    }
+
 }
