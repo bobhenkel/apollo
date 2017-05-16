@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ "$#" == "0" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]
+then
+  echo "Create new migration file"
+  echo "USAGE: $0 <Name of migration>"
+  echo "EXAMPLE: $0 Create users table"
+  exit 0
+fi
+
+version=$(date +%Y%m%d%H%M%S)
+name=$(echo $@ | tr -s ' ' | tr ' ' '_' | python -c "print raw_input().capitalize()")
+
+filename="V${version}__${name}.sql"
+path="src/main/resources/db/migration/${filename}"
+
+touch ${path}
+git add ${path}
