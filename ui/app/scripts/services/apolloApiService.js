@@ -130,6 +130,14 @@ function ApiService($q, $http){
         });
     };
 
+    var createService = function(name, deploymentYaml, serviceYaml) {
+        return $http.post(CONFIG.appUrl + "service/", {
+            name: name,
+            deploymentYaml: deploymentYaml,
+            serviceYaml: serviceYaml
+        });
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
@@ -154,6 +162,7 @@ function ApiService($q, $http){
         serviceStatus: serviceStatus,
         environmentStatus: environmentStatus,
         logsFromStatus: logsFromStatus,
-        restartPod: restartPod
+        restartPod: restartPod,
+        createService: createService
     };
 }
