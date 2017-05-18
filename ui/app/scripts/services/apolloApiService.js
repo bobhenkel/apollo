@@ -144,6 +144,7 @@ function ApiService($q, $http){
             deploymentYaml: deploymentYaml,
             serviceYaml: serviceYaml
         });
+    };
 
     var getLatestDeployableVersionsByServiceId = function (serviceId) {
         return $http.get(CONFIG.appUrl + "deployable-version/latest/service/" + serviceId);
