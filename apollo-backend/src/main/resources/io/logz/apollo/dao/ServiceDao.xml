@@ -24,7 +24,7 @@
         UPDATE service SET
             name=#{name},
             deployment_yaml=#{deploymentYaml},
-            service_yaml=service_yaml#{serviceYaml}
+            service_yaml=#{serviceYaml}
         WHERE
             id=#{id}
     </update>
