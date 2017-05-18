@@ -14,6 +14,7 @@ public class HttpStatus {
     public static int BAD_REQUEST = 400;
     public static int UNAUTHORIZED = 401;
     public static int FORBIDDEN = 403;
+    public static int NOT_FOUND = 404;
     public static int CONFLICT = 409;
     public static int TOO_MANY_REQUESTS = 429;
 }

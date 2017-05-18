@@ -19,4 +19,13 @@
         INSERT INTO service (name, deployment_yaml, service_yaml)
         VALUES (#{name}, #{deploymentYaml}, #{serviceYaml})
     </insert>
+
+    <update id="updateService">
+        UPDATE service SET
+            name=#{name},
+            deployment_yaml=#{deploymentYaml},
+            service_yaml=#{serviceYaml}
+        WHERE
+            id=#{id}
+    </update>
 </mapper>
