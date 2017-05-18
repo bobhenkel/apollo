@@ -32,7 +32,7 @@ angular.module('apollo')
 
         // Scope variables
 		$scope.environmentSelected = null;
-		$scope.selectedService = null;
+		$scope.serviceSelected = null;
 		$scope.versionSelected = null;
 		$scope.showNextStep = true;
 
@@ -45,7 +45,7 @@ angular.module('apollo')
 
 
         $scope.setSelectedService = function (serviceSelected) {
-            $scope.selectedService = selectedService;
+            $scope.serviceSelected = serviceSelected;
         };
         $scope.setSelectedVersion = function (versionSelected) {
             $scope.versionSelected = versionSelected;
@@ -95,7 +95,7 @@ angular.module('apollo')
 
             // Now we can deploy
             apolloApiService.createNewDeployment(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
-                    $scope.selectedService.id, $scope.environmentSelected.id).then(function (response) {
+                    $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
 
                         // Wait a bit to let the deployment be in the DB
                         setTimeout(function () {
@@ -123,7 +123,7 @@ angular.module('apollo')
 
             // Set the current selection on local storage, for pre-selection on the next run
             localStorageService.set(previouseEnvironmentLocalStorageKey, $scope.environmentSelected.id);
-            localStorageService.set(previouseServiceLocalStorageKey, $scope.selectedService.id);
+            localStorageService.set(previouseServiceLocalStorageKey, $scope.serviceSelected.id);
         };
 
         $scope.dtOptions = {
@@ -150,7 +150,7 @@ angular.module('apollo')
         }
 
         function validateService() {
-            return $scope.selectedService != null;
+            return $scope.serviceSelected != null;
         }
 
         function validateVersion() {
