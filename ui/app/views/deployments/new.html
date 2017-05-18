@@ -100,7 +100,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="deployableVersion in allDeployableVersions | filter: {serviceId: serviceSelected.id} : true"
+                            <tr ng-repeat="deployableVersion in allDeployableVersions"
                                 ng-click="setSelectedVersion(deployableVersion)"
                                 ng-dblclick="nextStep()"
                                 ng-class="{'active':deployableVersion.gitCommitSha == versionSelected.gitCommitSha}">
