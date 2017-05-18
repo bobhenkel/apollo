@@ -138,17 +138,12 @@ function ApiService($q, $http){
         });
     };
 
-    var getLatestDeployableVersionsByServiceId = function (serviceId) {
-        return $http.get(CONFIG.appUrl + "deployable-version/latest/service/" + serviceId);
-    };
-
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
         getAllServices: getAllServices,
         getAllDeployableVersions: getAllDeployableVersions,
         getDeployableVersionBasedOnSha: getDeployableVersionBasedOnSha,
-        getLatestDeployableVersionsByServiceId: getLatestDeployableVersionsByServiceId,
         createNewDeployment: createNewDeployment,
         getAllRunningDeployments: getAllRunningDeployments,
         getRunningAndJustFinishedDeployments: getRunningAndJustFinishedDeployments,

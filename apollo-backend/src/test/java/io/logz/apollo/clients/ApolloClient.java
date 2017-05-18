@@ -91,10 +91,6 @@ public class ApolloClient {
         return genericApolloClient.getResult("/deployable-version/sha/" + sha, new TypeReference<DeployableVersion>() {});
     }
 
-    public List<DeployableVersion> getLatestDeployableVersionsByServiceId(int serviceId) throws ApolloClientException {
-        return genericApolloClient.getResult("/deployable-version/latest/service/" + serviceId, new TypeReference<List<DeployableVersion>>() {});
-    }
-
     public Deployment addDeployment(Deployment deployment) throws ApolloClientException {
         String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
                 "serviceId", String.valueOf(deployment.getServiceId()),

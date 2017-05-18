@@ -5,7 +5,6 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.PodStatus;
@@ -232,17 +231,6 @@ public class KubernetesHandler {
                 .inNamespace(environment.getKubernetesNamespace())
                 .withName(podName)
                 .delete();
-    }
-
-    public void test() {
-        ExecWatch exec = kubernetesClient
-                .pods()
-                .inNamespace(environment.getKubernetesNamespace())
-                .withName("")
-                .inContainer("")
-                .exec("");
-
-
     }
 
     private PodStatus getPodStatus(String name) {

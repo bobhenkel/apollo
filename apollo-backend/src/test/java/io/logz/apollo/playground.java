@@ -15,7 +15,6 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
  */
 public class playground {
 
-    @Ignore
     @Test
     public void tahat() {
 
