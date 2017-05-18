@@ -24,7 +24,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="service in allServices | filter:globalSearch"
+                                <tr ng-repeat="service in allServices"
                                     ng-click="setSelectedService(service)"
                                     ng-dblclick="nextStep()"
                                     ng-class="{'active':service.id == selectedService.id}">
