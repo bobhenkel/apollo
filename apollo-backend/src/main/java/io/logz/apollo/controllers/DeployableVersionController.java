@@ -50,6 +50,15 @@ public class DeployableVersionController {
         }
     }
 
+    @LoggedIn
+    @GET("/deployable-version/latest/service/{serviceId}")
+    public List<DeployableVersion> getLatestDeployableVersionsByServiceId(int serviceId) {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
+            return deployableVersionDao.getLatestDeployableVersionsByServiceId(serviceId);
+        }
+    }
+
     @POST("/deployable-version")
     public void addDeployableVersion(String gitCommitSha, String githubRepositoryUrl, int serviceId, Req req) {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {

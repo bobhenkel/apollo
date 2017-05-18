@@ -45,8 +45,15 @@ angular.module('apollo')
 
 
         $scope.setSelectedService = function (serviceSelected) {
-            $scope.serviceSelected = serviceSelected;
+            // If we already pre-fetched the data since we have it in the localstorage, no need to do so again
+            if ($scope.serviceSelected !== serviceSelected) {
+                $scope.serviceSelected = serviceSelected;
+                if (serviceSelected !== undefined) {
+                    loadDeployableVersions(serviceSelected.id)
+                }
+            }
         };
+
         $scope.setSelectedVersion = function (versionSelected) {
             $scope.versionSelected = versionSelected;
         };
@@ -186,10 +193,11 @@ angular.module('apollo')
             }
         });
 
-        apolloApiService.getAllDeployableVersions().then(function(response) {
-            // Save it aside for later data matching
-            $scope.allDeployableVersions = response.data;
-        });
+		function loadDeployableVersions(serviceId) {
+            apolloApiService.getLatestDeployableVersionsByServiceId(serviceId).then(function(response) {
+                $scope.allDeployableVersions = response.data;
+            });
+        }
 
         hotkeys.bindTo($scope)
             .add({

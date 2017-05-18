@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.rapidoid.serialize.Ser;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,6 +95,15 @@ public class DeployableVersionTest {
         DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersionFromSha(testDeployableVersion.getGitCommitSha());
 
         assertThat(testDeployableVersion.getId()).isEqualTo(returnedDeployableVersion.getId());
+    }
+
+    @Test
+    public void testGetLatestDeployableVersionsByServiceId() throws ApolloClientException {
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+
+        DeployableVersion testDeployableVersion = createAndSubmitDeployableVersion(apolloTestClient);
+        List<DeployableVersion> returnedDeployableVersion = apolloTestClient.getLatestDeployableVersionsByServiceId(testDeployableVersion.getServiceId());
+        assertThat(returnedDeployableVersion.stream().anyMatch(deployableVersion -> deployableVersion.getId() == testDeployableVersion.getId())).isTrue();
     }
 
     private DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {
