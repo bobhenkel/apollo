@@ -51,11 +51,11 @@
                         </div>
                         <div class="form-group">
                             <label>Deployment YAML</label>
-                            <ui-codemirror ui-codemirror-opts="editorOptions" ng-model="selectedService.deploymentYaml" name="deploymentYaml" required rows="10"></ui-codemirror>
+                            <ui-codemirror ui-codemirror-opts="editorOptions" ng-model="selectedService.deploymentYaml" name="deploymentYaml" required></ui-codemirror>
                         </div>
                         <div class="form-group">
                             <label>Service YAML</label>
-                            <ui-codemirror ui-codemirror-opts="editorOptions" ng-model="selectedService.serviceYaml" name="serviceYaml" required rows="5"></ui-codemirror>
+                            <ui-codemirror ui-codemirror-opts="editorOptions" ng-model="selectedService.serviceYaml" name="serviceYaml"></ui-codemirror>
                         </div>
                         <div class="form-group">
                             <input ng-disabled="buttonDisabled || serviceForm.$invalid" class="btn btn-success" type="submit" value="Save">
