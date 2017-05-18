@@ -138,6 +138,14 @@ function ApiService($q, $http){
         });
     };
 
+    var updateService = function(id, name, deploymentYaml, serviceYaml) {
+        return $http.put(CONFIG.appUrl + "service/" + id, {
+            name: name,
+            deploymentYaml: deploymentYaml,
+            serviceYaml: serviceYaml
+        });
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
@@ -163,6 +171,7 @@ function ApiService($q, $http){
         environmentStatus: environmentStatus,
         logsFromStatus: logsFromStatus,
         restartPod: restartPod,
-        createService: createService
+        createService: createService,
+        updateService: updateService
     };
 }

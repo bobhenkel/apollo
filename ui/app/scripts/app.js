@@ -20,6 +20,7 @@ angular
     'angular.filter',
     'LocalStorageModule',
     'ui.gravatar',
+    'ui.codemirror',
     'datatables',
     'cfp.hotkeys'
   ])
