@@ -45,7 +45,7 @@ public class GithubConnector {
 
             return new CommitDetails(sha, commit.getHtmlUrl().toString(),
                     commit.getCommitShortInfo().getMessage(), commit.getCommitDate(),
-                    commit.getCommitter().getAvatarUrl(), commit.getCommitter().getName());
+                    commit.getAuthor().getAvatarUrl(), commit.getAuthor().getName());
 
         } catch (IOException e) {
             logger.error("Could not get commit details from Github!", e);
