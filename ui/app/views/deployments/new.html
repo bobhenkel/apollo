@@ -106,7 +106,7 @@
                                 ng-class="{'active':deployableVersion.gitCommitSha == versionSelected.gitCommitSha}">
                                 <td>{{deployableVersion.commitDate | date:'dd/MM/yy HH:mm:ss'}}</td>
                                 <td><a target="_blank" href="{{deployableVersion.commitUrl}}">{{deployableVersion.gitCommitSha | limitTo: 7}}</a></td>
-                                <td>{{deployableVersion.commitMessage}}</td>
+                                <td>{{firstLine(deployableVersion.commitMessage)}}</td>
                                 <td><span><img class="apollo-committer-image" ng-src="{{deployableVersion.committerAvatarUrl}}">{{deployableVersion.committerName}}</span></td>
                             </tr>
                             </tbody>

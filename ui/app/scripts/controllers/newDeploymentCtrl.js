@@ -133,6 +133,16 @@ angular.module('apollo')
             localStorageService.set(previouseServiceLocalStorageKey, $scope.serviceSelected.id);
         };
 
+        $scope.firstLine = function (multiLineString) {
+            if (!multiLineString) {
+                return '';
+            }
+
+            var firstLine = multiLineString.split('\n')[0];
+            firstLine = firstLine.split('\r')[0];
+            return firstLine;
+        };
+
         $scope.dtOptions = {
             paginationType: 'simple_numbers',
             displayLength: 20,
