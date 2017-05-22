@@ -42,11 +42,11 @@ public class DeployableVersionController {
     }
 
     @LoggedIn
-    @GET("/deployable-version/sha/{sha}")
-    public DeployableVersion getDeployableVersionFromSha(String sha) {
+    @GET("/deployable-version/sha/{sha}/service/{serviceId}")
+    public DeployableVersion getDeployableVersionFromSha(String sha, int serviceId) {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()){
             DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
-            return deployableVersionDao.getDeployableVersionFromSha(sha);
+            return deployableVersionDao.getDeployableVersionFromSha(sha, serviceId);
         }
     }
 
@@ -59,6 +59,32 @@ public class DeployableVersionController {
         }
     }
 
+    @LoggedIn
+    @GET("/deployable-version/latest/branch/{branchName}/repofrom/{deployableVersionId}")
+    public DeployableVersion getLatestDeployableVersionOnBranchBasedOnOtherDeployableVersion(String branchName, int deployableVersionId, Req req) {
+        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
+
+            DeployableVersion referenceDeployableVersion = deployableVersionDao.getDeployableVersion(deployableVersionId);
+            String actualRepo = getRepoNameFromRepositoryUrl(referenceDeployableVersion.getGithubRepositoryUrl());
+
+            String latestSha = GithubConnector.getLatestCommitShaOnBranch(actualRepo, branchName);
+
+            if (latestSha == null) {
+                assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Did not found latest commit on that branch");
+                throw new RuntimeException();
+            } else {
+                DeployableVersion deployableVersionFromSha = deployableVersionDao.getDeployableVersionFromSha(latestSha, referenceDeployableVersion.getServiceId());
+                if (deployableVersionFromSha == null) {
+                    assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Did not found deployable version matching the sha " + latestSha);
+                    throw new RuntimeException();
+                } else {
+                    return deployableVersionFromSha;
+                }
+            }
+        }
+    }
+
     @POST("/deployable-version")
     public void addDeployableVersion(String gitCommitSha, String githubRepositoryUrl, int serviceId, Req req) {
         try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
@@ -66,7 +92,7 @@ public class DeployableVersionController {
             DeployableVersion newDeployableVersion = new DeployableVersion();
 
             // Getting the commit details
-            String actualRepo = githubRepositoryUrl.replaceFirst("https:\\/\\/github.com\\/", "");
+            String actualRepo = getRepoNameFromRepositoryUrl(githubRepositoryUrl);
             CommitDetails commitDetails = GithubConnector.getCommitDetails(actualRepo, gitCommitSha);
 
             newDeployableVersion.setGitCommitSha(gitCommitSha);
@@ -85,5 +111,9 @@ public class DeployableVersionController {
             deployableVersionDao.addDeployableVersion(newDeployableVersion);
             assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
         }
+    }
+
+    private String getRepoNameFromRepositoryUrl(String githubRepositoryUrl) {
+        return githubRepositoryUrl.replaceFirst("https:\\/\\/github.com\\/", "");
     }
 }

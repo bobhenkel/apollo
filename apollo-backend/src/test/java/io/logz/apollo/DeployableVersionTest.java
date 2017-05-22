@@ -92,7 +92,7 @@ public class DeployableVersionTest {
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         DeployableVersion testDeployableVersion = createAndSubmitDeployableVersion(apolloTestClient);
-        DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersionFromSha(testDeployableVersion.getGitCommitSha());
+        DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersionFromSha(testDeployableVersion.getGitCommitSha(), testDeployableVersion.getServiceId());
 
         assertThat(testDeployableVersion.getId()).isEqualTo(returnedDeployableVersion.getId());
     }

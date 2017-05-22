@@ -143,6 +143,20 @@ angular.module('apollo')
             return firstLine;
         };
 
+        $scope.deployableVersionFromBranch = function(branchName) {
+            if (branchName === undefined) {
+                branchName = $scope.branchName;
+            }
+
+            apolloApiService.getDeployableVersionFromLatestCommitOnBranch(branchName, $scope.allDeployableVersions[0].id)
+                .then(function (response) {
+                $scope.allDeployableVersions = [];
+                $scope.allDeployableVersions[0] = response.data;
+            }, function (error) {
+                    growl.error("Could not get latest commit on this branch!");
+                })
+        };
+
         $scope.dtOptions = {
             paginationType: 'simple_numbers',
             displayLength: 20,

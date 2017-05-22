@@ -55,7 +55,20 @@ public class GithubConnector {
                     author.getAvatarUrl(), committerName);
 
         } catch (IOException e) {
-            logger.error("Could not get commit details from Github!", e);
+            logger.warn("Could not get commit details from Github!", e);
+            return null;
+        }
+    }
+
+    public static String getLatestCommitShaOnBranch(String githubRepo, String branchName) {
+        if (instance == null) {
+            throw new RuntimeException("You must first initialize GithubConnector before getting commit details!");
+        }
+        try {
+            return instance.gitHub.getRepository(githubRepo).getBranch(branchName).getSHA1();
+
+        } catch (IOException e) {
+            logger.warn("Could not get latest commit on branch from Github!", e);
             return null;
         }
     }

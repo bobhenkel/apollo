@@ -25,8 +25,8 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'deployable-version/');
     };
 
-    var getDeployableVersionBasedOnSha = function (sha) {
-        return $http.get(CONFIG.appUrl + "deployable-version/sha/" + sha + "/")
+    var getDeployableVersionBasedOnSha = function (sha, serviceId) {
+        return $http.get(CONFIG.appUrl + "deployable-version/sha/" + sha + "/service/" + serviceId)
     };
 
     var getAllRunningDeployments = function() {
@@ -150,6 +150,10 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + "deployable-version/latest/service/" + serviceId);
     };
 
+    var getDeployableVersionFromLatestCommitOnBranch = function (branchName, sourceDeployableVersion) {
+      return $http.get(CONFIG.appUrl + "deployable-version/latest/branch/" + encodeURIComponent(branchName) + "/repofrom/" + sourceDeployableVersion);
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
@@ -177,6 +181,7 @@ function ApiService($q, $http){
         logsFromStatus: logsFromStatus,
         restartPod: restartPod,
         createService: createService,
-        updateService: updateService
+        updateService: updateService,
+        getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch
     };
 }
