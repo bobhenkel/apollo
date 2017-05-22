@@ -95,11 +95,11 @@ angular.module('apollo')
                 });
             }
 
-            function populateDeployableVersions() {
+            function populateDeployableVersions(service) {
                 $scope.deployableVersions = [];
                 $scope.filteredResults.forEach(function (status) {
-                    if (status != null) {
-                        apolloApiService.getDeployableVersionBasedOnSha(status.gitCommitSha).then(function (response) {
+                    if (status !== null) {
+                        apolloApiService.getDeployableVersionBasedOnSha(status.gitCommitSha, status.serviceId).then(function (response) {
                             $scope.deployableVersions[response.data.gitCommitSha] = response.data;
                         })
                     }

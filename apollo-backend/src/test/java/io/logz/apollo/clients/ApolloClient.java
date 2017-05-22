@@ -87,8 +87,8 @@ public class ApolloClient {
         return genericApolloClient.getResult("/deployable-version/", new TypeReference<List<DeployableVersion>>(){});
     }
 
-    public DeployableVersion getDeployableVersionFromSha(String sha) throws ApolloClientException {
-        return genericApolloClient.getResult("/deployable-version/sha/" + sha, new TypeReference<DeployableVersion>() {});
+    public DeployableVersion getDeployableVersionFromSha(String sha, int serviceId) throws ApolloClientException {
+        return genericApolloClient.getResult("/deployable-version/sha/" + sha + "/service/" + serviceId, new TypeReference<DeployableVersion>() {});
     }
 
     public List<DeployableVersion> getLatestDeployableVersionsByServiceId(int serviceId) throws ApolloClientException {

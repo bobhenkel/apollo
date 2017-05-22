@@ -18,7 +18,7 @@
     <select id="getDeployableVersionFromSha" resultType="io.logz.apollo.models.DeployableVersion">
         SELECT *
         FROM deployable_version
-        WHERE git_commit_sha = #{gitCommitSha}
+        WHERE git_commit_sha = #{gitCommitSha} AND service_id = #{serviceId}
     </select>
 
     <select id="getLatestDeployableVersionsByServiceId" resultType="io.logz.apollo.models.DeployableVersion">

@@ -86,7 +86,16 @@
         <div class="col-lg-12 col-sm-12 animate-switch-container" ng-switch-when="choose-version">
             <div class="panel panel-default">
                 <div class="panel-heading apollo-form-headline">
-                    Select version
+                    <div class="row">
+                        <div class="col-sm-9">
+                            Select version
+                        </div>
+                        <div class="col-sm-3 pull-right">
+                            <button class="btn btn-outline btn-primary" data-toggle="modal" data-target="#latest-commit-from-branch">
+                                Deploy latest commit from branch
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">
@@ -174,7 +183,7 @@
         </div>
     </div>
 
-        <div class="modal fade" id="show-kubernetes-service-yaml" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal fade" id="show-kubernetes-service-yaml" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -185,6 +194,38 @@
                     <pre class="apollo-logs">
 {{serviceSelected.serviceYaml}}
                     </pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="latest-commit-from-branch" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Select the branch you want the latest commit from</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-1 col-sm-offset-4">
+                            <button class="btn btn-primary" data-dismiss="modal" ng-click="deployableVersionFromBranch('master')">
+                                <strong>master</strong>
+                            </button>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="pull-left">
+                                <strong class="apollo-delimiter-right">OR</strong>
+                                <input class="apollo-form-control" type="text" placeholder="Branch Name" ng-model="branchName">
+                                <button class="btn btn-circle btn-primary" data-dismiss="modal" ng-click="deployableVersionFromBranch()">
+                                    <strong>OK</strong>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
