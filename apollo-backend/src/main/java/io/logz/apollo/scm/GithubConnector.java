@@ -2,6 +2,7 @@ package io.logz.apollo.scm;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +44,15 @@ public class GithubConnector {
             logger.info("Getting commit details for sha {} on url {}", sha, githubRepo);
             GHCommit commit = instance.gitHub.getRepository(githubRepo).getCommit(sha);
 
+            GHUser author = commit.getAuthor();
+            String committerName = author.getName();
+            if (committerName == null || committerName.isEmpty()) {
+                committerName = author.getLogin();
+            }
+
             return new CommitDetails(sha, commit.getHtmlUrl().toString(),
                     commit.getCommitShortInfo().getMessage(), commit.getCommitDate(),
-                    commit.getAuthor().getAvatarUrl(), commit.getAuthor().getName());
+                    author.getAvatarUrl(), committerName);
 
         } catch (IOException e) {
             logger.error("Could not get commit details from Github!", e);
