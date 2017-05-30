@@ -1,6 +1,8 @@
 package io.logz.apollo;
 
+import com.google.inject.Guice;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.di.ApolloModule;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import io.logz.apollo.websockets.WebSocketServer;
 import org.slf4j.Logger;
@@ -23,7 +25,7 @@ public class ApolloMain {
             logger.info("Started apollo main");
             ApolloConfiguration apolloConfiguration = ApolloConfiguration.parseConfigurationFromResources();
 
-            apolloServer = new ApolloServer(apolloConfiguration);
+            apolloServer = new ApolloServer(apolloConfiguration, Guice.createInjector(new ApolloModule()));
             apolloServer.start();
 
             // Not touching kubernetes on local run
