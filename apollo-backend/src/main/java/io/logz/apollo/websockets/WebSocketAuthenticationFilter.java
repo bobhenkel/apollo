@@ -43,28 +43,30 @@ public class WebSocketAuthenticationFilter implements Filter {
                 .findFirst()
                 .map(Cookie::getValue);
 
-        if (token.isPresent()) {
-            try {
-                String userName = TokenConverter.convertTokenToUser(token.get());
-                int environmentId = QueryStringParser.getIntFromQueryString(((HttpServletRequest) servletRequest).getQueryString(), ContainerExecEndpoint.QUERY_STRING_ENVIRONMENT_KEY);
-                int serviceId = QueryStringParser.getIntFromQueryString(((HttpServletRequest) servletRequest).getQueryString(), ContainerExecEndpoint.QUERY_STRING_SERVICE_KEY);
-
-                try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-                    DeploymentPermissionDao deploymentPermissionDao = apolloMyBatisSession.getDao(DeploymentPermissionDao.class);
-                    if (PermissionsValidator.isAllowedToDeploy(serviceId, environmentId, deploymentPermissionDao.getPermissionsByUser(userName))) {
-                        logger.info("Granted Live-Session permission to user {} on service {} and environment {}", userName, serviceId, environmentId);
-                        filterChain.doFilter(servletRequest, servletResponse);
-                    } else {
-                        logger.info("User {} have no permissions to exec to service {} on environment {}", userName, serviceId, environmentId);
-                        ((HttpServletResponse) servletResponse).setStatus(HttpStatus.FORBIDDEN);
-                    }
-                }
-            } catch (Exception e) {
-                logger.warn("Got exception while validating user permissions for deployment, assuming no!", e);
-                ((HttpServletResponse) servletResponse).setStatus(HttpStatus.FORBIDDEN);
-            }
-        } else {
+        if (!token.isPresent()) {
             ((HttpServletResponse) servletResponse).setStatus(HttpStatus.UNAUTHORIZED);
+            return;
+        }
+
+        try {
+            String userName = TokenConverter.convertTokenToUser(token.get());
+            int environmentId = QueryStringParser.getIntFromQueryString(((HttpServletRequest) servletRequest).getQueryString(), ContainerExecEndpoint.QUERY_STRING_ENVIRONMENT_KEY);
+            int serviceId = QueryStringParser.getIntFromQueryString(((HttpServletRequest) servletRequest).getQueryString(), ContainerExecEndpoint.QUERY_STRING_SERVICE_KEY);
+
+            try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+                DeploymentPermissionDao deploymentPermissionDao = apolloMyBatisSession.getDao(DeploymentPermissionDao.class);
+                if (PermissionsValidator.isAllowedToDeploy(serviceId, environmentId, deploymentPermissionDao.getPermissionsByUser(userName))) {
+                    logger.info("Granted Live-Session permission to user {} on service {} and environment {}", userName, serviceId, environmentId);
+                    filterChain.doFilter(servletRequest, servletResponse);
+                } else {
+                    logger.info("User {} have no permissions to exec to service {} on environment {}", userName, serviceId, environmentId);
+                    ((HttpServletResponse) servletResponse).setStatus(HttpStatus.FORBIDDEN);
+                }
+            }
+
+        } catch (Exception e) {
+            logger.warn("Got exception while validating user permissions for deployment, assuming no!", e);
+            ((HttpServletResponse) servletResponse).setStatus(HttpStatus.FORBIDDEN);
         }
     }
 

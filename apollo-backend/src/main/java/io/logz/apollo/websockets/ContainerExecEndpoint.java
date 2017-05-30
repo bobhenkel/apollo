@@ -79,9 +79,9 @@ public class ContainerExecEndpoint {
     public void onClose(Session session) {
         logger.info("Closing session..");
         SessionExecModel sessionExecModel = execWebSocketSessionStore.getSessionExecModel(session);
+        sessionExecModel.getExecutor().shutdownNow();
         sessionExecModel.getExecWatch().close();
         execWebSocketSessionStore.deleteSession(session);
-        sessionExecModel.getExecutor().shutdownNow();
     }
 
     @OnMessage
