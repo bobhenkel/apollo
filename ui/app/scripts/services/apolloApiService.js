@@ -153,6 +153,10 @@ function ApiService($q, $http){
     var getDeployableVersionFromLatestCommitOnBranch = function (branchName, sourceDeployableVersion) {
       return $http.get(CONFIG.appUrl + "deployable-version/latest/branch/" + encodeURIComponent(branchName) + "/repofrom/" + sourceDeployableVersion);
     };
+    
+    var getWebsocketExecUrl = function (environment, service, podName, containerName) {
+      return CONFIG.wsUrl + "/exec/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
+    };
 
     return {
         getAllUsers: getAllUsers,
@@ -182,6 +186,7 @@ function ApiService($q, $http){
         restartPod: restartPod,
         createService: createService,
         updateService: updateService,
-        getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch
+        getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch,
+        getWebsocketExecUrl: getWebsocketExecUrl
     };
 }

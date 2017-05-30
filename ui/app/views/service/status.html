@@ -122,6 +122,10 @@
                                         ng-click="restartPod(podStatus.name)">
                                             <i class="fa fa-times"></i>
                                         </button>
+                                        <button type="button" class="btn btn-success btn-circle" uib-tooltip="Live Terminal" data-toggle="modal" data-target="#select-container"
+                                        ng-click="selectPod(podStatus)">
+                                            <i class="fa fa-terminal"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -154,6 +158,48 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogs()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="select-container" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Select the container you want to open live session to</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="row text-center">
+                            <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector"
+                                    ng-repeat="container in selectedPodStatus.containers" ng-click="startLiveSession(container)" data-toggle="modal" data-target="#select-container,#live-session">
+                                {{container}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="live-session" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="closeLiveSession()">×</button>
+                    <h4 class="modal-title">Live session! (Beta)</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="terminal" class="apollo-live-session">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="closeLiveSession()">Close</button>
                 </div>
             </div>
         </div>

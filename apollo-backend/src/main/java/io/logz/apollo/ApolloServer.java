@@ -22,8 +22,13 @@ public class ApolloServer {
         GithubConnector.initialize(configuration);
 
         // Initialize the REST API server
-        On.address(configuration.getApiListen()).port(configuration.getApiPort());
-        App.bootstrap("secret=" + configuration.getSecret()).auth();
+        String[] args = new String[] {
+                "secret=" + configuration.getSecret(),
+                "on.address=" + configuration.getApiListen(),
+                "on.port=" + configuration.getApiPort()
+        };
+
+        App.bootstrap(args).auth();
     }
 
     public void stop() {

@@ -2,6 +2,7 @@ package io.logz.apollo;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
+import io.logz.apollo.websockets.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ public class ApolloMain {
     private static final Logger logger = LoggerFactory.getLogger(ApolloMain.class);
     private static ApolloServer apolloServer;
     private static KubernetesMonitor kubernetesMonitor;
+    private static WebSocketServer webSocketServer;
 
     public static void main(String[] args) {
 
@@ -37,7 +39,13 @@ public class ApolloMain {
                 }
             }
 
+            // Starting Websocket server
+            webSocketServer = new WebSocketServer(apolloConfiguration);
+            webSocketServer.start();
+
             Runtime.getRuntime().addShutdownHook(new Thread(ApolloMain::shutdown));
+
+            logger.info("Apollo is up!");
 
         } catch (RuntimeException e) {
             logger.error(e.getMessage(), e);
@@ -48,6 +56,7 @@ public class ApolloMain {
 
     private static void shutdown() {
         logger.info("Cleaning up..");
+        webSocketServer.stop();
         kubernetesMonitor.stop();
         apolloServer.stop();
     }

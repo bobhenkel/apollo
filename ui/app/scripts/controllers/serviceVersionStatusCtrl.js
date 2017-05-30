@@ -7,9 +7,12 @@ angular.module('apollo')
 
             $scope.filteredResults = [];
             $scope.selectedStatus = null;
+            $scope.selectedPodStatus = null;
             $scope.currentScreen = "filters";
             $scope.showingBy = null;
             $scope.showingByValue = null;
+            $scope.websocket = null;
+            $scope.term = null;
 
             $scope.showByService = function(service) {
                 usSpinnerService.spin('result-spinner');
@@ -75,6 +78,39 @@ angular.module('apollo')
                 } else {
                     $scope.showByEnvironment($scope.showingByValue);
                 }
+            };
+
+            $scope.selectPod = function (podStatus) {
+                $scope.selectedPodStatus = podStatus;
+            };
+
+            $scope.startLiveSession = function (containerName) {
+                setTimeout(function () {
+                    $scope.term = new Terminal({
+                        scrollback: 3000
+                    });
+
+                    $scope.websocket = new WebSocket(apolloApiService.getWebsocketExecUrl($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId,
+                                                                                        $scope.selectedPodStatus.name, containerName));
+
+                    $scope.websocket.onopen = function () {
+                        $scope.websocket.send("export TERM=\"xterm\"\n");
+                    };
+
+                    $scope.term.open(document.getElementById('terminal'));
+                    $scope.term.fit();
+                    $scope.term.focus();
+
+                    $scope.term.attach($scope.websocket, true, false);
+                    $scope.term.writeln("Wait for the prompt, initializing...");
+
+                }, 300);
+            };
+
+            $scope.closeLiveSession = function () {
+                $scope.term.detach();
+                $scope.term.destroy();
+                $scope.websocket.close();
             };
 
             function refreshPreSelectedStatus() {
