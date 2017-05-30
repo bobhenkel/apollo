@@ -1,5 +1,7 @@
 package io.logz.apollo.models;
 
+import java.util.List;
+
 /**
  * Created by roiravhon on 2/27/17.
  */
@@ -11,6 +13,7 @@ public class PodStatus {
     private String phase;
     private String reason;
     private String startTime;
+    private List<String> containers;
 
     public PodStatus() {
     }
@@ -61,5 +64,13 @@ public class PodStatus {
 
     public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public List<String> getContainers() {
+        return containers;
+    }
+
+    public void setContainers(List<String> containers) {
+        this.containers = containers;
     }
 }

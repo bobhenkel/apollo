@@ -1,0 +1,1 @@
+ALTER TABLE service ADD default_shell VARCHAR(100) DEFAULT NULL

@@ -9,6 +9,7 @@ public class Service {
     private String name;
     private String deploymentYaml;
     private String serviceYaml;
+    private String defaultShell;
 
     public Service() {
 
@@ -44,5 +45,13 @@ public class Service {
 
     public void setServiceYaml(String serviceYaml) {
         this.serviceYaml = serviceYaml;
+    }
+
+    public String getDefaultShell() {
+        return defaultShell;
+    }
+
+    public void setDefaultShell(String defaultShell) {
+        this.defaultShell = defaultShell;
     }
 }

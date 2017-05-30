@@ -1,18 +1,26 @@
 package io.logz.apollo.kubernetes;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.ExecListener;
+import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.PodStatus;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -233,6 +241,20 @@ public class KubernetesHandler {
                 .delete();
     }
 
+    public ExecWatch getExecWatch(String podName, String containerName, String... command) {
+
+        return kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(podName)
+                .inContainer(containerName)
+                .redirectingInput()
+                .redirectingOutput()
+                .redirectingError()
+                .withTTY()
+                .exec(command);
+    }
+
     private PodStatus getPodStatus(String name) {
         io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
                 .pods()
@@ -248,6 +270,17 @@ public class KubernetesHandler {
         podStatus.setPhase(kubernetesPodStatus.getPhase());
         podStatus.setReason(kubernetesPodStatus.getReason());
         podStatus.setStartTime(kubernetesPodStatus.getStartTime());
+
+        podStatus.setContainers(kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(name)
+                .get()
+                .getSpec()
+                .getContainers()
+                .stream()
+                .map(Container::getName)
+                .collect(Collectors.toList()));
 
         return podStatus;
     }

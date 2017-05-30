@@ -159,6 +159,7 @@ public class KubernetesHandlerTest {
         assertThat(returnedPodStatus.getPhase()).isEqualTo(podStatus.getPhase());
         assertThat(returnedPodStatus.getReason()).isEqualTo(podStatus.getReason());
         assertThat(returnedPodStatus.getStartTime()).isEqualTo(podStatus.getStartTime());
+        assertThat(returnedPodStatus.getContainers()).contains(podStatus.getName() + "-container");
     }
 
     @Test

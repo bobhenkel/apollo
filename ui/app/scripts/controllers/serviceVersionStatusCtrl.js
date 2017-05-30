@@ -7,9 +7,12 @@ angular.module('apollo')
 
             $scope.filteredResults = [];
             $scope.selectedStatus = null;
+            $scope.selectedPodStatus = null;
             $scope.currentScreen = "filters";
             $scope.showingBy = null;
             $scope.showingByValue = null;
+            $scope.websocket = null;
+            $scope.term = null;
 
             $scope.showByService = function(service) {
                 usSpinnerService.spin('result-spinner');
@@ -74,6 +77,50 @@ angular.module('apollo')
                     $scope.showByService($scope.showingByValue);
                 } else {
                     $scope.showByEnvironment($scope.showingByValue);
+                }
+            };
+
+            $scope.selectPod = function (podStatus) {
+                $scope.selectedPodStatus = podStatus;
+            };
+
+            $scope.startLiveSession = function (containerName) {
+                setTimeout(function () {
+                    $scope.term = new Terminal({
+                        scrollback: 3000
+                    });
+
+                    try {
+                        $scope.websocket = new WebSocket(apolloApiService.getWebsocketExecUrl($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId,
+                            $scope.selectedPodStatus.name, containerName));
+                    } catch(err) {
+
+                        growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
+                        return;
+                    }
+
+                    $scope.websocket.onopen = function () {
+                        $scope.websocket.send("export TERM=\"xterm\"\n");
+                    };
+
+                    $scope.term.open(document.getElementById('terminal'));
+                    $scope.term.fit();
+                    $scope.term.focus();
+
+                    $scope.term.attach($scope.websocket, true, false);
+                    $scope.term.writeln("Wait for the prompt, initializing...");
+
+                }, 300);
+            };
+
+            $scope.closeLiveSession = function () {
+                if ($scope.term !== null) {
+                    $scope.term.detach();
+                    $scope.term.destroy();
+                }
+
+                if ($scope.websocket !== null) {
+                    $scope.websocket.close();
                 }
             };
 

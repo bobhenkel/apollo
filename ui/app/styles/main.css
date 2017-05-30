@@ -123,6 +123,10 @@ background-color: #eee;
   max-height: 70vh;
 }
 
+.apollo-live-session {
+  height: 70vh;
+}
+
 .apollo-clear-filter {
 
     margin-top: -5px;

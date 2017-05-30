@@ -20,11 +20,14 @@ public class ApolloConfiguration {
     private String githubLogin;
     private String githubOauthToken;
     private String secret;
+    private int wsPort;
+    private int wsIdleTimeoutSeconds;
 
     @VisibleForTesting
     public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword,
                                String dbSchema, String apiListen, int apiPort,
-                               int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken, String secret) {
+                               int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken,
+                               String secret, int wsPort, int wsIdleTimeoutSeconds) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
@@ -36,6 +39,8 @@ public class ApolloConfiguration {
         this.githubLogin = githubLogin;
         this.githubOauthToken = githubOauthToken;
         this.secret = secret;
+        this.wsPort = wsPort;
+        this.wsIdleTimeoutSeconds = wsIdleTimeoutSeconds;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
@@ -61,8 +66,12 @@ public class ApolloConfiguration {
         String githubLogin = config.getString("apollo.scm.githubLogin");
         String githubOauthToken = config.getString("apollo.scm.githubOauthToken");
 
+        // Websocket related
+        int wsPort = config.getInt("apollo.websocket.port");
+        int wsIdleTimeoutSeconds = config.getInt("apollo.websocket.idleTimeoutSeconds");
+
         return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort,
-                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret);
+                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret, wsPort, wsIdleTimeoutSeconds);
     }
 
     public int getDbPort() {
@@ -107,6 +116,14 @@ public class ApolloConfiguration {
 
     public String getSecret() {
         return secret;
+    }
+
+    public int getWsPort() {
+        return wsPort;
+    }
+
+    public int getWsIdleTimeoutSeconds() {
+        return wsIdleTimeoutSeconds;
     }
 
     @VisibleForTesting
@@ -162,5 +179,15 @@ public class ApolloConfiguration {
     @VisibleForTesting
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    @VisibleForTesting
+    public void setWsPort(int wsPort) {
+        this.wsPort = wsPort;
+    }
+
+    @VisibleForTesting
+    public void setWsIdleTimeoutSeconds(int wsIdleTimeoutSeconds) {
+        this.wsIdleTimeoutSeconds = wsIdleTimeoutSeconds;
     }
 }
