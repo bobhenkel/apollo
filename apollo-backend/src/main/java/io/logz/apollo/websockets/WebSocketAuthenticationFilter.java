@@ -52,6 +52,7 @@ public class WebSocketAuthenticationFilter implements Filter {
                 try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
                     DeploymentPermissionDao deploymentPermissionDao = apolloMyBatisSession.getDao(DeploymentPermissionDao.class);
                     if (PermissionsValidator.isAllowedToDeploy(serviceId, environmentId, deploymentPermissionDao.getPermissionsByUser(userName))) {
+                        logger.info("Granted Live-Session permission to user {} on service {} and environment {}", userName, serviceId, environmentId);
                         filterChain.doFilter(servletRequest, servletResponse);
                     } else {
                         logger.info("User {} have no permissions to exec to service {} on environment {}", userName, serviceId, environmentId);

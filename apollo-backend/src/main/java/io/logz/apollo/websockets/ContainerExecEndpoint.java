@@ -63,7 +63,7 @@ public class ContainerExecEndpoint {
 
             KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
-            logger.info("Opening ExecWatch to container {} in pod {} in environment {}", containerName, podName, environment.getName());
+            logger.info("Opening ExecWatch to container {} in pod {} in environment {} related to service {}", containerName, podName, environment.getName(), service.getName());
             ExecWatch execWatch = kubernetesHandler.getExecWatch(podName, containerName,defaultShell);
             ExecutorService executor = Executors.newFixedThreadPool(2);
 
