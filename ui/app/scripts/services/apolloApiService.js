@@ -155,7 +155,7 @@ function ApiService($q, $http){
     };
     
     var getWebsocketExecUrl = function (environment, service, podName, containerName) {
-      return CONFIG.wsUrl + "/exec/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
+      return CONFIG.wsUrl + "exec/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
     };
 
     return {
