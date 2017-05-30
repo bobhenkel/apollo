@@ -90,8 +90,14 @@ angular.module('apollo')
                         scrollback: 3000
                     });
 
-                    $scope.websocket = new WebSocket(apolloApiService.getWebsocketExecUrl($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId,
-                                                                                        $scope.selectedPodStatus.name, containerName));
+                    try {
+                        $scope.websocket = new WebSocket(apolloApiService.getWebsocketExecUrl($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId,
+                            $scope.selectedPodStatus.name, containerName));
+                    } catch(err) {
+
+                        growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
+                        return;
+                    }
 
                     $scope.websocket.onopen = function () {
                         $scope.websocket.send("export TERM=\"xterm\"\n");
@@ -108,9 +114,14 @@ angular.module('apollo')
             };
 
             $scope.closeLiveSession = function () {
-                $scope.term.detach();
-                $scope.term.destroy();
-                $scope.websocket.close();
+                if ($scope.term !== null) {
+                    $scope.term.detach();
+                    $scope.term.destroy();
+                }
+
+                if ($scope.websocket !== null) {
+                    $scope.websocket.close();
+                }
             };
 
             function refreshPreSelectedStatus() {
