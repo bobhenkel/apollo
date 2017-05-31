@@ -8,7 +8,10 @@ import org.rapidoid.integrate.GuiceBeans;
 import org.rapidoid.integrate.Integrate;
 import org.rapidoid.setup.App;
 import org.rapidoid.setup.On;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -17,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 /**
  * Created by roiravhon on 11/22/16.
  */
-@Singleton
 public class ApolloServer {
 
     private final ApolloConfiguration configuration;
@@ -29,6 +31,7 @@ public class ApolloServer {
         this.injector = requireNonNull(injector);
     }
 
+    @PostConstruct
     public void start() {
         ApolloMyBatis.initialize(configuration);
         GithubConnector.initialize(configuration);
@@ -41,14 +44,15 @@ public class ApolloServer {
 
         // Initialize the REST API server
         On.changes().ignore();
-        On.address(configuration.getApiListen()).port(configuration.getApiPort());
-
         GuiceBeans beans = Integrate.guice(injector);
         App.register(beans);
         App.bootstrap(args).auth();
     }
 
+    @PreDestroy
     public void stop() {
         // Future cleanups..
+        LoggerFactory.getLogger(ApolloServer.class).warn("wefwefnufiwbfpwiub");
     }
+
 }

@@ -40,7 +40,7 @@ public class StandaloneApollo {
         apolloConfiguration.setApiPort(Common.getAvailablePort());
 
         // Start REST Server
-        server = new ApolloServer(apolloConfiguration, Guice.createInjector(new ApolloModule()));
+        server = new ApolloServer(apolloConfiguration, Guice.createInjector(new ApolloModule(apolloConfiguration)));
         server.start();
 
         // Create Kubernetes monitor, but dont start it yet (usually will want to inject mock first)

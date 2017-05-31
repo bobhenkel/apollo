@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.util.function.Consumer;
 
 /**
  * Created by roiravhon on 11/20/16.
@@ -46,7 +45,8 @@ public class ApolloMyBatis {
     private ApolloMyBatis(ApolloConfiguration configuration) {
         try {
             logger.info("Creating MyBatis instance");
-            DataSource dataSource = new ApolloDataSource(configuration).getDataSource();
+            DataSource dataSource = DataSourceFactory.create(configuration.getDbHost(), configuration.getDbPort(),
+                    configuration.getDbUser(), configuration.getDbPassword(), configuration.getDbSchema());
             migrateDatabase(dataSource);
 
             TransactionFactory transactionFactory = new JdbcTransactionFactory();

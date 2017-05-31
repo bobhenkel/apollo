@@ -87,7 +87,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.42</version>
+            <version>5.1.34</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
@@ -142,6 +142,11 @@
         <dependency>
             <groupId>com.netflix.governator</groupId>
             <artifactId>governator</artifactId>
+            <version>1.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.governator</groupId>
+            <artifactId>governator-core</artifactId>
             <version>1.17.2</version>
         </dependency>
         <dependency>
