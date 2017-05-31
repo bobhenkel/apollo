@@ -4,8 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import org.slf4j.Logger;
@@ -20,6 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Created by roiravhon on 11/21/16.
  */
@@ -30,12 +30,18 @@ public class KubernetesMonitor {
     private static final int TIMEOUT_TERMINATION = 60;
     public static final String LOCAL_RUN_PROPERTY = "localrun";
 
-    private final ApolloConfiguration apolloConfiguration;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final ApolloConfiguration apolloConfiguration;
+    private final EnvironmentDao environmentDao;
+    private final DeploymentDao deploymentDao;
 
     @Inject
-    public KubernetesMonitor(ApolloConfiguration apolloConfiguration) {
-        this.apolloConfiguration = apolloConfiguration;
+    public KubernetesMonitor(ApolloConfiguration apolloConfiguration, EnvironmentDao environmentDao,
+                             DeploymentDao deploymentDao) {
+        this.apolloConfiguration = requireNonNull(apolloConfiguration);
+        this.environmentDao = requireNonNull(environmentDao);
+        this.deploymentDao = requireNonNull(deploymentDao);
+
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("kubernetes-monitor-%d").build();
         scheduledExecutorService = Executors.newScheduledThreadPool(1, namedThreadFactory);
     }
@@ -70,40 +76,33 @@ public class KubernetesMonitor {
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public void monitor() {
+    private void monitor() {
+        // Defensive try, just to make sure nothing will close our executor service
+        try {
+            deploymentDao.getAllRunningDeployments().forEach(deployment -> {
 
-        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
-            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
+                Environment relatedEnv = environmentDao.getEnvironment(deployment.getEnvironmentId());
+                KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(relatedEnv);
 
-            // Defensive try, just to make sure nothing will close our executor service
-            try {
-                deploymentDao.getAllRunningDeployments().forEach(deployment -> {
+                Deployment returnedDeployment;
 
-                    Environment relatedEnv = environmentDao.getEnvironment(deployment.getEnvironmentId());
-                    KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(relatedEnv);
+                switch (deployment.getStatus()) {
+                    case PENDING:
+                        returnedDeployment = kubernetesHandler.startDeployment(deployment);
+                        break;
+                    case PENDING_CANCELLATION:
+                        returnedDeployment = kubernetesHandler.cancelDeployment(deployment);
+                        break;
+                    default:
+                        returnedDeployment = kubernetesHandler.monitorDeployment(deployment);
+                        break;
+                }
 
-                    Deployment returnedDeployment;
+                deploymentDao.updateDeploymentStatus(deployment.getId(), returnedDeployment.getStatus());
 
-                    switch (deployment.getStatus()) {
-                        case PENDING:
-                            returnedDeployment = kubernetesHandler.startDeployment(deployment);
-                            break;
-                        case PENDING_CANCELLATION:
-                            returnedDeployment = kubernetesHandler.cancelDeployment(deployment);
-                            break;
-                        default:
-                            returnedDeployment = kubernetesHandler.monitorDeployment(deployment);
-                            break;
-                    }
-
-                    deploymentDao.updateDeploymentStatus(deployment.getId(), returnedDeployment.getStatus());
-
-                });
-            } catch (Exception e) {
-                logger.error("Got unexpected exception in the monitoring thread! swallow and moving on..", e);
-            }
+            });
+        } catch (Exception e) {
+            logger.error("Got unexpected exception in the monitoring thread! swallow and moving on..", e);
         }
     }
 
