@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -23,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by roiravhon on 11/21/16.
  */
-@Singleton
 public class KubernetesMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesMonitor.class);

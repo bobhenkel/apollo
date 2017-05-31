@@ -52,7 +52,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <version>22.0</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -153,6 +153,11 @@
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-guice</artifactId>
             <version>3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
         </dependency>
 
         <!-- Test dependencies -->

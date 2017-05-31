@@ -1,19 +1,24 @@
 package io.logz.apollo;
 
 import com.google.inject.Injector;
+import io.logz.apollo.auth.PasswordManager;
+import io.logz.apollo.auth.User;
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.configuration.ApolloConfiguration;
-import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.scm.GithubConnector;
+import io.logz.apollo.dao.UserDao;
 import org.rapidoid.integrate.GuiceBeans;
 import org.rapidoid.integrate.Integrate;
+import org.rapidoid.security.Role;
 import org.rapidoid.setup.App;
+import org.rapidoid.setup.My;
 import org.rapidoid.setup.On;
+import org.rapidoid.u.U;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import static java.util.Objects.requireNonNull;
 
@@ -22,19 +27,23 @@ import static java.util.Objects.requireNonNull;
  */
 public class ApolloServer {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApolloServer.class);
+
     private final ApolloConfiguration configuration;
     private final Injector injector;
+    private final UserDao userDao;
 
     @Inject
-    public ApolloServer(ApolloConfiguration configuration, Injector injector) {
+    public ApolloServer(ApolloConfiguration configuration, Injector injector, UserDao userDao) {
         this.configuration = requireNonNull(configuration);
         this.injector = requireNonNull(injector);
+        this.userDao = requireNonNull(userDao);
     }
 
     @PostConstruct
     public void start() {
-        ApolloMyBatis.initialize(configuration);
-        GithubConnector.initialize(configuration);
+        registerLoginProvider();
+        registerRolesProvider();
 
         String[] args = new String[] {
                 "secret=" + configuration.getSecret(),
@@ -46,13 +55,45 @@ public class ApolloServer {
         On.changes().ignore();
         GuiceBeans beans = Integrate.guice(injector);
         App.register(beans);
-        App.bootstrap(args).auth();
+        App.run(args).auth();
     }
 
     @PreDestroy
     public void stop() {
         // Future cleanups..
         LoggerFactory.getLogger(ApolloServer.class).warn("wefwefnufiwbfpwiub");
+    }
+
+    private void registerLoginProvider() {
+        My.loginProvider((req, username, password) -> {
+            User requestedUser = userDao.getUser(username);
+            if (requestedUser == null) {
+                req.response().code(HttpStatus.UNAUTHORIZED);
+                return false;
+            }
+
+            if (PasswordManager.checkPassword(password, requestedUser.getHashedPassword())) {
+                return true;
+            } else {
+                req.response().code(HttpStatus.UNAUTHORIZED);
+                return false;
+            }
+        });
+    }
+
+    private void registerRolesProvider() {
+        My.rolesProvider((req, username) -> {
+            try {
+                if (userDao.getUser(username).isAdmin()) {
+                    return U.set(Role.ADMINISTRATOR);
+                }
+                return U.set(Role.ANYBODY);
+
+            } catch (Exception e) {
+                logger.error("Got exception while getting user roles! setting to ANYBODY", e);
+                return U.set(Role.ANYBODY);
+            }
+        });
     }
 
 }

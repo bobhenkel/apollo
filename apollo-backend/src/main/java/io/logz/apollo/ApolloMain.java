@@ -3,7 +3,10 @@ package io.logz.apollo;
 import com.netflix.governator.InjectorBuilder;
 import com.netflix.governator.LifecycleInjector;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.di.ApolloModule;
+import io.logz.apollo.di.ApolloMyBatisModule;
+import io.logz.apollo.scm.GithubConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +23,14 @@ public class ApolloMain {
             logger.info("Started apollo main");
             Runtime.getRuntime().addShutdownHook(new Thread(ApolloMain::shutdown));
             ApolloConfiguration configuration = ApolloConfiguration.parseConfigurationFromResources();
+            ApolloMyBatis.initialize(configuration);
+            GithubConnector.initialize(configuration);
+
             lifecycleInjector = InjectorBuilder.fromModules(
-                            new ApolloModule(configuration)
-                    ).createInjector();
+                    new ApolloModule(configuration),
+                    new ApolloMyBatisModule(configuration)
+            ).createInjector();
+
             lifecycleInjector.awaitTermination();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

@@ -1,6 +1,14 @@
 package io.logz.apollo.di;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.dao.DeployableVersionDao;
+import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.DeploymentGroupDao;
+import io.logz.apollo.dao.DeploymentPermissionDao;
+import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.ServiceDao;
+import io.logz.apollo.dao.UserDao;
+import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.DataSourceFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.flywaydb.core.Flyway;
@@ -17,19 +25,28 @@ public class ApolloMyBatisModule extends MyBatisModule {
     private final DataSource dataSource;
 
     public ApolloMyBatisModule(ApolloConfiguration configuration) {
-        this.dataSource = createDatasource(configuration);
+//        this.dataSource = createDatasource(configuration);
+        this.dataSource = ApolloMyBatis.getDataSource();
     }
 
     @Override
     protected void initialize() {
         init();
         migrateDatabase(dataSource);
-        bind(DataSource.class).toInstance(dataSource);
+
+        addMapperClass(DeployableVersionDao.class);
+        addMapperClass(DeploymentDao.class);
+        addMapperClass(DeploymentGroupDao.class);
+        addMapperClass(DeploymentPermissionDao.class);
+        addMapperClass(EnvironmentDao.class);
+        addMapperClass(ServiceDao.class);
+        addMapperClass(UserDao.class);
     }
 
     private void init() {
         environmentId("production");
 
+        bind(DataSource.class).toInstance(dataSource);
         bindTransactionFactoryType(JdbcTransactionFactory.class);
         bind(SqlSessionManagerProvider.class);
         bind(EnvironmentProvider.class);

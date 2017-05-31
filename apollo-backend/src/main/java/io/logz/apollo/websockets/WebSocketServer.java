@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
@@ -19,7 +18,6 @@ import javax.websocket.server.ServerContainer;
 /**
  * Created by roiravhon on 5/23/17.
  */
-@Singleton
 public class WebSocketServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
@@ -27,17 +25,22 @@ public class WebSocketServer {
     private final Server server;
 
     @Inject
-    public WebSocketServer(ApolloConfiguration apolloConfiguration) {
+    public WebSocketServer(ApolloConfiguration configuration, WebSocketAuthenticationFilter authenticationFilter) {
+        this.server = createWebsocketServer(configuration, authenticationFilter);
+    }
+
+    private Server createWebsocketServer(ApolloConfiguration configuration, WebSocketAuthenticationFilter authenticationFilter) {
         try {
-            server = new Server(apolloConfiguration.getWsPort());
+            Server server = new Server(configuration.getWsPort());
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-            context.addFilter(new FilterHolder(WebSocketAuthenticationFilter.class), "/*", null);
+            context.addFilter(new FilterHolder(authenticationFilter), "/*", null);
             server.setHandler(context);
 
             ServerContainer wsContainer = WebSocketServerContainerInitializer.configureContext(context);
-            wsContainer.setDefaultMaxSessionIdleTimeout(apolloConfiguration.getWsIdleTimeoutSeconds() * 1000);
+            wsContainer.setDefaultMaxSessionIdleTimeout(configuration.getWsIdleTimeoutSeconds() * 1000);
             wsContainer.addEndpoint(ContainerExecEndpoint.class);
 
+            return server;
         } catch (ServletException e) {
             throw new RuntimeException("Could not initialize WebSocket container!", e);
         } catch (DeploymentException e) {

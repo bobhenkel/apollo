@@ -1,10 +1,12 @@
 package io.logz.apollo.helpers;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.logz.apollo.ApolloServer;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.di.ApolloModule;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 
@@ -40,7 +42,8 @@ public class StandaloneApollo {
         apolloConfiguration.setApiPort(Common.getAvailablePort());
 
         // Start REST Server
-        server = new ApolloServer(apolloConfiguration, Guice.createInjector(new ApolloModule(apolloConfiguration)));
+        Injector injector = Guice.createInjector(new ApolloModule(apolloConfiguration));
+        server = new ApolloServer(apolloConfiguration, injector, injector.getInstance(UserDao.class));
         server.start();
 
         // Create Kubernetes monitor, but dont start it yet (usually will want to inject mock first)
@@ -48,10 +51,10 @@ public class StandaloneApollo {
     }
 
     public static StandaloneApollo getOrCreateServer() throws ScriptException, IOException, SQLException {
-
         if (instance == null) {
             instance = new StandaloneApollo();
         }
+
         return instance;
     }
 
