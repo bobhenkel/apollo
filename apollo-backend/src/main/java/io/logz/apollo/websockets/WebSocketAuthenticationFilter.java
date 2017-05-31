@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,6 +28,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Created by roiravhon on 5/23/17.
  */
+@Singleton
 public class WebSocketAuthenticationFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketAuthenticationFilter.class);

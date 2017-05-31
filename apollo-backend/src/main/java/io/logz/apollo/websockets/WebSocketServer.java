@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
@@ -18,6 +19,7 @@ import javax.websocket.server.ServerContainer;
 /**
  * Created by roiravhon on 5/23/17.
  */
+@Singleton
 public class WebSocketServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
@@ -60,10 +62,10 @@ public class WebSocketServer {
 
     @PreDestroy
     public void stop() {
+        logger.info("Stopping Jetty server");
         if (server.isStarted() || server.isStarted()) {
             try {
                 server.stop();
-
             } catch (Exception e) {
                 logger.warn("Could not stop Jetty server!", e);
             }

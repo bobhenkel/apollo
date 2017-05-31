@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -22,26 +23,27 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by roiravhon on 11/21/16.
  */
+@Singleton
 public class KubernetesMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesMonitor.class);
     private static final int TIMEOUT_TERMINATION = 60;
+    public static final String LOCAL_RUN_PROPERTY = "localrun";
+
     private final ApolloConfiguration apolloConfiguration;
     private final ScheduledExecutorService scheduledExecutorService;
-    private final boolean localrun;
 
     @Inject
     public KubernetesMonitor(ApolloConfiguration apolloConfiguration) {
         this.apolloConfiguration = apolloConfiguration;
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("kubernetes-monitor-%d").build();
         scheduledExecutorService = Executors.newScheduledThreadPool(1, namedThreadFactory);
-        this.localrun = Boolean.valueOf(System.getenv("localrun"));
     }
 
     @PostConstruct
     public void start() {
         try {
-            if (localrun) {
+            if (isLocalRun()) {
                 logger.info("Running in local-mode, kubernetes monitor thread is not up.");
                 return;
             }
@@ -56,7 +58,7 @@ public class KubernetesMonitor {
 
     @PreDestroy
     public void stop() {
-        if (localrun) return;
+        if (isLocalRun()) return;
 
         try {
             logger.info("Stopping kubernetes monitoring thread");
@@ -103,5 +105,9 @@ public class KubernetesMonitor {
                 logger.error("Got unexpected exception in the monitoring thread! swallow and moving on..", e);
             }
         }
+    }
+
+    private boolean isLocalRun() {
+        return Boolean.valueOf(System.getenv(LOCAL_RUN_PROPERTY)) || Boolean.valueOf(System.getProperty(LOCAL_RUN_PROPERTY));
     }
 }

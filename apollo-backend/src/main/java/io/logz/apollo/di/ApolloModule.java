@@ -1,8 +1,8 @@
 package io.logz.apollo.di;
 
 import com.google.inject.AbstractModule;
-import io.logz.apollo.ApolloMain;
-import io.logz.apollo.ApolloServer;
+import io.logz.apollo.ApolloApplication;
+import io.logz.apollo.rest.RestServer;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import io.logz.apollo.websockets.WebSocketServer;
@@ -26,13 +26,13 @@ public class ApolloModule extends AbstractModule {
         bind(ApolloConfiguration.class).toInstance(configuration);
         bind(KubernetesMonitor.class).asEagerSingleton();
         bind(WebSocketServer.class).asEagerSingleton();
-        bind(ApolloServer.class).asEagerSingleton();
+        bind(RestServer.class).asEagerSingleton();
 
         bindControllers();
     }
 
     private void bindControllers() {
-        Reflections reflections = new Reflections(ApolloMain.class.getPackage().getName());
+        Reflections reflections = new Reflections(ApolloApplication.class.getPackage().getName());
         Set<Class<?>> controllers = reflections.getTypesAnnotatedWith(Controller.class);
         controllers.forEach(this::bindAsEagerSingleton);
     }

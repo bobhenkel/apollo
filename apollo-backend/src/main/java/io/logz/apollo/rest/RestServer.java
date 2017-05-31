@@ -1,4 +1,4 @@
-package io.logz.apollo;
+package io.logz.apollo.rest;
 
 import com.google.inject.Injector;
 import io.logz.apollo.auth.PasswordManager;
@@ -25,16 +25,16 @@ import static java.util.Objects.requireNonNull;
 /**
  * Created by roiravhon on 11/22/16.
  */
-public class ApolloServer {
+public class RestServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApolloServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestServer.class);
 
     private final ApolloConfiguration configuration;
     private final Injector injector;
     private final UserDao userDao;
 
     @Inject
-    public ApolloServer(ApolloConfiguration configuration, Injector injector, UserDao userDao) {
+    public RestServer(ApolloConfiguration configuration, Injector injector, UserDao userDao) {
         this.configuration = requireNonNull(configuration);
         this.injector = requireNonNull(injector);
         this.userDao = requireNonNull(userDao);
@@ -54,14 +54,13 @@ public class ApolloServer {
         // Initialize the REST API server
         On.changes().ignore();
         GuiceBeans beans = Integrate.guice(injector);
-        App.register(beans);
         App.run(args).auth();
+        App.register(beans);
     }
 
     @PreDestroy
     public void stop() {
         // Future cleanups..
-        LoggerFactory.getLogger(ApolloServer.class).warn("wefwefnufiwbfpwiub");
     }
 
     private void registerLoginProvider() {
