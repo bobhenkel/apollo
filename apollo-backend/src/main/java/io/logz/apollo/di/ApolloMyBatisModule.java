@@ -3,6 +3,7 @@ package io.logz.apollo.di;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.database.DataSourceFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.flywaydb.core.Flyway;
 import org.mybatis.guice.MyBatisModule;
 import org.mybatis.guice.configuration.ConfigurationProvider;
 import org.mybatis.guice.environment.EnvironmentProvider;
@@ -22,6 +23,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
     @Override
     protected void initialize() {
         init();
+        migrateDatabase(dataSource);
         bind(DataSource.class).toInstance(dataSource);
     }
 
@@ -44,6 +46,12 @@ public class ApolloMyBatisModule extends MyBatisModule {
         String password = configuration.getDbPassword();
         String schema = configuration.getDbSchema();
         return DataSourceFactory.create(host, port, user, password, schema);
+    }
+
+    private void migrateDatabase(DataSource dataSource) {
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
+        flyway.migrate();
     }
 
 }
