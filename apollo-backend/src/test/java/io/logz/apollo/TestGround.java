@@ -1,36 +1,10 @@
 package io.logz.apollo;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.ClientPodResource;
-import io.fabric8.kubernetes.client.dsl.internal.PodOperationsImpl;
-import io.logz.apollo.auth.User;
-import io.logz.apollo.dao.DeployableVersionDao;
-import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.dao.ServiceDao;
-import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.helpers.ModelsGenerator;
-import io.logz.apollo.helpers.StandaloneApollo;
-import io.logz.apollo.kubernetes.ApolloToKubernetes;
-import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
-import io.logz.apollo.models.DeployableVersion;
-import io.logz.apollo.models.Deployment;
-import io.logz.apollo.models.Environment;
-import io.logz.apollo.models.Service;
 import org.junit.Test;
 
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by roiravhon on 1/15/17.

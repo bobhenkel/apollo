@@ -111,12 +111,4 @@ public class ApolloClient {
         return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
     }
 
-    public boolean isApolloHealthy() {
-        try {
-            return genericApolloClient.getResult("/health", new TypeReference<String>() {}).equals("ok");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
 }

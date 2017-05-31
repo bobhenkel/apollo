@@ -6,8 +6,6 @@ import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.database.ApolloMyBatis.ApolloMyBatisSession;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
@@ -25,6 +23,7 @@ public class RealDeploymentGenerator {
     private final String DEFAULT_ENVIRONMENT_VARIABLE_NAME = "ENV";
     private final String DEFAULT_ENVIRONMENT_VARIABLE_VALUE = "enval";
 
+    private final StandaloneApollo standaloneApollo;
     private final Environment environment;
     private final Service service;
     private final DeployableVersion deployableVersion;
@@ -32,14 +31,13 @@ public class RealDeploymentGenerator {
     private final Deployment deployment;
 
     public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient) {
-
-        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-
-            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
-            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
-            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
-            DeployableVersionDao deployableVersionDao = apolloMyBatisSession.getDao(DeployableVersionDao.class);
-            UserDao userDao = apolloMyBatisSession.getDao(UserDao.class);
+        try {
+            standaloneApollo = StandaloneApollo.getOrCreateServer();
+            DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
+            EnvironmentDao environmentDao = standaloneApollo.getInstance(EnvironmentDao.class);
+            ServiceDao serviceDao = standaloneApollo.getInstance(ServiceDao.class);
+            DeployableVersionDao deployableVersionDao = standaloneApollo.getInstance(DeployableVersionDao.class);
+            UserDao userDao = standaloneApollo.getInstance(UserDao.class);
 
             // Create all models in DB
             environment = ModelsGenerator.createEnvironment();
@@ -62,6 +60,8 @@ public class RealDeploymentGenerator {
             deployment.setSourceVersion("abc" + Common.randomStr(5));
             deployment.setUserEmail(user.getUserEmail());
             deploymentDao.addDeployment(deployment);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -106,10 +106,8 @@ public class RealDeploymentGenerator {
     }
 
     public void updateDeploymentStatus(Deployment.DeploymentStatus deploymentStatus) {
-        try (ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            DeploymentDao deploymentDao = apolloMyBatisSession.getDao(DeploymentDao.class);
-            deploymentDao.updateDeploymentStatus(deployment.getId(), deploymentStatus);
-        }
+        DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
+        deploymentDao.updateDeploymentStatus(deployment.getId(), deploymentStatus);
     }
 
     private String getDeploymentKubernetesYaml(String imageName, String extraLabelKey, String extraLabelValue) {

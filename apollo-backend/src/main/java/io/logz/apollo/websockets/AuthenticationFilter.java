@@ -29,14 +29,14 @@ import static java.util.Objects.requireNonNull;
  * Created by roiravhon on 5/23/17.
  */
 @Singleton
-public class WebSocketAuthenticationFilter implements Filter {
+public class AuthenticationFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketAuthenticationFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     private final DeploymentPermissionDao deploymentPermissionDao;
 
     @Inject
-    public WebSocketAuthenticationFilter(DeploymentPermissionDao deploymentPermissionDao) {
+    public AuthenticationFilter(DeploymentPermissionDao deploymentPermissionDao) {
         this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
     }
 

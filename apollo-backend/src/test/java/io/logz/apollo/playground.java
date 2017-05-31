@@ -1,28 +1,14 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.PermissionsValidator;
-import io.logz.apollo.auth.User;
-import io.logz.apollo.clients.ApolloClient;
-import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
-import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
-import io.logz.apollo.helpers.Common;
-import io.logz.apollo.helpers.ModelsGenerator;
+import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Created by roiravhon on 1/26/17.
@@ -31,7 +17,8 @@ public class playground {
 
     @Ignore
     @Test
-    public void tahat() {
+    public void tahat() throws Exception {
+        StandaloneApollo standaloneApollo = StandaloneApollo.getOrCreateServer();
 
 //        DeploymentPermission deploymentPermission = new DeploymentPermission();
 //        deploymentPermission.setId(1);
@@ -59,20 +46,15 @@ public class playground {
 //
 //        System.out.println(mavet.get());
 
-        ApolloConfiguration apolloConfiguration = ApolloConfiguration.parseConfigurationFromResources();
-        ApolloMyBatis.initialize(apolloConfiguration);
+        KubernetesHandlerFactory kubernetesHandlerFactory = standaloneApollo.getInstance(KubernetesHandlerFactory.class);
+        EnvironmentDao environmentDao = standaloneApollo.getInstance(EnvironmentDao.class);
+        ServiceDao serviceDao = standaloneApollo.getInstance(ServiceDao.class);
 
-        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
-            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+        Environment environment = environmentDao.getEnvironment(2);
+        Service service = serviceDao.getService(3);
 
-            Environment environment = environmentDao.getEnvironment(2);
-            Service service = serviceDao.getService(3);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
-            KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
-
-            System.out.println(kubernetesHandler.getDeploymentLogs(environment, service));
-        }
-
+        System.out.println(kubernetesHandler.getDeploymentLogs(environment, service));
     }
 }

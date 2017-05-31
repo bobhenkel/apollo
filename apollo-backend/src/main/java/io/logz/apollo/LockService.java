@@ -1,37 +1,30 @@
 package io.logz.apollo;
 
-import io.logz.apollo.models.Deployment;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import javax.inject.Singleton;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by roiravhon on 1/17/17.
  */
+@Singleton
 public class LockService {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LockService.class);
-    private static LockService instance;
-    private HashMap<String, Boolean> lockMap;
+    private static final Logger logger = LoggerFactory.getLogger(LockService.class);
+    private Map<String, Boolean> locks;
 
-    private LockService() {
-        lockMap = new HashMap<>();
+    public LockService() {
+        locks = new ConcurrentHashMap<>();
     }
 
-    private synchronized static LockService getInstance() {
-        if (instance == null) {
-            instance = new LockService();
-        }
-
-        return instance;
-    }
-
-    public static synchronized boolean getAndObtainLock(String lockName) {
-        LockService lockService = getInstance();
-        Boolean lockStatus = lockService.lockMap.get(lockName);
+    public synchronized boolean getAndObtainLock(String lockName) {
+        Boolean lockStatus = locks.get(lockName);
         if (lockStatus == null || !lockStatus) {
             logger.debug("Got request to lock for key {}, granted.", lockName);
-            lockService.lockMap.put(lockName, true);
+            locks.put(lockName, true);
             return true;
 
         } else {
@@ -40,22 +33,21 @@ public class LockService {
         }
     }
 
-    public static synchronized void releaseLock(String lockName) {
-        LockService lockService = getInstance();
-        Boolean lockStatus = lockService.lockMap.get(lockName);
+    public synchronized void releaseLock(String lockName) {
+        Boolean lockStatus = locks.get(lockName);
         if (lockStatus == null) {
             logger.debug("Got request to release a lock for key {}, but its not set. Ignoring..", lockName);
         } else {
             logger.debug("Got request to release a lock for key {}. released.", lockName);
-            lockService.lockMap.put(lockName, false);
+            locks.put(lockName, false);
         }
     }
 
-    public static String getDeploymentLockName(int serviceId, int environmentId) {
+    public String getDeploymentLockName(int serviceId, int environmentId) {
         return "lock-service-" + serviceId + "-environment-" + environmentId;
     }
 
-    public static String getDeploymentCancelationName(int deploymentId) {
+    public String getDeploymentCancelationName(int deploymentId) {
         return "lock-deployment-cancelation-id-" + deploymentId;
     }
 }

@@ -4,6 +4,7 @@ import io.logz.apollo.configuration.ApolloConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.websocket.api.InvalidWebSocketException;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,11 @@ import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
+import javax.websocket.server.ServerEndpoint;
+import javax.websocket.server.ServerEndpointConfig;
+import java.util.Arrays;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Created by roiravhon on 5/23/17.
@@ -24,14 +30,17 @@ public class WebSocketServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
 
+    private final GuiceConfigurator configurator;
     private final Server server;
 
     @Inject
-    public WebSocketServer(ApolloConfiguration configuration, WebSocketAuthenticationFilter authenticationFilter) {
+    public WebSocketServer(ApolloConfiguration configuration, AuthenticationFilter authenticationFilter,
+                           GuiceConfigurator configurator) {
+        this.configurator = requireNonNull(configurator);
         this.server = createWebsocketServer(configuration, authenticationFilter);
     }
 
-    private Server createWebsocketServer(ApolloConfiguration configuration, WebSocketAuthenticationFilter authenticationFilter) {
+    private Server createWebsocketServer(ApolloConfiguration configuration, AuthenticationFilter authenticationFilter) {
         try {
             Server server = new Server(configuration.getWsPort());
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
@@ -40,7 +49,7 @@ public class WebSocketServer {
 
             ServerContainer wsContainer = WebSocketServerContainerInitializer.configureContext(context);
             wsContainer.setDefaultMaxSessionIdleTimeout(configuration.getWsIdleTimeoutSeconds() * 1000);
-            wsContainer.addEndpoint(ContainerExecEndpoint.class);
+            wsContainer.addEndpoint(createEndpointConfig(ContainerExecEndpoint.class));
 
             return server;
         } catch (ServletException e) {
@@ -73,4 +82,20 @@ public class WebSocketServer {
             logger.warn("Jetty already stopped, or did not start. can't stop!");
         }
     }
+
+    private ServerEndpointConfig createEndpointConfig(Class<?> endpointClass) throws DeploymentException {
+        ServerEndpoint annotation = endpointClass.getAnnotation(ServerEndpoint.class);
+        if (annotation == null) {
+            throw new InvalidWebSocketException("Unsupported WebSocket object, missing @" +
+                    ServerEndpoint.class + " annotation");
+        }
+
+        return ServerEndpointConfig.Builder.create(endpointClass, annotation.value())
+                .subprotocols(Arrays.asList(annotation.subprotocols()))
+                .decoders(Arrays.asList(annotation.decoders()))
+                .encoders(Arrays.asList(annotation.encoders()))
+                .configurator(configurator)
+                .build();
+    }
+
 }

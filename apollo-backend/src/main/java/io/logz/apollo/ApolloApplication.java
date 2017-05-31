@@ -4,10 +4,8 @@ import com.google.inject.Injector;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import io.logz.apollo.configuration.ApolloConfiguration;
-import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.di.ApolloModule;
 import io.logz.apollo.di.ApolloMyBatisModule;
-import io.logz.apollo.scm.GithubConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,6 @@ public class ApolloApplication {
     public void start() {
         try {
             logger.info("Starting apollo..");
-            ApolloMyBatis.initialize(configuration);
 
             injector = LifecycleInjector.builder().withModules(
                     new ApolloModule(configuration),

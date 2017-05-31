@@ -8,7 +8,6 @@ import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.database.DataSourceFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.flywaydb.core.Flyway;
@@ -25,8 +24,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
     private final DataSource dataSource;
 
     public ApolloMyBatisModule(ApolloConfiguration configuration) {
-//        this.dataSource = createDatasource(configuration);
-        this.dataSource = ApolloMyBatis.getDataSource();
+        this.dataSource = createDatasource(configuration);
     }
 
     @Override

@@ -3,15 +3,9 @@ package io.logz.apollo.helpers;
 import com.google.gson.Gson;
 import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.User;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
-import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.UserDao;
-import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
-import io.logz.apollo.models.DeployableVersion;
-import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 
 import javax.script.ScriptException;
@@ -40,13 +34,6 @@ public class Common {
         socket.close();
 
         return port;
-    }
-
-    public static void registerUserInDb(User user) {
-        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
-            UserDao userDao = apolloMyBatisSession.getDao(UserDao.class);
-            userDao.addUser(user);
-        }
     }
 
     public static String generateJson(String... keyValuePairs ) {

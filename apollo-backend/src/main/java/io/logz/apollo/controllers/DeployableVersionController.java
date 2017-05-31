@@ -105,7 +105,7 @@ public class DeployableVersionController {
     }
 
     private String getRepoNameFromRepositoryUrl(String githubRepositoryUrl) {
-        return githubRepositoryUrl.replaceFirst("https:\\/\\/github.com\\/", "");
+        return githubRepositoryUrl.replaceFirst("https?://github.com/", "");
     }
 
 }

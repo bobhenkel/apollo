@@ -27,11 +27,14 @@ public class StatusController {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
+    private final KubernetesHandlerFactory kubernetesHandlerFactory;
     private final EnvironmentDao environmentDao;
     private final ServiceDao serviceDao;
 
     @Inject
-    public StatusController(EnvironmentDao environmentDao, ServiceDao serviceDao) {
+    public StatusController(KubernetesHandlerFactory kubernetesHandlerFactory, EnvironmentDao environmentDao,
+                            ServiceDao serviceDao) {
+        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
         this.environmentDao = requireNonNull(environmentDao);
         this.serviceDao = requireNonNull(serviceDao);
     }
@@ -43,7 +46,7 @@ public class StatusController {
 
         environmentDao.getAllEnvironments().forEach(environment -> {
             try {
-                kubernetesDeploymentStatusList.add(KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
+                kubernetesDeploymentStatusList.add(kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
             } catch (Exception e) {
                 logger.warn("Could not get status of service {} on environment {}! trying others..", id, environment.getId(), e);
             }
@@ -56,7 +59,7 @@ public class StatusController {
     public List<KubernetesDeploymentStatus> getCurrentEnvironmentStatus(int id) {
         List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
         Environment environment = environmentDao.getEnvironment(id);
-        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
         serviceDao.getAllServices().forEach(service -> {
             try {
@@ -74,7 +77,7 @@ public class StatusController {
     public String getLogs(int environmentId, int serviceId) {
         Environment environment = environmentDao.getEnvironment(environmentId);
         Service service = serviceDao.getService(serviceId);
-        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
         return kubernetesHandler.getDeploymentLogs(environment, service);
     }

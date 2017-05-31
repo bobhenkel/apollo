@@ -20,10 +20,12 @@ import static java.util.Objects.requireNonNull;
 @Controller
 public class KubernetesActionsController {
 
+    private final KubernetesHandlerFactory kubernetesHandlerFactory;
     private final EnvironmentDao environmentDao;
 
     @Inject
-    public KubernetesActionsController(EnvironmentDao environmentDao) {
+    public KubernetesActionsController(KubernetesHandlerFactory kubernetesHandlerFactory, EnvironmentDao environmentDao) {
+        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
         this.environmentDao = requireNonNull(environmentDao);
     }
 
@@ -37,7 +39,7 @@ public class KubernetesActionsController {
             return;
         }
 
-        KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).restartPod(podName);
+        kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).restartPod(podName);
         ControllerCommon.assignJsonResponseToReq(req, HttpStatus.OK, "Ok");
     }
 

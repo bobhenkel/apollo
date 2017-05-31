@@ -16,6 +16,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +122,8 @@ public class GenericApolloClient {
     }
 
     private String getFullUrlWithToken(String url) {
-        return "http://localhost:" + apolloConfiguration.getApiPort() + url + "?_token=" + token;
+        String tokenPostfix = StringUtils.isNotBlank(token) ? "?_token=" + token : "";
+        return "http://localhost:" + apolloConfiguration.getApiPort() + url + tokenPostfix;
     }
 
     private String generateLoginJson() {

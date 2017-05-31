@@ -4,7 +4,6 @@ import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.logz.apollo.common.QueryStringParser;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
-import io.logz.apollo.database.ApolloMyBatis;
 import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
 import io.logz.apollo.models.Environment;
@@ -12,6 +11,7 @@ import io.logz.apollo.models.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -27,10 +27,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Created by roiravhon on 5/23/17.
  */
-@SuppressWarnings("ALL")
 @ServerEndpoint(value = "/exec/pod/{podName}/container/{containerName}")
 public class ContainerExecEndpoint {
 
@@ -39,40 +40,44 @@ public class ContainerExecEndpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerExecEndpoint.class);
     private final ExecWebSocketSessionStore execWebSocketSessionStore;
+    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final EnvironmentDao environmentDao;
+    private final ServiceDao serviceDao;
 
-    public ContainerExecEndpoint() {
-        execWebSocketSessionStore = ExecWebSocketSessionStore.getInstance();
+    @Inject
+    public ContainerExecEndpoint(ExecWebSocketSessionStore execWebSocketSessionStore,
+                                 KubernetesHandlerFactory kubernetesHandlerFactory,
+                                 EnvironmentDao environmentDao, ServiceDao serviceDao) {
+        this.execWebSocketSessionStore = requireNonNull(execWebSocketSessionStore);
+        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+        this.environmentDao = requireNonNull(environmentDao);
+        this.serviceDao = requireNonNull(serviceDao);
     }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("podName") String podName, @PathParam("containerName") String containerName) {
-
         int environmentId = QueryStringParser.getIntFromQueryString(session.getQueryString(), QUERY_STRING_ENVIRONMENT_KEY);
         int serviceId = QueryStringParser.getIntFromQueryString(session.getQueryString(), QUERY_STRING_SERVICE_KEY);
 
-        try (ApolloMyBatis.ApolloMyBatisSession apolloMyBatisSession = ApolloMyBatis.getSession()) {
+        Environment environment = environmentDao.getEnvironment(environmentId);
+        Service service = serviceDao.getService(serviceId);
 
-            EnvironmentDao environmentDao = apolloMyBatisSession.getDao(EnvironmentDao.class);
-            ServiceDao serviceDao = apolloMyBatisSession.getDao(ServiceDao.class);
+        // Get default shell
+        String defaultShell = Optional.ofNullable(service.getDefaultShell()).orElse("/bin/bash");
 
-            Environment environment = environmentDao.getEnvironment(environmentId);
-            Service service = serviceDao.getService(serviceId);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
-            // Get default shell
-            String defaultShell = Optional.ofNullable(service.getDefaultShell()).orElse("/bin/bash");
+        logger.info("Opening ExecWatch to container {} in pod {} in environment {} related to service {}",
+                containerName, podName, environment.getName(), service.getName());
 
-            KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        ExecWatch execWatch = kubernetesHandler.getExecWatch(podName, containerName,defaultShell);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
 
-            logger.info("Opening ExecWatch to container {} in pod {} in environment {} related to service {}", containerName, podName, environment.getName(), service.getName());
-            ExecWatch execWatch = kubernetesHandler.getExecWatch(podName, containerName,defaultShell);
-            ExecutorService executor = Executors.newFixedThreadPool(2);
+        SessionExecModel sessionExecModel = new SessionExecModel(execWatch, executor);
+        openReaderThreads(session, sessionExecModel);
 
-            SessionExecModel sessionExecModel = new SessionExecModel(execWatch, executor);
-            openReaderThreads(session, sessionExecModel);
-
-            // Initialize the ExecWatch against kubernetes handler
-            execWebSocketSessionStore.addSession(session, sessionExecModel);
-        }
+        // Initialize the ExecWatch against kubernetes handler
+        execWebSocketSessionStore.addSession(session, sessionExecModel);
     }
 
     @OnClose
@@ -85,7 +90,7 @@ public class ContainerExecEndpoint {
     }
 
     @OnMessage
-    public void onMessageRecieved(Session session, String command) {
+    public void onMessageReceived(Session session, String command) {
         SessionExecModel sessionModel = execWebSocketSessionStore.getSessionExecModel(session);
         ExecWatch execWatch = sessionModel.getExecWatch();
 

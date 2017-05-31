@@ -4,40 +4,37 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.logz.apollo.models.Environment;
 
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Created by roiravhon on 2/2/17.
  */
+@Singleton
 public class KubernetesHandlerFactory {
 
-    private static KubernetesHandlerFactory instance;
-    private Map<Integer, KubernetesHandler> kubernetesHandlerMap;
+    private final ApolloToKubernetesFactory apolloToKubernetesFactory;
+    private final Map<Integer, KubernetesHandler> kubernetesHandlerMap;
 
-    private KubernetesHandlerFactory() {
-        kubernetesHandlerMap = new HashMap<>();
+    @Inject
+    public KubernetesHandlerFactory(ApolloToKubernetesFactory apolloToKubernetesFactory) {
+        this.apolloToKubernetesFactory = requireNonNull(apolloToKubernetesFactory);
+        this.kubernetesHandlerMap = new ConcurrentHashMap<>();
     }
 
-    private static synchronized KubernetesHandlerFactory getInstance() {
-
-        if (instance == null) {
-            instance = new KubernetesHandlerFactory();
-        }
-
-        return instance;
-    }
-
-    public static KubernetesHandler getOrCreateKubernetesHandler(Environment environment) {
-
-        KubernetesHandlerFactory instance = getInstance();
-        return instance.kubernetesHandlerMap.computeIfAbsent(environment.getId(), key -> new KubernetesHandler(environment));
+    public KubernetesHandler getOrCreateKubernetesHandler(Environment environment) {
+        return kubernetesHandlerMap.computeIfAbsent(environment.getId(),
+                key -> new KubernetesHandler(apolloToKubernetesFactory, environment));
     }
 
     @VisibleForTesting
-    public static KubernetesHandler getOrCreateKubernetesHandlerWithSpecificClient(Environment environment, KubernetesClient kubernetesClient) {
-
-        KubernetesHandlerFactory instance = getInstance();
-        return instance.kubernetesHandlerMap.computeIfAbsent(environment.getId(), key -> new KubernetesHandler(environment, kubernetesClient));
+    public KubernetesHandler getOrCreateKubernetesHandlerWithSpecificClient(Environment environment, KubernetesClient kubernetesClient) {
+        return kubernetesHandlerMap.computeIfAbsent(environment.getId(),
+                key -> new KubernetesHandler(apolloToKubernetesFactory, kubernetesClient, environment));
     }
+
 }

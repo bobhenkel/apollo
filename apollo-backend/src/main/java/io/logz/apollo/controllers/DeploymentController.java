@@ -39,18 +39,23 @@ public class DeploymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
 
+    private final KubernetesHandlerFactory kubernetesHandlerFactory;
     private final DeploymentPermissionDao deploymentPermissionDao;
     private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
     private final ServiceDao serviceDao;
+    private final LockService lockService;
 
     @Inject
-    public DeploymentController(DeploymentPermissionDao deploymentPermissionDao, EnvironmentDao environmentDao,
-                                DeploymentDao deploymentDao, ServiceDao serviceDao) {
+    public DeploymentController(KubernetesHandlerFactory kubernetesHandlerFactory,
+                                DeploymentPermissionDao deploymentPermissionDao, EnvironmentDao environmentDao,
+                                DeploymentDao deploymentDao, ServiceDao serviceDao, LockService lockService) {
+        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
         this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
         this.serviceDao = requireNonNull(serviceDao);
+        this.lockService = requireNonNull(lockService);
     }
 
     @LoggedIn
@@ -72,7 +77,7 @@ public class DeploymentController {
         Deployment deployment = deploymentDao.getDeployment(id);
         Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
         Service service = serviceDao.getService(deployment.getServiceId());
-        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
 
         return kubernetesHandler.getDeploymentLogs(environment, service);
     }
@@ -106,7 +111,7 @@ public class DeploymentController {
             // Get the current commit sha from kubernetes so we can revert if necessary
             Environment environment = environmentDao.getEnvironment(environmentId);
             Service service = serviceDao.getService(serviceId);
-            KubernetesDeploymentStatus kubernetesDeploymentStatus = KubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
 
             if (kubernetesDeploymentStatus != null)
                 sourceVersion = kubernetesDeploymentStatus.getGitCommitSha();
@@ -130,8 +135,8 @@ public class DeploymentController {
             return;
         }
 
-        String lockName = LockService.getDeploymentLockName(serviceId, environmentId);
-        if (!LockService.getAndObtainLock(lockName)) {
+        String lockName = lockService.getDeploymentLockName(serviceId, environmentId);
+        if (!lockService.getAndObtainLock(lockName)) {
             logger.warn("A deployment request of this sort is currently being run");
             assignJsonResponseToReq(req, HttpStatus.TOO_MANY_REQUESTS, "A deployment request is currently running for this service and environment! Wait until its done");
             return;
@@ -152,7 +157,6 @@ public class DeploymentController {
                         runningDeployment.get().getUserEmail());
 
                 assignJsonResponseToReq(req, HttpStatus.CONFLICT, "There is an on-going deployment for this service in this environment");
-                ;
                 return;
             }
 
@@ -169,7 +173,7 @@ public class DeploymentController {
             deploymentDao.addDeployment(newDeployment);
             assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployment);
         } finally {
-            LockService.releaseLock(lockName);
+            lockService.releaseLock(lockName);
         }
 
     }
@@ -177,10 +181,9 @@ public class DeploymentController {
     @LoggedIn
     @DELETE("/deployment/{id}")
     public void cancelDeployment(int id, Req req) {
-
-        String lockName = LockService.getDeploymentCancelationName(id);
+        String lockName = lockService.getDeploymentCancelationName(id);
         try {
-            if (!LockService.getAndObtainLock(lockName)) {
+            if (!lockService.getAndObtainLock(lockName)) {
                 logger.warn("A deployment cancel request is currently running for this deployment! Wait until its done");
                 assignJsonResponseToReq(req, HttpStatus.TOO_MANY_REQUESTS, "A deployment cancel request is currently running for this deployment! Wait until its done");
                 return;
@@ -205,9 +208,8 @@ public class DeploymentController {
                 logger.warn("Deployment is in status {}, can't cancel it now!", deployment.getStatus());
                 assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Can't cancel the deployment as it is not in a state that's allows canceling");
             }
-        }
-        finally {
-            LockService.releaseLock(lockName);
+        } finally {
+            lockService.releaseLock(lockName);
         }
     }
 }

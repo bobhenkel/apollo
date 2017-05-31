@@ -1,35 +1,53 @@
 package io.logz.apollo.kubernetes;
 
+import io.logz.apollo.dao.DeployableVersionDao;
+import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.ServiceDao;
+import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
 
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Created by roiravhon on 2/2/17.
  */
+@Singleton
 public class ApolloToKubernetesFactory {
 
-    private static ApolloToKubernetesFactory instance;
-    private Map<Integer, ApolloToKubernetes> apolloToKubernetesMap;
+    private final Map<Integer, ApolloToKubernetes> mappers;
 
-    private ApolloToKubernetesFactory() {
-        apolloToKubernetesMap = new HashMap<>();
+    private final DeployableVersionDao deployableVersionDao;
+    private final EnvironmentDao environmentDao;
+    private final DeploymentDao deploymentDao;
+    private final ServiceDao serviceDao;
+
+    @Inject
+    public ApolloToKubernetesFactory(DeployableVersionDao deployableVersionDao, EnvironmentDao environmentDao,
+                                      DeploymentDao deploymentDao, ServiceDao serviceDao) {
+        this.mappers = new ConcurrentHashMap<>();
+        this.deployableVersionDao = requireNonNull(deployableVersionDao);
+        this.environmentDao = requireNonNull(environmentDao);
+        this.deploymentDao = requireNonNull(deploymentDao);
+        this.serviceDao = requireNonNull(serviceDao);
     }
 
-    private static synchronized ApolloToKubernetesFactory getInstance() {
-
-        if (instance == null) {
-            instance = new ApolloToKubernetesFactory();
-        }
-
-        return instance;
+    public ApolloToKubernetes getOrCreateApolloToKubernetes(Deployment deployment) {
+        return mappers.computeIfAbsent(deployment.getId(), key -> createMapper(deployment));
     }
 
-    public static ApolloToKubernetes getOrCreateApolloToKubernetes(Deployment deployment) {
+    private ApolloToKubernetes createMapper(Deployment deployment) {
+        DeployableVersion deployableVersion = deployableVersionDao.getDeployableVersion(deployment.getDeployableVersionId());
+        Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
+        Service service = serviceDao.getService(deployment.getServiceId());
 
-        ApolloToKubernetesFactory instance = getInstance();
-        return instance.apolloToKubernetesMap.computeIfAbsent(deployment.getId(), key -> new ApolloToKubernetes(deployment));
+        return new ApolloToKubernetes(deploymentDao, deployableVersion, environment, deployment, service);
     }
 }

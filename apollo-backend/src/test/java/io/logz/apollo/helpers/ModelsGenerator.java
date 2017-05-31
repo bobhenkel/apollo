@@ -1,8 +1,8 @@
 package io.logz.apollo.helpers;
 
 import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
@@ -32,7 +32,7 @@ public class ModelsGenerator {
     public static DeployableVersion createDeployableVersion(Service relatedService) {
         DeployableVersion testDeployableVersion = new DeployableVersion();
         testDeployableVersion.setGitCommitSha("abc129aed837f6" + Common.randomStr(5));
-        testDeployableVersion.setGithubRepositoryUrl("http://github/logzio/" + Common.randomStr(5));
+        testDeployableVersion.setGithubRepositoryUrl("http://github.com/logzio/" + Common.randomStr(5));
         testDeployableVersion.setServiceId(relatedService.getId());
 
         return testDeployableVersion;

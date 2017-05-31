@@ -4,6 +4,7 @@ import io.logz.apollo.ApolloApplication;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 
 import javax.script.ScriptException;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 public class StandaloneApollo {
 
     private static StandaloneApollo instance;
+    private final ApolloApplication apolloApplication;
     private final KubernetesMonitor kubernetesMonitor;
 
     private ApolloConfiguration apolloConfiguration;
@@ -37,12 +39,12 @@ public class StandaloneApollo {
         apolloConfiguration.setApiPort(Common.getAvailablePort());
 
         // Start apollo
-        ApolloApplication application = new ApolloApplication(apolloConfiguration);
-        application.start();
+        apolloApplication = new ApolloApplication(apolloConfiguration);
+        apolloApplication.start();
 
         // Get Kubernetes monitor, the monitor is stopped by default in tests because usually will want to inject mock first
-        kubernetesMonitor = application.getInjector().getInstance(KubernetesMonitor.class);
-        Runtime.getRuntime().addShutdownHook(new Thread(application::shutdown));
+        kubernetesMonitor = apolloApplication.getInjector().getInstance(KubernetesMonitor.class);
+        Runtime.getRuntime().addShutdownHook(new Thread(apolloApplication::shutdown));
     }
 
     public static StandaloneApollo getOrCreateServer() throws ScriptException, IOException, SQLException {
@@ -62,7 +64,13 @@ public class StandaloneApollo {
         return new ApolloTestClient(apolloConfiguration);
     }
 
-    public ApolloTestAdminClient createTestAdminClient() {
-        return new ApolloTestAdminClient(apolloConfiguration);
+    public <T> T getInstance(Class<T> clazz) {
+        return apolloApplication.getInjector().getInstance(clazz);
     }
+
+    public ApolloTestAdminClient createTestAdminClient() {
+        UserDao userDao = getInstance(UserDao.class);
+        return new ApolloTestAdminClient(apolloConfiguration, userDao);
+    }
+
 }
