@@ -34,7 +34,6 @@ public class ApolloApplication {
         try {
             logger.info("Starting apollo..");
             ApolloMyBatis.initialize(configuration);
-            GithubConnector.initialize(configuration);
 
             injector = LifecycleInjector.builder().withModules(
                     new ApolloModule(configuration),

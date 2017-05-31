@@ -3,7 +3,6 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.models.DeployableVersion;
-import io.logz.apollo.scm.CommitDetails;
 import io.logz.apollo.scm.GithubConnector;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
@@ -13,6 +12,7 @@ import org.rapidoid.security.annotation.LoggedIn;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
 import static java.util.Objects.requireNonNull;
@@ -24,10 +24,12 @@ import static java.util.Objects.requireNonNull;
 public class DeployableVersionController {
 
     private final DeployableVersionDao deployableVersionDao;
+    private final GithubConnector githubConnector;
 
     @Inject
-    public DeployableVersionController(DeployableVersionDao deployableVersionDao) {
+    public DeployableVersionController(DeployableVersionDao deployableVersionDao, GithubConnector githubConnector) {
         this.deployableVersionDao = requireNonNull(deployableVersionDao);
+        this.githubConnector = requireNonNull(githubConnector);
     }
 
     @LoggedIn
@@ -60,19 +62,21 @@ public class DeployableVersionController {
         DeployableVersion referenceDeployableVersion = deployableVersionDao.getDeployableVersion(deployableVersionId);
         String actualRepo = getRepoNameFromRepositoryUrl(referenceDeployableVersion.getGithubRepositoryUrl());
 
-        String latestSha = GithubConnector.getLatestCommitShaOnBranch(actualRepo, branchName);
+        Optional<String> latestSha = githubConnector.getLatestCommitShaOnBranch(actualRepo, branchName);
 
-        if (latestSha == null) {
+        if (!latestSha.isPresent()) {
             assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Did not found latest commit on that branch");
             throw new RuntimeException();
+        }
+
+        DeployableVersion deployableVersionFromSha = deployableVersionDao.getDeployableVersionFromSha(latestSha.get(),
+                referenceDeployableVersion.getServiceId());
+
+        if (deployableVersionFromSha == null) {
+            assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Did not found deployable version matching the sha " + latestSha);
+            throw new RuntimeException();
         } else {
-            DeployableVersion deployableVersionFromSha = deployableVersionDao.getDeployableVersionFromSha(latestSha, referenceDeployableVersion.getServiceId());
-            if (deployableVersionFromSha == null) {
-                assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Did not found deployable version matching the sha " + latestSha);
-                throw new RuntimeException();
-            } else {
-                return deployableVersionFromSha;
-            }
+            return deployableVersionFromSha;
         }
     }
 
@@ -82,20 +86,19 @@ public class DeployableVersionController {
 
         // Getting the commit details
         String actualRepo = getRepoNameFromRepositoryUrl(githubRepositoryUrl);
-        CommitDetails commitDetails = GithubConnector.getCommitDetails(actualRepo, gitCommitSha);
 
         newDeployableVersion.setGitCommitSha(gitCommitSha);
         newDeployableVersion.setGithubRepositoryUrl(githubRepositoryUrl);
         newDeployableVersion.setServiceId(serviceId);
 
         // Not failing if this is null
-        if (commitDetails != null) {
+        githubConnector.getCommitDetails(actualRepo, gitCommitSha).ifPresent(commitDetails -> {
             newDeployableVersion.setCommitUrl(commitDetails.getCommitUrl());
             newDeployableVersion.setCommitMessage(commitDetails.getCommitMessage());
             newDeployableVersion.setCommitDate(commitDetails.getCommitDate());
             newDeployableVersion.setCommitterAvatarUrl(commitDetails.getCommitterAvatarUrl());
             newDeployableVersion.setCommitterName(commitDetails.getCommitterName());
-        }
+        });
 
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
         assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
