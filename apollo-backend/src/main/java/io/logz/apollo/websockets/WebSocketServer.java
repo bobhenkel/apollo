@@ -1,5 +1,6 @@
 package io.logz.apollo.websockets;
 
+import com.google.inject.Injector;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -35,8 +36,8 @@ public class WebSocketServer {
 
     @Inject
     public WebSocketServer(ApolloConfiguration configuration, AuthenticationFilter authenticationFilter,
-                           GuiceConfigurator configurator) {
-        this.configurator = requireNonNull(configurator);
+                           Injector injector) {
+        this.configurator = new GuiceConfigurator(injector);
         this.server = createWebsocketServer(configuration, authenticationFilter);
     }
 
