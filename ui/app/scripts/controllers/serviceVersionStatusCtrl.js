@@ -101,8 +101,12 @@ angular.module('apollo')
                         $scope.websocket.send("export TERM=\"xterm\"\n");
                     };
 
-                    $scope.websocket.onerror = function () {
-                        growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
+                    $scope.websocket.onerror = function (event) {
+                        if (event.code) {
+                            growl.error("Unknown error occurred, error code: " + event.code, {ttl: 7000});
+                        } else {
+                            growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
+                        }
                     };
 
                     $scope.term.open(document.getElementById('terminal'));

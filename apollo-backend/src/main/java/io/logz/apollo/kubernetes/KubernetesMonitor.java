@@ -78,7 +78,7 @@ public class KubernetesMonitor {
         }
     }
 
-    private void monitor() {
+    public void monitor() {
         // Defensive try, just to make sure nothing will close our executor service
         try {
             deploymentDao.getAllRunningDeployments().forEach(deployment -> {

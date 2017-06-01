@@ -73,7 +73,7 @@ public class WebSocketServer {
     @PreDestroy
     public void stop() {
         logger.info("Stopping Jetty server");
-        if (server.isStarted() || server.isStarted()) {
+        if (server.isStarted() || server.isStarting()) {
             try {
                 server.stop();
             } catch (Exception e) {
