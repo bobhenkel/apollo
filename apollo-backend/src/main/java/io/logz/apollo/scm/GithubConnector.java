@@ -1,27 +1,35 @@
 package io.logz.apollo.scm;
 
 import io.logz.apollo.configuration.ApolloConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 2/20/17.
  */
+@Singleton
 public class GithubConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(GithubConnector.class);
-    private static GithubConnector instance;
+
     private final GitHub gitHub;
 
-    private GithubConnector(ApolloConfiguration apolloConfiguration) {
+    @Inject
+    public GithubConnector(ApolloConfiguration apolloConfiguration) {
         try {
+            logger.info("Initializing Github Connector");
+
             // If no user or oauth was provided, attempt to go anonymous
-            if (apolloConfiguration.getGithubLogin().equals("") || apolloConfiguration.getGithubOauthToken().equals("")) {
+            if (StringUtils.isEmpty(apolloConfiguration.getGithubLogin()) || StringUtils.isEmpty(apolloConfiguration.getGithubOauthToken())) {
                 gitHub = GitHub.connectAnonymously();
             } else {
                 gitHub = GitHub.connect(apolloConfiguration.getGithubLogin(), apolloConfiguration.getGithubOauthToken());
@@ -31,18 +39,10 @@ public class GithubConnector {
         }
     }
 
-    public static void initialize(ApolloConfiguration apolloConfiguration) {
-        logger.info("Initializing Github Connector for the first time");
-        instance = new GithubConnector(apolloConfiguration);
-    }
-
-    public static CommitDetails getCommitDetails(String githubRepo, String sha) {
-        if (instance == null) {
-            throw new RuntimeException("You must first initialize GithubConnector before getting commit details!");
-        }
+    public Optional<CommitDetails> getCommitDetails(String githubRepo, String sha) {
         try {
             logger.info("Getting commit details for sha {} on url {}", sha, githubRepo);
-            GHCommit commit = instance.gitHub.getRepository(githubRepo).getCommit(sha);
+            GHCommit commit = gitHub.getRepository(githubRepo).getCommit(sha);
 
             GHUser author = commit.getAuthor();
             String committerName = author.getName();
@@ -50,26 +50,23 @@ public class GithubConnector {
                 committerName = author.getLogin();
             }
 
-            return new CommitDetails(sha, commit.getHtmlUrl().toString(),
+            CommitDetails commitDetails = new CommitDetails(sha, commit.getHtmlUrl().toString(),
                     commit.getCommitShortInfo().getMessage(), commit.getCommitDate(),
                     author.getAvatarUrl(), committerName);
-
+            return Optional.of(commitDetails);
         } catch (IOException e) {
             logger.warn("Could not get commit details from Github!", e);
-            return null;
+            return Optional.empty();
         }
     }
 
-    public static String getLatestCommitShaOnBranch(String githubRepo, String branchName) {
-        if (instance == null) {
-            throw new RuntimeException("You must first initialize GithubConnector before getting commit details!");
-        }
+    public Optional<String> getLatestCommitShaOnBranch(String githubRepo, String branchName) {
         try {
-            return instance.gitHub.getRepository(githubRepo).getBranch(branchName).getSHA1();
-
-        } catch (IOException e) {
+            return Optional.of(gitHub.getRepository(githubRepo).getBranch(branchName).getSHA1());
+        } catch (Exception e) {
             logger.warn("Could not get latest commit on branch from Github!", e);
-            return null;
+            return Optional.empty();
         }
     }
+
 }

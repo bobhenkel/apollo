@@ -110,4 +110,5 @@ public class ApolloClient {
     public List<Deployment> getAllDeployments() throws ApolloClientException {
         return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
     }
+
 }

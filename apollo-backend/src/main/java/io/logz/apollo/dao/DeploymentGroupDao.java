@@ -2,7 +2,6 @@ package io.logz.apollo.dao;
 
 import io.logz.apollo.auth.DeploymentGroup;
 import org.apache.ibatis.annotations.Param;
-import org.rapidoid.annotation.PATCH;
 
 import java.util.List;
 

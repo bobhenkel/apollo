@@ -1,6 +1,5 @@
 package io.logz.apollo;
 
-import io.logz.apollo.clients.ApolloClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
@@ -9,7 +8,6 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Service;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import org.rapidoid.serialize.Ser;
 
 import java.util.List;
 import java.util.Optional;

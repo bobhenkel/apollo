@@ -4,7 +4,8 @@ import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.logz.apollo.models.Deployment.DeploymentStatus.*;
+import static io.logz.apollo.models.Deployment.DeploymentStatus.CANCELING;
+import static io.logz.apollo.models.Deployment.DeploymentStatus.PENDING_CANCELLATION;
 
 /**
  * Created by roiravhon on 1/31/17.

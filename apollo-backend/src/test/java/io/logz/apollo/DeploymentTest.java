@@ -1,8 +1,5 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;

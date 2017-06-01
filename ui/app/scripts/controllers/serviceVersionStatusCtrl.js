@@ -90,17 +90,23 @@ angular.module('apollo')
                         scrollback: 3000
                     });
 
-                    try {
-                        $scope.websocket = new WebSocket(apolloApiService.getWebsocketExecUrl($scope.selectedStatus.environmentId, $scope.selectedStatus.serviceId,
-                            $scope.selectedPodStatus.name, containerName));
-                    } catch(err) {
+                    var environmentId = $scope.selectedStatus.environmentId;
+                    var serviceId = $scope.selectedStatus.serviceId;
+                    var podName = $scope.selectedPodStatus.name;
+                    var execUrl = apolloApiService.getWebsocketExecUrl(environmentId, serviceId, podName, containerName);
 
-                        growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
-                        return;
-                    }
+                    $scope.websocket = new WebSocket(execUrl);
 
                     $scope.websocket.onopen = function () {
                         $scope.websocket.send("export TERM=\"xterm\"\n");
+                    };
+
+                    $scope.websocket.onerror = function (event) {
+                        if (event.code) {
+                            growl.error("Unknown error occurred, error code: " + event.code, {ttl: 7000});
+                        } else {
+                            growl.error("You don't have permissions to deploy to that service on that environment, hence no live-session!", {ttl: 7000});
+                        }
                     };
 
                     $scope.term.open(document.getElementById('terminal'));
