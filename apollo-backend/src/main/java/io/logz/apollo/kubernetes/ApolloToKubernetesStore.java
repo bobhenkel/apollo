@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
  * Created by roiravhon on 2/2/17.
  */
 @Singleton
-public class ApolloToKubernetesFactory {
+public class ApolloToKubernetesStore {
 
     private final Map<Integer, ApolloToKubernetes> mappers;
 
@@ -30,8 +30,8 @@ public class ApolloToKubernetesFactory {
     private final ServiceDao serviceDao;
 
     @Inject
-    public ApolloToKubernetesFactory(DeployableVersionDao deployableVersionDao, EnvironmentDao environmentDao,
-                                      DeploymentDao deploymentDao, ServiceDao serviceDao) {
+    public ApolloToKubernetesStore(DeployableVersionDao deployableVersionDao, EnvironmentDao environmentDao,
+                                   DeploymentDao deploymentDao, ServiceDao serviceDao) {
         this.mappers = new ConcurrentHashMap<>();
         this.deployableVersionDao = requireNonNull(deployableVersionDao);
         this.environmentDao = requireNonNull(environmentDao);

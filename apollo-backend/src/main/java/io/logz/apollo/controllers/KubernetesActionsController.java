@@ -3,7 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.common.ControllerCommon;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.POST;
@@ -20,12 +20,12 @@ import static java.util.Objects.requireNonNull;
 @Controller
 public class KubernetesActionsController {
 
-    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final KubernetesHandlerStore kubernetesHandlerStore;
     private final EnvironmentDao environmentDao;
 
     @Inject
-    public KubernetesActionsController(KubernetesHandlerFactory kubernetesHandlerFactory, EnvironmentDao environmentDao) {
-        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+    public KubernetesActionsController(KubernetesHandlerStore kubernetesHandlerStore, EnvironmentDao environmentDao) {
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.environmentDao = requireNonNull(environmentDao);
     }
 
@@ -39,7 +39,7 @@ public class KubernetesActionsController {
             return;
         }
 
-        kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).restartPod(podName);
+        kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).restartPod(podName);
         ControllerCommon.assignJsonResponseToReq(req, HttpStatus.OK, "Ok");
     }
 

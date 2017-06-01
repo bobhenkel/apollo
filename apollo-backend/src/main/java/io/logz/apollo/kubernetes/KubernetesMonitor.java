@@ -31,15 +31,15 @@ public class KubernetesMonitor {
     public static final String LOCAL_RUN_PROPERTY = "localrun";
 
     private final ScheduledExecutorService scheduledExecutorService;
-    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final KubernetesHandlerStore kubernetesHandlerStore;
     private final ApolloConfiguration apolloConfiguration;
     private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
 
     @Inject
-    public KubernetesMonitor(KubernetesHandlerFactory kubernetesHandlerFactory, ApolloConfiguration apolloConfiguration,
+    public KubernetesMonitor(KubernetesHandlerStore kubernetesHandlerStore, ApolloConfiguration apolloConfiguration,
                              EnvironmentDao environmentDao, DeploymentDao deploymentDao) {
-        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.apolloConfiguration = requireNonNull(apolloConfiguration);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
@@ -84,7 +84,7 @@ public class KubernetesMonitor {
             deploymentDao.getAllRunningDeployments().forEach(deployment -> {
 
                 Environment relatedEnv = environmentDao.getEnvironment(deployment.getEnvironmentId());
-                KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(relatedEnv);
+                KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(relatedEnv);
 
                 Deployment returnedDeployment;
 

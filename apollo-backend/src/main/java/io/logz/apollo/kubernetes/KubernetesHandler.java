@@ -28,20 +28,20 @@ public class KubernetesHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesHandler.class);
     private static final int NUMBER_OF_LOG_LINES_TO_FETCH = 500;
-    private final ApolloToKubernetesFactory apolloToKubernetesFactory;
+    private final ApolloToKubernetesStore apolloToKubernetesStore;
     private final KubernetesClient kubernetesClient;
     private final Environment environment;
 
     @VisibleForTesting
-    KubernetesHandler(ApolloToKubernetesFactory apolloToKubernetesFactory, KubernetesClient kubernetesClient,
+    KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, KubernetesClient kubernetesClient,
                       Environment environment) {
-        this.apolloToKubernetesFactory = requireNonNull(apolloToKubernetesFactory);
+        this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.kubernetesClient = requireNonNull(kubernetesClient);
         this.environment = requireNonNull(environment);
     }
 
-    public KubernetesHandler(ApolloToKubernetesFactory apolloToKubernetesFactory, Environment environment) {
-        this.apolloToKubernetesFactory = requireNonNull(apolloToKubernetesFactory);
+    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment) {
+        this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.environment = requireNonNull(environment);
 
         this.kubernetesClient = createKubernetesClient(environment);
@@ -49,7 +49,7 @@ public class KubernetesHandler {
 
     Deployment startDeployment(Deployment deployment) {
         try {
-            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
+            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesStore.getOrCreateApolloToKubernetes(deployment);
             io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = apolloToKubernetes.getKubernetesDeployment();
             io.fabric8.kubernetes.api.model.Service kubernetesService = apolloToKubernetes.getKubernetesService();
 
@@ -79,7 +79,7 @@ public class KubernetesHandler {
 
     Deployment cancelDeployment(Deployment deployment) {
         try {
-            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
+            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesStore.getOrCreateApolloToKubernetes(deployment);
             io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = apolloToKubernetes.getKubernetesDeployment();
             kubernetesClient
                     .extensions()
@@ -100,7 +100,7 @@ public class KubernetesHandler {
     Deployment monitorDeployment(Deployment deployment) {
 
         try {
-            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesFactory.getOrCreateApolloToKubernetes(deployment);
+            ApolloToKubernetes apolloToKubernetes = apolloToKubernetesStore.getOrCreateApolloToKubernetes(deployment);
             Optional<io.fabric8.kubernetes.api.model.extensions.Deployment> returnedDeployment = kubernetesClient
                     .extensions()
                     .deployments()

@@ -120,7 +120,7 @@ public class TestGround {
 //        testDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
 //        deploymentDao.addDeployment(testDeployment);
 //
-//        KubernetesHandler kubernetesHandler = KubernetesHandlerFactory.getOrCreateApolloToKubernetes(testEnvironment);
+//        KubernetesHandler kubernetesHandler = KubernetesHandlerStore.getOrCreateApolloToKubernetes(testEnvironment);
 //        Deployment returnedDep = kubernetesHandler.startDeployment(testDeployment);
 
 

@@ -5,7 +5,7 @@ import io.logz.apollo.common.QueryStringParser;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import org.slf4j.Logger;
@@ -40,16 +40,16 @@ public class ContainerExecEndpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerExecEndpoint.class);
     private final ExecWebSocketSessionStore execWebSocketSessionStore;
-    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final KubernetesHandlerStore kubernetesHandlerStore;
     private final EnvironmentDao environmentDao;
     private final ServiceDao serviceDao;
 
     @Inject
     public ContainerExecEndpoint(ExecWebSocketSessionStore execWebSocketSessionStore,
-                                 KubernetesHandlerFactory kubernetesHandlerFactory,
+                                 KubernetesHandlerStore kubernetesHandlerStore,
                                  EnvironmentDao environmentDao, ServiceDao serviceDao) {
         this.execWebSocketSessionStore = requireNonNull(execWebSocketSessionStore);
-        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.environmentDao = requireNonNull(environmentDao);
         this.serviceDao = requireNonNull(serviceDao);
     }
@@ -65,7 +65,7 @@ public class ContainerExecEndpoint {
         // Get default shell
         String defaultShell = Optional.ofNullable(service.getDefaultShell()).orElse("/bin/bash");
 
-        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         logger.info("Opening ExecWatch to container {} in pod {} in environment {} related to service {}",
                 containerName, podName, environment.getName(), service.getName());

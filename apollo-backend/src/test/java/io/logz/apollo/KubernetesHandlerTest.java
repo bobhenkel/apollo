@@ -16,9 +16,9 @@ import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.kubernetes.ApolloToKubernetes;
-import io.logz.apollo.kubernetes.ApolloToKubernetesFactory;
+import io.logz.apollo.kubernetes.ApolloToKubernetesStore;
 import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
@@ -57,8 +57,8 @@ public class KubernetesHandlerTest {
 
         // We need a server here
         standaloneApollo = StandaloneApollo.getOrCreateServer();
-        ApolloToKubernetesFactory apolloToKubernetesFactory = standaloneApollo.getInstance(ApolloToKubernetesFactory.class);
-        KubernetesHandlerFactory kubernetesHandlerFactory = standaloneApollo.getInstance(KubernetesHandlerFactory.class);
+        ApolloToKubernetesStore apolloToKubernetesStore = standaloneApollo.getInstance(ApolloToKubernetesStore.class);
+        KubernetesHandlerStore kubernetesHandlerStore = standaloneApollo.getInstance(KubernetesHandlerStore.class);
 
         kubernetesMockClient = new KubernetesMockClient();
 
@@ -70,11 +70,11 @@ public class KubernetesHandlerTest {
         statusDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
 
         // Set mock endpoints
-        setMockDeploymentStatus(notFinishedDeployment, false, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
-        setMockDeploymentStatus(finishedDeployment, true, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(finishedDeployment.getDeployment()));
-        setMockDeploymentStatus(notFinishedCanceledDeployment, false, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
-        setMockDeploymentStatus(finishedCanceledDeployment, true, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
-        setMockDeploymentStatus(statusDeployment, true, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
+        setMockDeploymentStatus(notFinishedDeployment, false, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
+        setMockDeploymentStatus(finishedDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedDeployment.getDeployment()));
+        setMockDeploymentStatus(notFinishedCanceledDeployment, false, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
+        setMockDeploymentStatus(finishedCanceledDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
+        setMockDeploymentStatus(statusDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
         // Setting a mock pod status
         podStatus = new PodStatus();
@@ -87,20 +87,20 @@ public class KubernetesHandlerTest {
 
 
         // Set the logs and status mock on arbitrary one
-        setMockPodLogsAndStatus(notFinishedDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
+        setMockPodLogsAndStatus(notFinishedDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
 
         // And we need the mocks on the pod level again on the status check mock
-        setMockPodLogsAndStatus(statusDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesFactory.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
+        setMockPodLogsAndStatus(statusDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
         // Get an instance of the client
         KubernetesClient kubernetesClient = kubernetesMockClient.replay();
 
         // Inject the client
-        notFinishedDeploymentHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedDeployment.getEnvironment(), kubernetesClient);
-        kubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(finishedDeployment.getEnvironment(), kubernetesClient);
-        kubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedCanceledDeployment.getEnvironment(), kubernetesClient);
-        kubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(finishedCanceledDeployment.getEnvironment(), kubernetesClient);
-        kubernetesHandlerFactory.getOrCreateKubernetesHandlerWithSpecificClient(statusDeployment.getEnvironment(), kubernetesClient);
+        notFinishedDeploymentHandler = kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedDeployment.getEnvironment(), kubernetesClient);
+        kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(finishedDeployment.getEnvironment(), kubernetesClient);
+        kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedCanceledDeployment.getEnvironment(), kubernetesClient);
+        kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(finishedCanceledDeployment.getEnvironment(), kubernetesClient);
+        kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(statusDeployment.getEnvironment(), kubernetesClient);
 
         // Since the mock library does not support "createOrReplace" we can't mock this phase (and its fine to neglect it since its fabric8 code)
         notFinishedDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.STARTED);

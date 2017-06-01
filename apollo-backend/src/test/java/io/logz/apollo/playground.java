@@ -4,7 +4,7 @@ import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import org.junit.Ignore;
@@ -46,14 +46,14 @@ public class playground {
 //
 //        System.out.println(mavet.get());
 
-        KubernetesHandlerFactory kubernetesHandlerFactory = standaloneApollo.getInstance(KubernetesHandlerFactory.class);
+        KubernetesHandlerStore kubernetesHandlerStore = standaloneApollo.getInstance(KubernetesHandlerStore.class);
         EnvironmentDao environmentDao = standaloneApollo.getInstance(EnvironmentDao.class);
         ServiceDao serviceDao = standaloneApollo.getInstance(ServiceDao.class);
 
         Environment environment = environmentDao.getEnvironment(2);
         Service service = serviceDao.getService(3);
 
-        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         System.out.println(kubernetesHandler.getDeploymentLogs(environment, service));
     }

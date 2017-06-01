@@ -3,7 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
@@ -27,14 +27,14 @@ public class StatusController {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
-    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final KubernetesHandlerStore kubernetesHandlerStore;
     private final EnvironmentDao environmentDao;
     private final ServiceDao serviceDao;
 
     @Inject
-    public StatusController(KubernetesHandlerFactory kubernetesHandlerFactory, EnvironmentDao environmentDao,
+    public StatusController(KubernetesHandlerStore kubernetesHandlerStore, EnvironmentDao environmentDao,
                             ServiceDao serviceDao) {
-        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.environmentDao = requireNonNull(environmentDao);
         this.serviceDao = requireNonNull(serviceDao);
     }
@@ -46,7 +46,7 @@ public class StatusController {
 
         environmentDao.getAllEnvironments().forEach(environment -> {
             try {
-                kubernetesDeploymentStatusList.add(kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
+                kubernetesDeploymentStatusList.add(kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
             } catch (Exception e) {
                 logger.warn("Could not get status of service {} on environment {}! trying others..", id, environment.getId(), e);
             }
@@ -59,7 +59,7 @@ public class StatusController {
     public List<KubernetesDeploymentStatus> getCurrentEnvironmentStatus(int id) {
         List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
         Environment environment = environmentDao.getEnvironment(id);
-        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         serviceDao.getAllServices().forEach(service -> {
             try {
@@ -77,7 +77,7 @@ public class StatusController {
     public String getLogs(int environmentId, int serviceId) {
         Environment environment = environmentDao.getEnvironment(environmentId);
         Service service = serviceDao.getService(serviceId);
-        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         return kubernetesHandler.getDeploymentLogs(environment, service);
     }

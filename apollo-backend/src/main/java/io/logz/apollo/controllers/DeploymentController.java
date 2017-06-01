@@ -9,7 +9,7 @@ import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerFactory;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
@@ -39,7 +39,7 @@ public class DeploymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
 
-    private final KubernetesHandlerFactory kubernetesHandlerFactory;
+    private final KubernetesHandlerStore kubernetesHandlerStore;
     private final DeploymentPermissionDao deploymentPermissionDao;
     private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
@@ -47,10 +47,10 @@ public class DeploymentController {
     private final LockService lockService;
 
     @Inject
-    public DeploymentController(KubernetesHandlerFactory kubernetesHandlerFactory,
+    public DeploymentController(KubernetesHandlerStore kubernetesHandlerStore,
                                 DeploymentPermissionDao deploymentPermissionDao, EnvironmentDao environmentDao,
                                 DeploymentDao deploymentDao, ServiceDao serviceDao, LockService lockService) {
-        this.kubernetesHandlerFactory = requireNonNull(kubernetesHandlerFactory);
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
@@ -77,7 +77,7 @@ public class DeploymentController {
         Deployment deployment = deploymentDao.getDeployment(id);
         Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
         Service service = serviceDao.getService(deployment.getServiceId());
-        KubernetesHandler kubernetesHandler = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         return kubernetesHandler.getDeploymentLogs(environment, service);
     }
@@ -111,7 +111,7 @@ public class DeploymentController {
             // Get the current commit sha from kubernetes so we can revert if necessary
             Environment environment = environmentDao.getEnvironment(environmentId);
             Service service = serviceDao.getService(serviceId);
-            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandlerFactory.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
 
             if (kubernetesDeploymentStatus != null)
                 sourceVersion = kubernetesDeploymentStatus.getGitCommitSha();

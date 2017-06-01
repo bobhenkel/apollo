@@ -15,26 +15,26 @@ import static java.util.Objects.requireNonNull;
  * Created by roiravhon on 2/2/17.
  */
 @Singleton
-public class KubernetesHandlerFactory {
+public class KubernetesHandlerStore {
 
-    private final ApolloToKubernetesFactory apolloToKubernetesFactory;
+    private final ApolloToKubernetesStore apolloToKubernetesStore;
     private final Map<Integer, KubernetesHandler> kubernetesHandlerMap;
 
     @Inject
-    public KubernetesHandlerFactory(ApolloToKubernetesFactory apolloToKubernetesFactory) {
-        this.apolloToKubernetesFactory = requireNonNull(apolloToKubernetesFactory);
+    public KubernetesHandlerStore(ApolloToKubernetesStore apolloToKubernetesStore) {
+        this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.kubernetesHandlerMap = new ConcurrentHashMap<>();
     }
 
     public KubernetesHandler getOrCreateKubernetesHandler(Environment environment) {
         return kubernetesHandlerMap.computeIfAbsent(environment.getId(),
-                key -> new KubernetesHandler(apolloToKubernetesFactory, environment));
+                key -> new KubernetesHandler(apolloToKubernetesStore, environment));
     }
 
     @VisibleForTesting
     public KubernetesHandler getOrCreateKubernetesHandlerWithSpecificClient(Environment environment, KubernetesClient kubernetesClient) {
         return kubernetesHandlerMap.computeIfAbsent(environment.getId(),
-                key -> new KubernetesHandler(apolloToKubernetesFactory, kubernetesClient, environment));
+                key -> new KubernetesHandler(apolloToKubernetesStore, kubernetesClient, environment));
     }
 
 }
