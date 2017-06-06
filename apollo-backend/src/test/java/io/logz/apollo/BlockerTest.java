@@ -114,7 +114,7 @@ public class BlockerTest {
 
         BlockerDefinition blocker = createAndSubmitBlocker(apolloTestAdminClient, "timebased",
                 getTimeBasedBlockerJsonConfiguration(dayOfWeek, twoMinutesBeforeNow, twoMinutesFromNow),
-                null, null);
+                environment, service);
 
         assertThatThrownBy(() -> ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, service ,deployableVersion)).isInstanceOf(ApolloBlockedException.class);
 
@@ -143,7 +143,7 @@ public class BlockerTest {
 
         BlockerDefinition blocker = createAndSubmitBlocker(apolloTestAdminClient, "branch",
                 getBranchBlockerJsonConfiguration("develop"),
-                null, null);
+                environment, service);
 
         assertThatThrownBy(() -> ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, service ,deployableVersion)).isInstanceOf(ApolloBlockedException.class);
 
