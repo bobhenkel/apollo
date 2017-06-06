@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -69,4 +70,24 @@ public class GithubConnector {
         }
     }
 
+    public boolean isCommitInBranchHistory(String githubRepo, String branch, String sha) {
+        Optional<List<GHCommit>> allCommitsOnABranch = getAllCommitsOnABranch(githubRepo, branch);
+        return allCommitsOnABranch.map(ghCommits -> ghCommits
+                .stream()
+                .anyMatch(ghCommit -> ghCommit.getSHA1().equals(sha)))
+                .orElse(false);
+    }
+
+    public static String getRepoNameFromRepositoryUrl(String githubRepositoryUrl) {
+        return githubRepositoryUrl.replaceFirst("https?://github.com/", "");
+    }
+
+    private Optional<List<GHCommit>> getAllCommitsOnABranch(String githubRepo, String branch) {
+        try {
+            return Optional.of(gitHub.getRepository(githubRepo).queryCommits().from(branch).list().asList());
+        } catch (Throwable e) {  // The library is throwing and Error and not an exception, for god sake
+            logger.warn("Could not get all commits on branch {} for repo {}", branch, githubRepo, e);
+            return Optional.empty();
+        }
+    }
 }

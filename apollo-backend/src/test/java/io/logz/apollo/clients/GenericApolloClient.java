@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.exceptions.ApolloBlockedException;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.exceptions.ApolloNotAuthenticatedException;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by roiravhon on 11/24/16.
@@ -38,9 +40,21 @@ public class GenericApolloClient {
     private final ObjectMapper mapper;
     private String token;
 
+    private enum HTTP_METHOD {
+        GET,
+        POST,
+        PUT,
+        DELETE
+    }
+
     GenericApolloClient(String userName, String plainPassword, ApolloConfiguration apolloConfiguration) {
 
-        client = new OkHttpClient();
+        client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
+
         this.userName = userName;
         this.plainPassword = plainPassword;
         this.apolloConfiguration = apolloConfiguration;
@@ -69,6 +83,12 @@ public class GenericApolloClient {
         return new RestResponse(response.code(), response.body().string());
     }
 
+    RestResponse delete(String url) throws IOException {
+        Request request = new Request.Builder().url(getFullUrlWithToken(url)).delete().build();
+        Response response = client.newCall(request).execute();
+        return new RestResponse(response.code(), response.body().string());
+    }
+
     RestResponse post(String url, String json) throws IOException {
         RequestBody requestBody = RequestBody.create(JSON, json);
         Request request = new Request.Builder().url(getFullUrlWithToken(url)).post(requestBody).build();
@@ -76,33 +96,72 @@ public class GenericApolloClient {
         return new RestResponse(response.code(), response.body().string());
     }
 
+    RestResponse put(String url, String json) throws IOException {
+        RequestBody requestBody = RequestBody.create(JSON, json);
+        Request request = new Request.Builder().url(getFullUrlWithToken(url)).put(requestBody).build();
+        Response response = client.newCall(request).execute();
+        return new RestResponse(response.code(), response.body().string());
+    }
+
     <T> T getResult(String url, TypeReference<T> responseType) throws ApolloClientException {
-        return runAndGetResult(url, Optional.empty(), responseType);
+        return runAndGetResult(url, Optional.empty(), responseType, HTTP_METHOD.GET);
     }
 
     <T> T postAndGetResult(String url, String body, TypeReference<T> responseType) throws ApolloClientException {
-        return runAndGetResult(url, Optional.of(body), responseType);
+        return runAndGetResult(url, Optional.of(body), responseType, HTTP_METHOD.POST);
     }
 
-    private <T> T runAndGetResult(String url, Optional<String> body, TypeReference<T> responseType) throws ApolloClientException {
+    <T> T putAndGetResult(String url, String body, TypeReference<T> responseType) throws ApolloClientException {
+        return runAndGetResult(url, Optional.of(body), responseType, HTTP_METHOD.PUT);
+    }
+
+    private <T> T runAndGetResult(String url, Optional<String> body, TypeReference<T> responseType, HTTP_METHOD httpMethod) throws ApolloClientException {
         try {
             RestResponse restResponse;
 
             if (body.isPresent()) {
-                restResponse = post(url, body.get());
+                switch (httpMethod) {
+                    case POST:
+                        restResponse = post(url, body.get());
+                        break;
+                    case PUT:
+                        restResponse = put(url, body.get());
+                        break;
+                    default:
+                        throw new ApolloClientException("Unsupported method!");
+
+                }
+
                 switch (restResponse.getCode()) {
+                    case 200:
+                        if (httpMethod.equals(HTTP_METHOD.PUT))
+                            break;
+                        else
+                            throw new ApolloClientException("Got http 200 on POST, something did not work");
                     case 201:
                         break;
                     case 401:
                         throw new ApolloNotAuthenticatedException();
                     case 403:
                         throw new ApolloNotAuthorizedException();
+                    case 406:
+                        throw new ApolloBlockedException();
                     default:
                         throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
                 }
 
             } else {
-                restResponse = get(url);
+                switch (httpMethod) {
+                    case GET:
+                        restResponse = get(url);
+                        break;
+                    case DELETE:
+                        restResponse = delete(url);
+                        break;
+                    default:
+                        throw new ApolloClientException("Unsupported method!");
+                }
+
                 switch (restResponse.getCode()) {
                     case 200:
                         break;
@@ -110,6 +169,8 @@ public class GenericApolloClient {
                         throw new ApolloNotAuthenticatedException();
                     case 403:
                         throw new ApolloNotAuthorizedException();
+                    case 406:
+                        throw new ApolloBlockedException();
                     default:
                         throw new ApolloClientException("Got HTTP return code " + restResponse.getCode() + " with text: " + restResponse.getBody());
                 }

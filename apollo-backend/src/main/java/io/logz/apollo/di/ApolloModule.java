@@ -2,6 +2,7 @@ package io.logz.apollo.di;
 
 import com.google.inject.AbstractModule;
 import io.logz.apollo.ApolloApplication;
+import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import io.logz.apollo.rest.RestServer;
@@ -27,6 +28,7 @@ public class ApolloModule extends AbstractModule {
         bind(KubernetesMonitor.class).asEagerSingleton();
         bind(WebSocketServer.class).asEagerSingleton();
         bind(RestServer.class).asEagerSingleton();
+        bind(BlockerService.class).asEagerSingleton();
 
         bindControllers();
     }

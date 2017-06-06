@@ -2,6 +2,7 @@ package io.logz.apollo.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.blockers.BlockerDefinition;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
@@ -111,4 +112,11 @@ public class ApolloClient {
         return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
     }
 
+    public BlockerDefinition getBlockerDefinition(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/blocker-definition/" + id, new TypeReference<BlockerDefinition>() {});
+    }
+
+    public List<BlockerDefinition> getAllBlockerDefinitions() throws ApolloClientException {
+        return genericApolloClient.getResult("/blocker-definition/", new TypeReference<List<BlockerDefinition>>() {});
+    }
 }

@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitEnvironment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -65,11 +66,5 @@ public class EnvironmentTest {
             }
         }
         assertThat(found).isTrue();
-    }
-
-    private Environment createAndSubmitEnvironment(ApolloTestClient apolloTestClient) throws ApolloClientException {
-        Environment testEnvironment = ModelsGenerator.createEnvironment();
-        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
-        return testEnvironment;
     }
 }

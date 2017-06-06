@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.blockers.BlockerDefinition;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
@@ -87,6 +88,28 @@ public class ApolloAdminClient {
                 "deploymentPermissionId", String.valueOf(deploymentPermissionId));
 
         genericApolloClient.postAndGetResult("/add-deployment-permission-to-deployment-group", requestBody, new TypeReference<Object>() {});
+    }
+
+    public BlockerDefinition addBlocker(BlockerDefinition blockerDefinition) throws ApolloClientException {
+        String requestBody = Common.generateJson("name", blockerDefinition.getName(),
+                "environmentId", String.valueOf(blockerDefinition.getEnvironmentId()),
+                "serviceId", String.valueOf(blockerDefinition.getServiceId()),
+                "blockerTypeName", blockerDefinition.getBlockerTypeName(),
+                "blockerJsonConfiguration", blockerDefinition.getBlockerJsonConfiguration());
+
+        return genericApolloClient.postAndGetResult("/blocker-definition", requestBody, new TypeReference<BlockerDefinition>() {});
+    }
+
+    public BlockerDefinition updateBlocker(BlockerDefinition blockerDefinition) throws ApolloClientException {
+        String requestBody = Common.generateJson("id", String.valueOf(blockerDefinition.getId()),
+                "name", blockerDefinition.getName(),
+                "environmentId", String.valueOf(blockerDefinition.getEnvironmentId()),
+                "serviceId", String.valueOf(blockerDefinition.getServiceId()),
+                "isActive", String.valueOf(blockerDefinition.getActive()),
+                "blockerTypeName", blockerDefinition.getBlockerTypeName(),
+                "blockerJsonConfiguration", blockerDefinition.getBlockerJsonConfiguration());
+
+        return genericApolloClient.putAndGetResult("/blocker-definition/" + blockerDefinition.getId(), requestBody, new TypeReference<BlockerDefinition>() {});
     }
 
     private String generateSignupJson(User user, String plainPassword) {

@@ -12,6 +12,8 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitDeployableVersion;
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitService;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -102,24 +104,5 @@ public class DeployableVersionTest {
         DeployableVersion testDeployableVersion = createAndSubmitDeployableVersion(apolloTestClient);
         List<DeployableVersion> returnedDeployableVersion = apolloTestClient.getLatestDeployableVersionsByServiceId(testDeployableVersion.getServiceId());
         assertThat(returnedDeployableVersion.stream().anyMatch(deployableVersion -> deployableVersion.getId() == testDeployableVersion.getId())).isTrue();
-    }
-
-    private DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {
-
-        // Needed for FK
-        Service testService = createAndSubmitService(apolloTestClient);
-
-        // Add deployable version
-        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
-        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
-
-        return testDeployableVersion;
-    }
-
-    @NotNull
-    private Service createAndSubmitService(ApolloTestClient apolloTestClient) throws ApolloClientException {
-        Service testService = ModelsGenerator.createService();
-        testService.setId(apolloTestClient.addService(testService).getId());
-        return testService;
     }
 }

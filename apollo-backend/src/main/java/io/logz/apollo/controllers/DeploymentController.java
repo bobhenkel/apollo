@@ -3,6 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.LockService;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.PermissionsValidator;
+import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
@@ -45,17 +46,20 @@ public class DeploymentController {
     private final DeploymentDao deploymentDao;
     private final ServiceDao serviceDao;
     private final LockService lockService;
+    private final BlockerService blockerService;
 
     @Inject
     public DeploymentController(KubernetesHandlerStore kubernetesHandlerStore,
                                 DeploymentPermissionDao deploymentPermissionDao, EnvironmentDao environmentDao,
-                                DeploymentDao deploymentDao, ServiceDao serviceDao, LockService lockService) {
+                                DeploymentDao deploymentDao, ServiceDao serviceDao, LockService lockService,
+                                BlockerService blockerService) {
         this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
         this.serviceDao = requireNonNull(serviceDao);
         this.lockService = requireNonNull(lockService);
+        this.blockerService = requireNonNull(blockerService);
     }
 
     @LoggedIn
@@ -160,8 +164,6 @@ public class DeploymentController {
                 return;
             }
 
-            logger.info("All checks passed. Running deployment");
-
             Deployment newDeployment = new Deployment();
             newDeployment.setEnvironmentId(environmentId);
             newDeployment.setServiceId(serviceId);
@@ -170,6 +172,15 @@ public class DeploymentController {
             newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
             newDeployment.setSourceVersion(sourceVersion);
 
+
+            logger.info("Checking for blockers");
+            if (blockerService.shouldBlock(newDeployment)) {
+                logger.info("Deployment is blocked!");
+                assignJsonResponseToReq(req, HttpStatus.NOT_ACCEPTABLE, "There is a blocker currently blocking this deployment");
+                return;
+            }
+
+            logger.info("All checks passed. Running deployment");
             deploymentDao.addDeployment(newDeployment);
             assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployment);
         } finally {
