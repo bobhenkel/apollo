@@ -12,5 +12,5 @@ public interface BlockerDefinitionDao {
     List<BlockerDefinition> getAllBlockerDefinitions();
     void addBlockerDefinition(BlockerDefinition blockerDefinition);
     void updateBlockerDefinition(BlockerDefinition blockerDefinition);
-
+    void deleteBlockerDefinition(int id);
 }

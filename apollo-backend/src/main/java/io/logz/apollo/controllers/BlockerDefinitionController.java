@@ -6,6 +6,7 @@ import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.BlockerDefinitionDao;
 import org.rapidoid.annotation.Controller;
+import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
 import org.rapidoid.annotation.PUT;
@@ -54,7 +55,7 @@ public class BlockerDefinitionController {
 
     @Administrator
     @POST("/blocker-definition")
-    public void addBlockerDefinition(String name, String environmentId, String serviceId, String blockerTypeName, String blockerJsonConfiguration, Req req) {
+    public void addBlockerDefinition(String name, String environmentId, String serviceId, Boolean isActive, String blockerTypeName, String blockerJsonConfiguration, Req req) {
 
         if (!blockerService.getBlockerTypeBinding(blockerTypeName).isPresent()) {
             logger.warn("Could not find proper class that annotated with {}", blockerTypeName);
@@ -65,10 +66,10 @@ public class BlockerDefinitionController {
         Integer environmentIdParsed = null;
         Integer serviceIdParsed = null;
 
-        if (!environmentId.equals("null"))
+        if (environmentId != null && !environmentId.equals("null"))
             environmentIdParsed = Integer.parseInt(environmentId);
 
-        if (!serviceId.equals("null"))
+        if (serviceId != null && !serviceId.equals("null"))
             serviceIdParsed = Integer.parseInt(serviceId);
 
         BlockerDefinition blockerDefinition = new BlockerDefinition();
@@ -78,7 +79,7 @@ public class BlockerDefinitionController {
         blockerDefinition.setServiceId(serviceIdParsed);
         blockerDefinition.setBlockerTypeName(blockerTypeName);
         blockerDefinition.setBlockerJsonConfiguration(blockerJsonConfiguration);
-        blockerDefinition.setActive(true);
+        blockerDefinition.setActive(isActive);
 
         blockerDefinitionDao.addBlockerDefinition(blockerDefinition);
         assignJsonResponseToReq(req, HttpStatus.CREATED, blockerDefinition);
@@ -99,10 +100,10 @@ public class BlockerDefinitionController {
         Integer environmentIdParsed = null;
         Integer serviceIdParsed = null;
 
-        if (!environmentId.equals("null"))
+        if (environmentId != null && !environmentId.equals("null"))
             environmentIdParsed = Integer.parseInt(environmentId);
 
-        if (!serviceId.equals("null"))
+        if (serviceId != null && !serviceId.equals("null"))
             serviceIdParsed = Integer.parseInt(serviceId);
 
         blockerDefinition.setName(name);
@@ -114,5 +115,12 @@ public class BlockerDefinitionController {
 
         blockerDefinitionDao.updateBlockerDefinition(blockerDefinition);
         assignJsonResponseToReq(req, HttpStatus.OK, blockerDefinition);
+    }
+
+    @Administrator
+    @DELETE("/blocker-definition/{id}")
+    public void deleteBlockerDefinition(int id, Req req) {
+        blockerDefinitionDao.deleteBlockerDefinition(id);
+        assignJsonResponseToReq(req, HttpStatus.OK, "deleted");
     }
 }

@@ -31,4 +31,9 @@
         WHERE
             id=#{id}
     </update>
+
+    <delete id="deleteBlockerDefinition">
+        DELETE FROM blocker_definition
+        WHERE id=#{id}
+    </delete>
 </mapper>

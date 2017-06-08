@@ -157,6 +157,7 @@ public class ModelsGenerator {
         blockerDefinition.setName("blocker-" + Common.randomStr(5));
         blockerDefinition.setBlockerTypeName(blockerTypeName);
         blockerDefinition.setBlockerJsonConfiguration(blockerJsonConfiguration);
+        blockerDefinition.setActive(true);
 
         return blockerDefinition;
     }
@@ -167,7 +168,6 @@ public class ModelsGenerator {
 
         BlockerDefinition testBlockerDefinition = ModelsGenerator.createBlockerDefinition(environment, service, blockerTypeName, blockerJsonConfiguration);
         testBlockerDefinition.setId(apolloTestAdminClient.addBlocker(testBlockerDefinition).getId());
-        testBlockerDefinition.setActive(true);
 
         return testBlockerDefinition;
     }

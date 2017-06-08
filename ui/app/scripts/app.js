@@ -298,7 +298,19 @@ angular
          })
       .state('blocker.configure',{
             templateUrl:'views/blocker/configure.html',
-            url:'/configure'
+            controller: 'blockersCtrl',
+            url:'/configure',
+            resolve: {
+                      loadMyFiles:function($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                          name:'apollo',
+                          files:[
+                          'scripts/services/apolloApiService.js',
+                          'scripts/controllers/blockersCtrl.js'
+                          ]
+                        })
+                      }
+                    }
     });
     $stateProvider
                .state('auth', {
