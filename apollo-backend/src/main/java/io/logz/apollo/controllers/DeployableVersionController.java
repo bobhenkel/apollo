@@ -92,7 +92,7 @@ public class DeployableVersionController {
         newDeployableVersion.setServiceId(serviceId);
 
         // Just to protect tests from reaching github rate limit
-        if (!githubRepositoryUrl.contains("test.com")) {
+        if (githubRepositoryUrl.contains("github.com")) {
 
             // Not failing if this is null
             githubConnector.getCommitDetails(actualRepo, gitCommitSha).ifPresent(commitDetails -> {

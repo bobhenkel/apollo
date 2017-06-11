@@ -28,8 +28,8 @@ public class BranchBlocker implements BlockerFunction {
 
     @Override
     public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, DeployableVersion deployableVersion) {
-        if (!blockerInjectableCommons.getGithubConnector()
-                .isCommitInBranchHistory(GithubConnector.getRepoNameFromRepositoryUrl(deployableVersion.getGithubRepositoryUrl()),
+        String repoName = GithubConnector.getRepoNameFromRepositoryUrl(deployableVersion.getGithubRepositoryUrl());
+        if (!blockerInjectableCommons.getGithubConnector().isCommitInBranchHistory(repoName,
                         branchBlockerConfiguration.getBranchName(), deployableVersion.getGitCommitSha())) {
 
             logger.info("Commit sha {} is not part of branch {} on repo {}, blocking!",

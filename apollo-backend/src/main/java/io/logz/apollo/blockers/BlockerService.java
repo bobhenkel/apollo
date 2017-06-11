@@ -78,29 +78,33 @@ public class BlockerService {
     private List<Blocker> getBlockers() {
         return blockerDefinitionDao.getAllBlockerDefinitions()
                 .stream()
-                .map(blockerDefinition -> {
-                    Optional<Class<? extends BlockerFunction>> blockerTypeBinding = getBlockerTypeBinding(blockerDefinition.getBlockerTypeName());
-                    if (!blockerTypeBinding.isPresent()) {
-                        logger.warn("Got blocker definition (id {}) of an unknown blocker name {}, nothing to do here!",
-                                blockerDefinition.getId(), blockerDefinition.getBlockerTypeName());
-                        return null;
-                    }
-
-                    try {
-                        BlockerFunction blockerFunction = getBlockerTypeBinding(blockerDefinition.getBlockerTypeName()).get().newInstance();
-                        blockerFunction.init(blockerDefinition.getBlockerJsonConfiguration());
-                        return new Blocker(blockerDefinition.getName(), blockerDefinition.getServiceId(),
-                                blockerDefinition.getEnvironmentId(), blockerDefinition.getActive(), blockerFunction);
-
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        logger.warn("Could not create instance of {} ", blockerDefinition.getBlockerTypeName(), e);
-                        return null;
-                    } catch (IOException e) {
-                        logger.warn("Could not parse parameters for blocker definition {}", blockerDefinition.getId(), e);
-                        return null;
-                    }
-                }).filter(Objects::nonNull)
+                .map(this::createBlockerFromDefinition)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    private Optional<Blocker> createBlockerFromDefinition(BlockerDefinition blockerDefinition) {
+        Optional<Class<? extends BlockerFunction>> blockerTypeBinding = getBlockerTypeBinding(blockerDefinition.getBlockerTypeName());
+        if (!blockerTypeBinding.isPresent()) {
+            logger.warn("Got blocker definition (id {}) of an unknown blocker name {}, nothing to do here!",
+                    blockerDefinition.getId(), blockerDefinition.getBlockerTypeName());
+            return Optional.empty();
+        }
+
+        try {
+            BlockerFunction blockerFunction = getBlockerTypeBinding(blockerDefinition.getBlockerTypeName()).get().newInstance();
+            blockerFunction.init(blockerDefinition.getBlockerJsonConfiguration());
+            return Optional.of(new Blocker(blockerDefinition.getName(), blockerDefinition.getServiceId(),
+                    blockerDefinition.getEnvironmentId(), blockerDefinition.getActive(), blockerFunction));
+
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.warn("Could not create instance of {} ", blockerDefinition.getBlockerTypeName(), e);
+            return Optional.empty();
+        } catch (IOException e) {
+            logger.warn("Could not parse parameters for blocker definition {}", blockerDefinition.getId(), e);
+            return Optional.empty();
+        }
     }
 
     @SuppressWarnings("RedundantIfStatement")
