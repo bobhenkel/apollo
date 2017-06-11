@@ -157,6 +157,36 @@ function ApiService($q, $http){
     var getWebsocketExecUrl = function (environment, service, podName, containerName) {
       return CONFIG.wsUrl + "exec/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
     };
+    
+    var getAllBlockers = function () {
+        return $http.get(CONFIG.appUrl + "blocker-definition");
+    };
+    
+    var addBlocker = function (name, environmentId, serviceId, isActive, blockerTypeName, blockerJsonConfiguration) {
+        return $http.post(CONFIG.appUrl + "blocker-definition", {
+            name: name,
+            environmentId: environmentId,
+            serviceId: serviceId,
+            isActive: isActive,
+            blockerTypeName: blockerTypeName,
+            blockerJsonConfiguration: blockerJsonConfiguration
+        });
+    };
+
+    var updateBlocker = function (id, name, environmentId, serviceId, isActive, blockerTypeName, blockerJsonConfiguration) {
+        return $http.put(CONFIG.appUrl + "blocker-definition/" + id, {
+            name: name,
+            environmentId: environmentId,
+            serviceId: serviceId,
+            isActive: isActive,
+            blockerTypeName: blockerTypeName,
+            blockerJsonConfiguration: blockerJsonConfiguration
+        });
+    };
+
+    var deleteBlocker = function (id) {
+        return $http.delete(CONFIG.appUrl + "blocker-definition/" + id);
+    };
 
     return {
         getAllUsers: getAllUsers,
@@ -187,6 +217,10 @@ function ApiService($q, $http){
         createService: createService,
         updateService: updateService,
         getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch,
-        getWebsocketExecUrl: getWebsocketExecUrl
+        getWebsocketExecUrl: getWebsocketExecUrl,
+        getAllBlockers: getAllBlockers,
+        addBlocker: addBlocker,
+        updateBlocker: updateBlocker,
+        deleteBlocker: deleteBlocker
     };
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
+import static io.logz.apollo.scm.GithubConnector.getRepoNameFromRepositoryUrl;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -86,26 +87,24 @@ public class DeployableVersionController {
 
         // Getting the commit details
         String actualRepo = getRepoNameFromRepositoryUrl(githubRepositoryUrl);
-
         newDeployableVersion.setGitCommitSha(gitCommitSha);
         newDeployableVersion.setGithubRepositoryUrl(githubRepositoryUrl);
         newDeployableVersion.setServiceId(serviceId);
 
-        // Not failing if this is null
-        githubConnector.getCommitDetails(actualRepo, gitCommitSha).ifPresent(commitDetails -> {
-            newDeployableVersion.setCommitUrl(commitDetails.getCommitUrl());
-            newDeployableVersion.setCommitMessage(commitDetails.getCommitMessage());
-            newDeployableVersion.setCommitDate(commitDetails.getCommitDate());
-            newDeployableVersion.setCommitterAvatarUrl(commitDetails.getCommitterAvatarUrl());
-            newDeployableVersion.setCommitterName(commitDetails.getCommitterName());
-        });
+        // Just to protect tests from reaching github rate limit
+        if (githubRepositoryUrl.contains("github.com")) {
+
+            // Not failing if this is null
+            githubConnector.getCommitDetails(actualRepo, gitCommitSha).ifPresent(commitDetails -> {
+                newDeployableVersion.setCommitUrl(commitDetails.getCommitUrl());
+                newDeployableVersion.setCommitMessage(commitDetails.getCommitMessage());
+                newDeployableVersion.setCommitDate(commitDetails.getCommitDate());
+                newDeployableVersion.setCommitterAvatarUrl(commitDetails.getCommitterAvatarUrl());
+                newDeployableVersion.setCommitterName(commitDetails.getCommitterName());
+            });
+        }
 
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
         assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
     }
-
-    private String getRepoNameFromRepositoryUrl(String githubRepositoryUrl) {
-        return githubRepositoryUrl.replaceFirst("https?://github.com/", "");
-    }
-
 }

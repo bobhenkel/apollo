@@ -4,10 +4,15 @@ import io.logz.apollo.auth.DeploymentGroup;
 import io.logz.apollo.auth.DeploymentPermission;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.auth.User;
+import io.logz.apollo.blockers.BlockerDefinition;
+import io.logz.apollo.clients.ApolloTestAdminClient;
+import io.logz.apollo.clients.ApolloTestClient;
+import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import org.rapidoid.serialize.Ser;
 
 import java.util.Optional;
 
@@ -29,11 +34,38 @@ public class ModelsGenerator {
         return testEnvironment;
     }
 
+    public static Environment createAndSubmitEnvironment(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
+        return testEnvironment;
+    }
+
     public static DeployableVersion createDeployableVersion(Service relatedService) {
         DeployableVersion testDeployableVersion = new DeployableVersion();
         testDeployableVersion.setGitCommitSha("abc129aed837f6" + Common.randomStr(5));
-        testDeployableVersion.setGithubRepositoryUrl("http://github.com/logzio/" + Common.randomStr(5));
+        testDeployableVersion.setGithubRepositoryUrl("http://test.com/logzio/" + Common.randomStr(5));
         testDeployableVersion.setServiceId(relatedService.getId());
+
+        return testDeployableVersion;
+    }
+
+    public static DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {
+
+        // Needed for FK
+        Service testService = createAndSubmitService(apolloTestClient);
+
+        // Add deployable version
+        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
+        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
+
+        return testDeployableVersion;
+    }
+
+    public static DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient, Service service) throws ApolloClientException {
+
+        // Add deployable version
+        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(service);
+        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         return testDeployableVersion;
     }
@@ -47,6 +79,12 @@ public class ModelsGenerator {
         return testService;
     }
 
+    public static Service createAndSubmitService(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        Service testService = ModelsGenerator.createService();
+        testService.setId(apolloTestClient.addService(testService).getId());
+        return testService;
+    }
+
     public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
                                               DeployableVersion relatedDeployableVersion) {
 
@@ -54,6 +92,41 @@ public class ModelsGenerator {
         testDeployment.setEnvironmentId(relatedEnvironment.getId());
         testDeployment.setServiceId(relatedService.getId());
         testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
+        return testDeployment;
+    }
+
+    public static Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient) throws Exception {
+
+        // Add all foreign keys
+        Environment testEnvironment = ModelsGenerator.createEnvironment();
+        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
+
+        Service testService = ModelsGenerator.createService();
+        testService.setId(apolloTestClient.addService(testService).getId());
+
+        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
+        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
+
+        // Give the user permissions to deploy
+        Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
+
+        // Now we have enough to create a deployment
+        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
+        testDeployment.setId(apolloTestClient.addDeployment(testDeployment).getId());
+
+        return testDeployment;
+    }
+
+    public static Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient, Environment environment,
+                                                       Service service, DeployableVersion deployableVersion) throws Exception {
+
+        // Give the user permissions to deploy
+        Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, environment);
+
+        // Now we have enough to create a deployment
+        Deployment testDeployment = ModelsGenerator.createDeployment(service, environment, deployableVersion);
+        testDeployment.setId(apolloTestClient.addDeployment(testDeployment).getId());
+
         return testDeployment;
     }
 
@@ -70,6 +143,33 @@ public class ModelsGenerator {
 
     public static DeploymentPermission createDenyDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
         return createDeploymentPermission(relatedEnvironment, relatedService, false);
+    }
+
+    public static BlockerDefinition createBlockerDefinition(Environment environment, Service service, String blockerTypeName, String blockerJsonConfiguration) {
+        BlockerDefinition blockerDefinition = new BlockerDefinition();
+
+        if (environment != null)
+            blockerDefinition.setEnvironmentId(environment.getId());
+
+        if (service != null)
+            blockerDefinition.setServiceId(service.getId());
+
+        blockerDefinition.setName("blocker-" + Common.randomStr(5));
+        blockerDefinition.setBlockerTypeName(blockerTypeName);
+        blockerDefinition.setBlockerJsonConfiguration(blockerJsonConfiguration);
+        blockerDefinition.setActive(true);
+
+        return blockerDefinition;
+    }
+
+    public static BlockerDefinition createAndSubmitBlocker(ApolloTestAdminClient apolloTestAdminClient, String blockerTypeName,
+                                                           String blockerJsonConfiguration, Environment environment,
+                                                           Service service) throws Exception {
+
+        BlockerDefinition testBlockerDefinition = ModelsGenerator.createBlockerDefinition(environment, service, blockerTypeName, blockerJsonConfiguration);
+        testBlockerDefinition.setId(apolloTestAdminClient.addBlocker(testBlockerDefinition).getId());
+
+        return testBlockerDefinition;
     }
 
     private static DeploymentPermission createDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService, boolean allow) {

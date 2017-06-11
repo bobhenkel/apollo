@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitDeployment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -73,28 +74,4 @@ public class DeploymentTest {
         // Just to make sure we are not blocking different deployments to run on the same time
         createAndSubmitDeployment(apolloTestClient);
     }
-
-    private Deployment createAndSubmitDeployment(ApolloTestClient apolloTestClient) throws Exception {
-
-        // Add all foreign keys
-        Environment testEnvironment = ModelsGenerator.createEnvironment();
-        testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
-
-        Service testService = ModelsGenerator.createService();
-        testService.setId(apolloTestClient.addService(testService).getId());
-
-        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(testService);
-        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
-
-        // Give the user permissions to deploy
-        Common.grantUserFullPermissionsOnEnvironment(apolloTestClient, testEnvironment);
-
-        // Now we have enough to create a deployment
-        Deployment testDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
-        testDeployment.setId(apolloTestClient.addDeployment(testDeployment).getId());
-
-        return testDeployment;
-    }
-
-
 }
