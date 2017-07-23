@@ -151,7 +151,8 @@ function ApiService($q, $http){
     };
 
     var getDeployableVersionFromLatestCommitOnBranch = function (branchName, sourceDeployableVersion) {
-      return $http.get(CONFIG.appUrl + "deployable-version/latest/branch/" + encodeURIComponent(branchName) + "/repofrom/" + sourceDeployableVersion);
+        // Double encoding, as nginx is opening the first one
+        return $http.get(CONFIG.appUrl + "deployable-version/latest/branch/" + encodeURIComponent(encodeURIComponent(branchName)) + "/repofrom/" + sourceDeployableVersion);
     };
     
     var getWebsocketExecUrl = function (environment, service, podName, containerName) {
