@@ -12,6 +12,7 @@ import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.PodStatus;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.notifications.ApolloNotifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +22,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Created by roiravhon on 2/2/17.
- */
 public class KubernetesHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesHandler.class);
@@ -31,18 +29,21 @@ public class KubernetesHandler {
     private final ApolloToKubernetesStore apolloToKubernetesStore;
     private final KubernetesClient kubernetesClient;
     private final Environment environment;
+    private final ApolloNotifications apolloNotifications;
 
     @VisibleForTesting
     KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, KubernetesClient kubernetesClient,
-                      Environment environment) {
+                      Environment environment, ApolloNotifications apolloNotifications) {
         this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.kubernetesClient = requireNonNull(kubernetesClient);
         this.environment = requireNonNull(environment);
+        this.apolloNotifications = requireNonNull(apolloNotifications);
     }
 
-    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment) {
+    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment, ApolloNotifications apolloNotifications) {
         this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.environment = requireNonNull(environment);
+        this.apolloNotifications = requireNonNull(apolloNotifications);
 
         this.kubernetesClient = createKubernetesClient(environment);
     }
@@ -68,6 +69,7 @@ public class KubernetesHandler {
             }
 
             logger.info("Started deployment id {}", deployment.getId());
+            apolloNotifications.add(Deployment.DeploymentStatus.STARTED, deployment);
             deployment.setStatus(Deployment.DeploymentStatus.STARTED);
             return deployment;
 
@@ -88,6 +90,7 @@ public class KubernetesHandler {
                     .createOrReplace(kubernetesDeployment);
 
             logger.info("Canceled deployment id {}", deployment.getId());
+            apolloNotifications.add(Deployment.DeploymentStatus.CANCELING, deployment);
             deployment.setStatus(Deployment.DeploymentStatus.CANCELING);
             return deployment;
 
@@ -121,10 +124,12 @@ public class KubernetesHandler {
                 if (updatedReplicas == totalReplicas) {
                     if (deployment.getStatus().equals(Deployment.DeploymentStatus.STARTED)) {
                         logger.info("Deployment id {} is done deploying", deployment.getId());
+                        apolloNotifications.add(Deployment.DeploymentStatus.DONE, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.DONE);
 
                     } else if (deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELING)) {
                         logger.info("Deployment id {} is done canceling", deployment.getId());
+                        apolloNotifications.add(Deployment.DeploymentStatus.CANCELED, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.CANCELED);
                     }
                 }
