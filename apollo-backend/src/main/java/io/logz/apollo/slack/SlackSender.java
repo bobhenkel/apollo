@@ -63,7 +63,7 @@ public class SlackSender {
         Request request = builder.post(RequestBody.create(MediaType_JSON, body)).build();
         try {
             return sendToSlack(request);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("Slack message failed. Channel url: {}, Message body: {}", slackWebHookUrl, body);
             return false;
         }
