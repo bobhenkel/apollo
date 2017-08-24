@@ -5,6 +5,8 @@ RUN apk add --update \
     bash \
   && rm -rf /var/cache/apk/*
 
+ADD https://oss.sonatype.org/content/repositories/public/io/hawt/hawtio-app/1.5.3/hawtio-app-1.5.3.jar /
+
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/go.sh /go.sh
 
