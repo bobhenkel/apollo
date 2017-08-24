@@ -6,6 +6,7 @@ import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
@@ -84,7 +85,7 @@ public class JolokiaController {
     }
 
     private void genericJolokiaProxy(int environmentId, String podName, String path, Req req) {
-        Environment environment = environmentDao.getEnvironment(2);
+        Environment environment = environmentDao.getEnvironment(environmentId);
 
         if (environment == null) {
             ControllerCommon.assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Environment " + environmentId + " does not exists");
@@ -94,12 +95,10 @@ public class JolokiaController {
         Optional<Response> response = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).proxyJolokia(podName, path, req);
 
         if (response.isPresent()) {
-            try {
-                ControllerCommon.assignJsonBytesToReq(req, response.get().code(), response.get().body().bytes());
+            try (ResponseBody body = response.get().body()) {
+                ControllerCommon.assignJsonBytesToReq(req, response.get().code(), body.bytes());
             } catch (IOException e) {
                 ControllerCommon.assignJsonResponseToReq(req, HttpStatus.INTERNAL_SERVER_ERROR, "Could not read response from jolokia");
-            } finally {
-                response.get().close();
             }
         } else {
             ControllerCommon.assignJsonResponseToReq(req, HttpStatus.BAD_REQUEST, "Could not find jolokia");

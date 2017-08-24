@@ -5,17 +5,12 @@ import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
-import okhttp3.Response;
 import org.rapidoid.annotation.Controller;
-import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 
 import javax.inject.Inject;
-
-import java.io.IOException;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 

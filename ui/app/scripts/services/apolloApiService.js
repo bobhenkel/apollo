@@ -193,7 +193,11 @@ function ApiService($q, $http){
         var port = document.location.port;
         var host = document.location.hostname;
         if (port === "") {
-            port = "80";
+            if (document.location.protocol === "https:") {
+                port = "443";
+            } else {
+                port = "80";
+            }
         }
         return CONFIG.hawtioUrl + "hawtio/jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&path=jolokia/environment/" + environmentId + "/pod/" + podName;
     };
