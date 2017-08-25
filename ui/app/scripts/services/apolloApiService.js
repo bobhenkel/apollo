@@ -193,14 +193,18 @@ function ApiService($q, $http){
         var port = document.location.port;
         var host = document.location.hostname;
         var scheme = document.location.protocol.split(":")[0];
+        var prefix = "";
         if (port === "") {
+            // If running on nginx
+            prefix = "api/";
             if (document.location.protocol === "https:") {
                 port = "443";
             } else {
                 port = "80";
             }
         }
-        return CONFIG.hawtioUrl + "jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&scheme="+ scheme + "&path=jolokia/environment/" + environmentId + "/pod/" + podName;
+
+        return CONFIG.hawtioUrl + "jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&scheme="+ scheme + "&path=" + prefix + "jolokia/environment/" + environmentId + "/pod/" + podName;
     };
 
     return {
