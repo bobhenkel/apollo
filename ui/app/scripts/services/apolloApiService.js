@@ -199,7 +199,7 @@ function ApiService($q, $http){
                 port = "80";
             }
         }
-        return CONFIG.hawtioUrl + "hawtio/jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&path=jolokia/environment/" + environmentId + "/pod/" + podName;
+        return CONFIG.hawtioUrl + "jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&path=jolokia/environment/" + environmentId + "/pod/" + podName;
     };
 
     return {
