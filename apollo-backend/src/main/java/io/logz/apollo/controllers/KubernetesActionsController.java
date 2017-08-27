@@ -42,5 +42,4 @@ public class KubernetesActionsController {
         kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).restartPod(podName);
         ControllerCommon.assignJsonResponseToReq(req, HttpStatus.OK, "Ok");
     }
-
 }

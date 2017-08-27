@@ -18,4 +18,6 @@ public class HttpStatus {
     public static int NOT_ACCEPTABLE = 406;
     public static int CONFLICT = 409;
     public static int TOO_MANY_REQUESTS = 429;
+
+    public static int INTERNAL_SERVER_ERROR = 500;
 }

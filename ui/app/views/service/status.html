@@ -126,6 +126,9 @@
                                         ng-click="selectPod(podStatus)">
                                             <i class="fa fa-terminal"></i>
                                         </button>
+                                        <button type="button" class="btn btn-primary btn-circle" uib-tooltip="Hawt.io" ng-click="openHawtio(podStatus)" ng-show="podStatus.hasJolokia">
+                                            <i class="fa fa-coffee"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>

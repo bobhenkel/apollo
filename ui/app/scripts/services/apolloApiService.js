@@ -189,6 +189,24 @@ function ApiService($q, $http){
         return $http.delete(CONFIG.appUrl + "blocker-definition/" + id);
     };
 
+    var getHawtioLink = function (environmentId, podName) {
+        var port = document.location.port;
+        var host = document.location.hostname;
+        var scheme = document.location.protocol.split(":")[0];
+        var prefix = "";
+        if (port === "") {
+            // If running on nginx
+            prefix = "api/";
+            if (document.location.protocol === "https:") {
+                port = "443";
+            } else {
+                port = "80";
+            }
+        }
+
+        return CONFIG.hawtioUrl + "jvm/connect?name=" + podName +"&host=" + host + "&port=" + port + "&scheme="+ scheme + "&path=" + prefix + "jolokia/environment/" + environmentId + "/pod/" + podName;
+    };
+
     return {
         getAllUsers: getAllUsers,
         getAllEnvironments: getAllEnvironments,
@@ -222,6 +240,7 @@ function ApiService($q, $http){
         getAllBlockers: getAllBlockers,
         addBlocker: addBlocker,
         updateBlocker: updateBlocker,
-        deleteBlocker: deleteBlocker
+        deleteBlocker: deleteBlocker,
+        getHawtioLink: getHawtioLink
     };
 }
