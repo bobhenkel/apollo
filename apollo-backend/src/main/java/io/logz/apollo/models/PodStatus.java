@@ -13,6 +13,7 @@ public class PodStatus {
     private String phase;
     private String reason;
     private String startTime;
+    private Boolean hasJolokia;
     private List<String> containers;
 
     public PodStatus() {
@@ -64,6 +65,14 @@ public class PodStatus {
 
     public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public Boolean getHasJolokia() {
+        return hasJolokia;
+    }
+
+    public void setHasJolokia(Boolean hasJolokia) {
+        this.hasJolokia = hasJolokia;
     }
 
     public List<String> getContainers() {

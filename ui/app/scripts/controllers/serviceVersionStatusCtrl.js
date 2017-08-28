@@ -2,8 +2,8 @@
 
 angular.module('apollo')
   .controller('serviceVersionStatusCtrl', ['apolloApiService', '$scope',
-                                    '$timeout', '$state', '$interval', 'growl', 'usSpinnerService',
-            function (apolloApiService, $scope, $timeout, $state, $interval, growl, usSpinnerService) {
+                                    '$timeout', '$state', '$interval', '$window','growl', 'usSpinnerService',
+            function (apolloApiService, $scope, $timeout, $state, $interval, $window, growl, usSpinnerService) {
 
             $scope.filteredResults = [];
             $scope.selectedStatus = null;
@@ -128,6 +128,10 @@ angular.module('apollo')
                 if ($scope.websocket !== null) {
                     $scope.websocket.close();
                 }
+            };
+
+            $scope.openHawtio = function (podStatus) {
+                $window.open(apolloApiService.getHawtioLink($scope.selectedStatus.environmentId, podStatus.name));
             };
 
             function refreshPreSelectedStatus() {

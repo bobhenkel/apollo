@@ -12,10 +12,19 @@ import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.PodStatus;
 import io.logz.apollo.models.Service;
+
 import io.logz.apollo.notifications.ApolloNotifications;
+
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.rapidoid.http.Req;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +35,7 @@ public class KubernetesHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesHandler.class);
     private static final int NUMBER_OF_LOG_LINES_TO_FETCH = 500;
+    private static final String APOLLO_JOLOKIA_PORT_LABEL = "apollo_jolokia_port";
     private final ApolloToKubernetesStore apolloToKubernetesStore;
     private final KubernetesClient kubernetesClient;
     private final Environment environment;
@@ -249,6 +259,52 @@ public class KubernetesHandler {
                 .exec(command);
     }
 
+    public Optional<Response> proxyJolokia(String podName, String jolokiaPath, Req req) {
+        try {
+            Optional<Integer> podJolokiaPort = getPodJolokiaPort(podName);
+            if (!podJolokiaPort.isPresent()) {
+                return Optional.empty();
+            }
+
+            String url = kubernetesClient.getMasterUrl().toString() + "api/v1/namespaces/" + environment.getKubernetesNamespace() +
+                    "/pods/http:" + podName + ":" + String.valueOf(podJolokiaPort.get()) + "/proxy/jolokia/" + jolokiaPath + "?" + req.query();
+            Request request;
+
+            switch (req.verb()) {
+                case "GET":
+                    request = new Request.Builder().url(url).build();
+                    break;
+                case "POST":
+                    request = new Request.Builder().url(url).post(RequestBody.create(MediaType.parse(req.contentType().toString()), req.body())).build();
+                    break;
+                case "PUT":
+                    request = new Request.Builder().url(url).put(RequestBody.create(MediaType.parse(req.contentType().toString()), req.body())).build();
+                    break;
+                case "DELETE":
+                    request = new Request.Builder().url(url).delete(RequestBody.create(MediaType.parse(req.contentType().toString()), req.body())).build();
+                    break;
+                case "HEAD":
+                    request = new Request.Builder().url(url).head().build();
+                    break;
+                case "OPTIONS":
+                    request = new Request.Builder().url(url).method("OPTIONS", RequestBody.create(null, new byte[0])).build();
+                    break;
+                default:
+                    logger.info("Unsupported Verb {}", req.verb());
+                    return Optional.empty();
+            }
+
+            return Optional.of(
+                    ((DefaultKubernetesClient) kubernetesClient)
+                    .getHttpClient()
+                    .newCall(request)
+                    .execute());
+        } catch (IOException e) {
+            logger.warn("Got IOException while proxy the request to jolokia!", e);
+            return Optional.empty();
+        }
+    }
+
     private PodStatus getPodStatus(String name) {
         io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
                 .pods()
@@ -264,6 +320,7 @@ public class KubernetesHandler {
         podStatus.setPhase(kubernetesPodStatus.getPhase());
         podStatus.setReason(kubernetesPodStatus.getReason());
         podStatus.setStartTime(kubernetesPodStatus.getStartTime());
+        podStatus.setHasJolokia(getPodJolokiaPort(name).isPresent());
 
         podStatus.setContainers(kubernetesClient
                 .pods()
@@ -277,6 +334,27 @@ public class KubernetesHandler {
                 .collect(Collectors.toList()));
 
         return podStatus;
+    }
+
+    private Optional<Integer> getPodJolokiaPort(String name) {
+        String jolokiaPort = kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(name)
+                .get()
+                .getMetadata()
+                .getLabels()
+                .get(APOLLO_JOLOKIA_PORT_LABEL);
+
+        if (jolokiaPort == null) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(Integer.parseInt(jolokiaPort));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     private KubernetesClient createKubernetesClient(Environment environment) {
