@@ -1,4 +1,4 @@
-package io.logz.apollo.websockets;
+package io.logz.apollo.websockets.exec;
 
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 

@@ -7,6 +7,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
@@ -255,6 +256,16 @@ public class KubernetesHandler {
                 .redirectingError()
                 .withTTY()
                 .exec(command);
+    }
+
+    public LogWatch getLogWatch(String podName, String containerName) {
+
+        return kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(podName)
+                .inContainer(containerName)
+                .watchLog();
     }
 
     public Optional<Response> proxyJolokia(String podName, String jolokiaPath, Req req) {

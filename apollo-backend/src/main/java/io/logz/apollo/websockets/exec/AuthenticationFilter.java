@@ -1,4 +1,4 @@
-package io.logz.apollo.websockets;
+package io.logz.apollo.websockets.exec;
 
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.auth.TokenConverter;

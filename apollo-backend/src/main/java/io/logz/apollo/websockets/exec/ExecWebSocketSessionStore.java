@@ -1,4 +1,4 @@
-package io.logz.apollo.websockets;
+package io.logz.apollo.websockets.exec;
 
 import javax.inject.Singleton;
 import javax.websocket.Session;
