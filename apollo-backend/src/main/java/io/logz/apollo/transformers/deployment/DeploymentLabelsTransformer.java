@@ -38,7 +38,7 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
             }
         });
 
-        // And add all back to the deployment
+        // And notify all back to the deployment
         deployment.getMetadata().setLabels(labelsFromDeployment);
 
         // We also need to tag the pod

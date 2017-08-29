@@ -79,7 +79,6 @@ public class KubernetesHandler {
             }
 
             logger.info("Started deployment id {}", deployment.getId());
-            apolloNotifications.add(Deployment.DeploymentStatus.STARTED, deployment);
             deployment.setStatus(Deployment.DeploymentStatus.STARTED);
             return deployment;
 
@@ -100,7 +99,6 @@ public class KubernetesHandler {
                     .createOrReplace(kubernetesDeployment);
 
             logger.info("Canceled deployment id {}", deployment.getId());
-            apolloNotifications.add(Deployment.DeploymentStatus.CANCELING, deployment);
             deployment.setStatus(Deployment.DeploymentStatus.CANCELING);
             return deployment;
 
@@ -134,12 +132,12 @@ public class KubernetesHandler {
                 if (updatedReplicas == totalReplicas) {
                     if (deployment.getStatus().equals(Deployment.DeploymentStatus.STARTED)) {
                         logger.info("Deployment id {} is done deploying", deployment.getId());
-                        apolloNotifications.add(Deployment.DeploymentStatus.DONE, deployment);
+                        apolloNotifications.notify(Deployment.DeploymentStatus.DONE, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.DONE);
 
                     } else if (deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELING)) {
                         logger.info("Deployment id {} is done canceling", deployment.getId());
-                        apolloNotifications.add(Deployment.DeploymentStatus.CANCELED, deployment);
+                        apolloNotifications.notify(Deployment.DeploymentStatus.CANCELED, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.CANCELED);
                     }
                 }

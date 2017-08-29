@@ -7,7 +7,6 @@ import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import io.logz.apollo.notifications.ApolloNotifications;
 import io.logz.apollo.rest.RestServer;
-import io.logz.apollo.slack.SlackSender;
 import io.logz.apollo.websockets.WebSocketServer;
 import org.rapidoid.annotation.Controller;
 import org.reflections.Reflections;

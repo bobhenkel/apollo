@@ -198,23 +198,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>2.7.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!--There's a conflict between jetty-http versions used by jetty.websocket and WireMock-->
-        <!--Should be revisited from time to time as we upgrade WireMock-->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>9.2.20.v20161216</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-test</artifactId>
-            <version>2.7.1</version>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>3.10.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

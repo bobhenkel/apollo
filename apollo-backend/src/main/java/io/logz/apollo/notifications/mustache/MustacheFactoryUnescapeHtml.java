@@ -1,4 +1,4 @@
-package io.logz.apollo.mustache;
+package io.logz.apollo.notifications.mustache;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheException;

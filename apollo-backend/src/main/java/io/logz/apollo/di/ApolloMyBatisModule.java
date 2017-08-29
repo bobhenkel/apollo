@@ -7,9 +7,11 @@ import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentGroupDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.NotificationDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.DataSourceFactory;
+import io.logz.apollo.notifications.Notification;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.flywaydb.core.Flyway;
 import org.mybatis.guice.MyBatisModule;
@@ -41,6 +43,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
         addMapperClass(ServiceDao.class);
         addMapperClass(UserDao.class);
         addMapperClass(BlockerDefinitionDao.class);
+        addMapperClass(NotificationDao.class);
     }
 
     private void init() {

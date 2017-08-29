@@ -2,25 +2,63 @@ package io.logz.apollo.notifications;
 
 import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
 
-import java.util.Date;
-
 public class Notification {
 
-    public final NotificationType type;
-    public final Date lastUpdate;
-    public final String status;
-    public final String serviceName;
-    public final String environmentName;
-    public final String userEmail;
-    public int deploymentId;
+    private int id;
+    private String name;
+    private Integer serviceId;
+    private Integer environmentId;
+    private NotificationType type;
+    private String notificationJsonConfiguration;
 
-    public Notification(NotificationType type, Date lastUpdate, String status, String serviceName, String environmentName, String userEmail, int id) {
+    public Notification() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Integer serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public Integer getEnvironmentId() {
+        return environmentId;
+    }
+
+    public void setEnvironmentId(Integer environmentId) {
+        this.environmentId = environmentId;
+    }
+
+    public NotificationType getType() {
+        return type;
+    }
+
+    public void setType(NotificationType type) {
         this.type = type;
-        this.lastUpdate = lastUpdate;
-        this.status = status;
-        this.serviceName = serviceName;
-        this.environmentName = environmentName;
-        this.userEmail = userEmail;
-        this.deploymentId = id;
+    }
+
+    public String getNotificationJsonConfiguration() {
+        return notificationJsonConfiguration;
+    }
+
+    public void setNotificationJsonConfiguration(String notificationJsonConfiguration) {
+        this.notificationJsonConfiguration = notificationJsonConfiguration;
     }
 }

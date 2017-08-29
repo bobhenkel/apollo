@@ -36,5 +36,4 @@ public class KubernetesHandlerStore {
         return kubernetesHandlerMap.computeIfAbsent(environment.getId(),
                 key -> new KubernetesHandler(apolloToKubernetesStore, kubernetesClient, environment, apolloNotifications));
     }
-
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.NotificationDao">
+    <select id="getNotification" resultType="io.logz.apollo.notifications.Notification">
+        SELECT *
+        FROM notification
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllNotifications" resultType="io.logz.apollo.notifications.Notification">
+        SELECT *
+        FROM notification
+    </select>
+
+    <insert id="addNotification" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO notification (name, service_id, environment_id, type, notification_json_configuration)
+        VALUES (#{name}, #{serviceId}, #{environmentId}, #{type}, #{notificationJsonConfiguration})
+    </insert>
+
+    <update id="updateNotification">
+        UPDATE notification SET
+            name=#{name},
+            service_id=#{serviceId},
+            environment_id=#{environmentId},
+            type=#{type},
+            notification_json_configuration=#{blockerJsonConfiguration}
+        WHERE
+            id=#{id}
+    </update>
+
+    <delete id="deleteNotification">
+        DELETE FROM notification
+        WHERE id=#{id}
+    </delete>
+</mapper>

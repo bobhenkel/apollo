@@ -12,8 +12,12 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.notifications.ApolloNotifications;
+import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
+import io.logz.apollo.notifications.Notification;
 import org.rapidoid.serialize.Ser;
 
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -92,6 +96,8 @@ public class ModelsGenerator {
         testDeployment.setEnvironmentId(relatedEnvironment.getId());
         testDeployment.setServiceId(relatedService.getId());
         testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
+        testDeployment.setLastUpdate(new Date());
+        testDeployment.setUserEmail("user-" + Common.randomStr(5));
         return testDeployment;
     }
 
@@ -170,6 +176,33 @@ public class ModelsGenerator {
         testBlockerDefinition.setId(apolloTestAdminClient.addBlocker(testBlockerDefinition).getId());
 
         return testBlockerDefinition;
+    }
+
+    public static Notification createAndSubmitNotification(ApolloTestClient apolloTestClient,
+                                                           NotificationType notificationType,
+                                                           String notificationJsonConfiguration) throws ApolloClientException {
+
+        Environment environment = createAndSubmitEnvironment(apolloTestClient);
+        Service service = createAndSubmitService(apolloTestClient);
+        return createAndSubmitNotification(apolloTestClient, environment, service, notificationType, notificationJsonConfiguration);
+    }
+
+    public static Notification createAndSubmitNotification(ApolloTestClient apolloTestClient,
+                                                           Environment environment,
+                                                           Service service,
+                                                           NotificationType notificationType,
+                                                           String notificationJsonConfiguration) throws ApolloClientException {
+
+
+        Notification notification = new Notification();
+        notification.setEnvironmentId(environment.getId());
+        notification.setServiceId(service.getId());
+        notification.setName("notification" + Common.randomStr(5));
+        notification.setType(notificationType);
+        notification.setNotificationJsonConfiguration(notificationJsonConfiguration);
+
+        notification.setId(apolloTestClient.addNotification(notification).getId());
+        return notification;
     }
 
     private static DeploymentPermission createDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService, boolean allow) {
