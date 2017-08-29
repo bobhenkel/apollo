@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitBlocker;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -153,6 +156,34 @@ public class BlockerTest {
         ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, service ,deployableVersion);
     }
 
+    @Test
+    public void testConcurrencyBlocker() throws Exception {
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
+
+        Environment environment = ModelsGenerator.createAndSubmitEnvironment(apolloTestClient);
+        Service serviceA = ModelsGenerator.createAndSubmitService(apolloTestClient);
+        Service serviceB = ModelsGenerator.createAndSubmitService(apolloTestClient);
+
+        DeployableVersion deployableVersionA = ModelsGenerator.createAndSubmitDeployableVersion(apolloTestClient, serviceA);
+        DeployableVersion deployableVersionB = ModelsGenerator.createAndSubmitDeployableVersion(apolloTestClient, serviceB);
+
+        List<Integer> excludedService = new ArrayList<>();
+
+        BlockerDefinition blocker = createAndSubmitBlocker(apolloTestAdminClient, "concurrent",
+                getConcurrencyBlockerJsonConfiguration(1, excludedService),
+                environment, null);
+
+        ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, serviceA ,deployableVersionA);
+
+        assertThatThrownBy(() -> ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, serviceB ,deployableVersionB)).isInstanceOf(ApolloBlockedException.class);
+
+        excludedService.add(serviceB.getId());
+        blocker.setBlockerJsonConfiguration(getConcurrencyBlockerJsonConfiguration(1, excludedService));
+        apolloTestAdminClient.updateBlocker(blocker);
+        ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, serviceB ,deployableVersionB);
+    }
+
     private String getTimeBasedBlockerJsonConfiguration(int dayOfWeek, LocalTime startDate, LocalTime endDate) {
 
         return "{\n" +
@@ -167,6 +198,13 @@ public class BlockerTest {
     private String getBranchBlockerJsonConfiguration(String branchName) {
         return "{\n" +
                 "  \"branchName\": \"" + branchName + "\"\n" +
+                "}";
+    }
+
+    private String getConcurrencyBlockerJsonConfiguration(int allowedConcurrentDeployment, List<Integer> excludeServices) {
+        return "{\n" +
+                "  \"allowedConcurrentDeployment\": \"" + allowedConcurrentDeployment + "\",\n" +
+                "  \"excludeServices\":"+ excludeServices.toString() +
                 "}";
     }
 }

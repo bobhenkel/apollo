@@ -5,6 +5,7 @@ import io.logz.apollo.blockers.BlockerFunction;
 import io.logz.apollo.blockers.BlockerInjectableCommons;
 import io.logz.apollo.blockers.BlockerType;
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 import io.logz.apollo.scm.GithubConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,12 @@ public class BranchBlocker implements BlockerFunction {
     }
 
     @Override
-    public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, DeployableVersion deployableVersion) {
+    public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, Deployment deployment) {
+        DeployableVersion deployableVersion = blockerInjectableCommons.getDeployableVersionDao()
+                                                                      .getDeployableVersion(deployment.getDeployableVersionId());
+
         String repoName = GithubConnector.getRepoNameFromRepositoryUrl(deployableVersion.getGithubRepositoryUrl());
+
         if (!blockerInjectableCommons.getGithubConnector().isCommitInBranchHistory(repoName,
                         branchBlockerConfiguration.getBranchName(), deployableVersion.getGitCommitSha())) {
 
