@@ -38,11 +38,6 @@ public class NotificationsTest {
                 "        \"channel\": \"#slack\",\n" +
                 "        \"webhookUrl\": \""+ slackMockDomain +"\"\n" +
                 "}";
-
-        slackNotificationConfiguration = "{\n" +
-                "        \"channel\": \"#apollo-deployments\",\n" +
-                "        \"webhookUrl\": \"https://hooks.slack.com/services/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\"\n" +
-                "}";
     }
 
     @Test
