@@ -48,7 +48,7 @@ public class SlackSender implements NotificationSender{
             "                },\n" +
             "\t\t\t\t                {\n" +
             "                    \"title\": \"Service\",\n" +
-            "                    \"value\": \"{{service}}\",\n" +
+            "                    \"value\": \"{{service-name}}\",\n" +
             "                    \"short\": true\n" +
             "                },                {\n" +
             "                    \"title\": \"User\",\n" +
