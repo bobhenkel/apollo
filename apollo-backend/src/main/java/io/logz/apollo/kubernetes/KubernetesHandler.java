@@ -2,6 +2,7 @@ package io.logz.apollo.kubernetes;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -335,11 +336,17 @@ public class KubernetesHandler {
     }
 
     private Optional<Integer> getPodJolokiaPort(String name) {
-        String jolokiaPort = kubernetesClient
+        Pod pod = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
                 .withName(name)
-                .get()
+                .get();
+
+        if (pod == null) {
+            return Optional.empty();
+        }
+
+        String jolokiaPort = pod
                 .getMetadata()
                 .getLabels()
                 .get(APOLLO_JOLOKIA_PORT_LABEL);
