@@ -4,6 +4,7 @@ import io.logz.apollo.blockers.BlockerFunction;
 import io.logz.apollo.blockers.BlockerInjectableCommons;
 import io.logz.apollo.blockers.BlockerType;
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ public class UnconditionalBlocker implements BlockerFunction {
     }
 
     @Override
-    public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, DeployableVersion deployableVersion) {
+    public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, Deployment deployment) {
         return true;
     }
 }

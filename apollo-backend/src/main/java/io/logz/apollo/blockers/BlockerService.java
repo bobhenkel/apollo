@@ -30,15 +30,13 @@ public class BlockerService {
     private static final Logger logger = LoggerFactory.getLogger(BlockerService.class);
 
     private final BlockerDefinitionDao blockerDefinitionDao;
-    private final DeployableVersionDao deployableVersionDao;
     private final BlockerInjectableCommons blockerInjectableCommons;
     private final Map<String, Class<? extends BlockerFunction>> blockerTypeNameBindings;
     private final Reflections reflections;
 
     @Inject
-    public BlockerService(BlockerDefinitionDao blockerDefinitionDao, DeployableVersionDao deployableVersionDao, BlockerInjectableCommons blockerInjectableCommons) {
+    public BlockerService(BlockerDefinitionDao blockerDefinitionDao, BlockerInjectableCommons blockerInjectableCommons) {
         this.blockerDefinitionDao = requireNonNull(blockerDefinitionDao);
-        this.deployableVersionDao = requireNonNull(deployableVersionDao);
         this.blockerInjectableCommons = requireNonNull(blockerInjectableCommons);
 
         blockerTypeNameBindings = new HashMap<>();
@@ -63,8 +61,7 @@ public class BlockerService {
     public boolean shouldBlock(Deployment deployment) {
         for (Blocker blocker : getBlockers()) {
             if (isBlockerInScope(blocker, deployment)) {
-                DeployableVersion deployableVersion = deployableVersionDao.getDeployableVersion(deployment.getDeployableVersionId());
-                if (blocker.getBlockerFunction().shouldBlock(blockerInjectableCommons, deployableVersion)) {
+                if (blocker.getBlockerFunction().shouldBlock(blockerInjectableCommons, deployment)) {
                     logger.info("Blocking deployment for service {}, in environment {}, with deployable version of {} from {} due to {} blocker",
                             deployment.getServiceId(), deployment.getEnvironmentId(), deployment.getDeployableVersionId(), deployment.getUserEmail(), blocker.getName());
                     return true;

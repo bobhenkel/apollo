@@ -1,6 +1,7 @@
 package io.logz.apollo.blockers;
 
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.Deployment;
 
 import java.io.IOException;
 
@@ -9,5 +10,5 @@ import java.io.IOException;
  */
 public interface BlockerFunction {
     void init(String jsonConfiguration) throws IOException;
-    boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, DeployableVersion deployableVersion);
+    boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, Deployment deployment);
 }
