@@ -32,6 +32,7 @@ public class SlackSender implements NotificationSender{
     private static String slackBodyTemplate = "{\n" +
             "\t\"icon_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Putin-pictogram.svg/2000px-Putin-pictogram.svg.png\",\n" +
             "    \"username\": \"Apollo\",\n" +
+            "    \"channel\": \"{{ channel }}\",\n" +
             "    \"attachments\": [\n" +
             "        {\n" +
             "            \"fallback\": \"Apollo deployment of {{ service-name }}@{{ environment }} is {{ phase }}\",\n" +
@@ -59,9 +60,7 @@ public class SlackSender implements NotificationSender{
             "                    \"value\": \"{{phase}}\",\n" +
             "                    \"short\": true\n" +
             "                }\n" +
-            "            ],\n" +
-            "            \"image_url\": \"https://s-media-cache-ak0.pinimg.com/originals/d2/68/55/d26855d47dd12dbb4ce04c1005d7f9c8.png\",\n" +
-            "            \"thumb_url\": \"https://s-media-cache-ak0.pinimg.com/originals/d2/68/55/d26855d47dd12dbb4ce04c1005d7f9c8.png\"\n" +
+            "            ]\n" +
             "        }\n" +
             "    ]\n" +
             "}";

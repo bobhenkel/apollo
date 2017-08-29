@@ -22,14 +22,12 @@ public class ApolloConfiguration {
     private String secret;
     private int wsPort;
     private int wsIdleTimeoutSeconds;
-    private String slackWebHookUrl;
-    private String slackChanel;
 
     @VisibleForTesting
     public ApolloConfiguration(int dbPort, String dbHost, String dbUser, String dbPassword,
                                String dbSchema, String apiListen, int apiPort,
                                int monitorThreadFrequencySeconds, String githubLogin, String githubOauthToken,
-                               String secret, int wsPort, int wsIdleTimeoutSeconds, String slackWebHookUrl, String slackChanel) {
+                               String secret, int wsPort, int wsIdleTimeoutSeconds) {
         this.dbPort = dbPort;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
@@ -43,8 +41,6 @@ public class ApolloConfiguration {
         this.secret = secret;
         this.wsPort = wsPort;
         this.wsIdleTimeoutSeconds = wsIdleTimeoutSeconds;
-        this.slackWebHookUrl = slackWebHookUrl;
-        this.slackChanel = slackChanel;
     }
 
     public static ApolloConfiguration parseConfigurationFromResources() {
@@ -74,13 +70,9 @@ public class ApolloConfiguration {
         int wsPort = config.getInt("apollo.websocket.port");
         int wsIdleTimeoutSeconds = config.getInt("apollo.websocket.idleTimeoutSeconds");
 
-        // Notifications related
-        String slackWebHookUrl = config.getString("apollo.notifications.slack.webhookUrl");
-        String slackChanel = config.getString("apollo.notifications.slack.channel");
-
         return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort,
-                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret, wsPort, wsIdleTimeoutSeconds,
-                                       slackWebHookUrl, slackChanel);
+                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret, wsPort, wsIdleTimeoutSeconds
+        );
     }
 
     public int getDbPort() {
@@ -133,14 +125,6 @@ public class ApolloConfiguration {
 
     public int getWsIdleTimeoutSeconds() {
         return wsIdleTimeoutSeconds;
-    }
-
-    public String getSlackWebHookUrl() {
-        return slackWebHookUrl;
-    }
-
-    public String getSlackChanel() {
-        return slackChanel;
     }
 
     @VisibleForTesting
@@ -206,15 +190,5 @@ public class ApolloConfiguration {
     @VisibleForTesting
     public void setWsIdleTimeoutSeconds(int wsIdleTimeoutSeconds) {
         this.wsIdleTimeoutSeconds = wsIdleTimeoutSeconds;
-    }
-
-    @VisibleForTesting
-    public void setSlackWebHookUrl(String slackWebHookUrl) {
-        this.slackWebHookUrl = slackWebHookUrl;
-    }
-
-    @VisibleForTesting
-    public void setSlackChanel(String slackChanel) {
-        this.slackChanel = slackChanel;
     }
 }
