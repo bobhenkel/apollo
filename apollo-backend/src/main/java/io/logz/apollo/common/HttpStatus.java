@@ -1,8 +1,5 @@
 package io.logz.apollo.common;
 
-/**
- * Created by roiravhon on 3/21/17.
- */
 public class HttpStatus {
 
     // Implementing this class since there are missing codes in all of built in java classes, and have an external dependency just for this seems too much.
@@ -18,6 +15,10 @@ public class HttpStatus {
     public static int NOT_ACCEPTABLE = 406;
     public static int CONFLICT = 409;
     public static int TOO_MANY_REQUESTS = 429;
-
+    
     public static int INTERNAL_SERVER_ERROR = 500;
+  
+    public static boolean isPositive(int code) {
+        return code >= 200 && code < 300;
+    }
 }

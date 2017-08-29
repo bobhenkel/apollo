@@ -71,7 +71,8 @@ public class ApolloConfiguration {
         int wsIdleTimeoutSeconds = config.getInt("apollo.websocket.idleTimeoutSeconds");
 
         return new ApolloConfiguration(dbPort, dbHost, dbUser, dbPassword, dbSchema, apiListen, apiPort,
-                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret, wsPort, wsIdleTimeoutSeconds);
+                monitorThreadFrequencySeconds, githubLogin, githubOauthToken, secret, wsPort, wsIdleTimeoutSeconds
+        );
     }
 
     public int getDbPort() {

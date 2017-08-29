@@ -11,6 +11,7 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.notifications.Notification;
 
 import java.io.IOException;
 import java.util.List;
@@ -118,5 +119,34 @@ public class ApolloClient {
 
     public List<BlockerDefinition> getAllBlockerDefinitions() throws ApolloClientException {
         return genericApolloClient.getResult("/blocker-definition/", new TypeReference<List<BlockerDefinition>>() {});
+    }
+
+    public Notification addNotification(Notification notification) throws ApolloClientException {
+        String requestBody = Common.generateJson("name", notification.getName(),
+                "environmentId", String.valueOf(notification.getEnvironmentId()),
+                "serviceId", String.valueOf(notification.getServiceId()),
+                "type", String.valueOf(notification.getType()),
+                "notificationJsonConfiguration", notification.getNotificationJsonConfiguration());
+
+        return genericApolloClient.postAndGetResult("/notification", requestBody, new TypeReference<Notification>() {});
+    }
+
+    public Notification updateNotification(Notification notification) throws ApolloClientException {
+        String requestBody = Common.generateJson("id", String.valueOf(notification.getId()),
+                "name", notification.getName(),
+                "environmentId", String.valueOf(notification.getEnvironmentId()),
+                "serviceId", String.valueOf(notification.getServiceId()),
+                "type", String.valueOf(notification.getType()),
+                "notificationJsonConfiguration", notification.getNotificationJsonConfiguration());
+
+        return genericApolloClient.putAndGetResult("/notification/" + notification.getId(), requestBody, new TypeReference<Notification>() {});
+    }
+
+    public Notification getNotification(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/notification/" + id, new TypeReference<Notification>() {});
+    }
+
+    public List<Notification> getAllNotifications() throws ApolloClientException {
+        return genericApolloClient.getResult("/notification/", new TypeReference<List<Notification>>() {});
     }
 }

@@ -154,6 +154,11 @@
             <artifactId>reflections</artifactId>
             <version>0.9.11</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>0.8.12</version>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -184,6 +189,18 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-mock</artifactId>
             <version>1.4.14</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.8.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>3.10.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -28,12 +28,16 @@ public class Common {
         return UUID.randomUUID().toString().substring(0, size);
     }
 
-    public static int getAvailablePort() throws IOException {
-        ServerSocket socket = new ServerSocket(0);
-        int port = socket.getLocalPort();
-        socket.close();
+    public static int getAvailablePort() {
+        try {
+            ServerSocket socket = new ServerSocket(0);
+            int port = socket.getLocalPort();
+            socket.close();
 
-        return port;
+            return port;
+        } catch (IOException e) {
+            throw new RuntimeException("Could not find available port", e);
+        }
     }
 
     public static String generateJson(String... keyValuePairs ) {

@@ -2,6 +2,7 @@ package io.logz.apollo.kubernetes;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -12,11 +13,15 @@ import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.PodStatus;
 import io.logz.apollo.models.Service;
+
+import io.logz.apollo.notifications.ApolloNotifications;
+
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.rapidoid.http.Req;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +32,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Created by roiravhon on 2/2/17.
- */
 public class KubernetesHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesHandler.class);
@@ -38,18 +40,21 @@ public class KubernetesHandler {
     private final ApolloToKubernetesStore apolloToKubernetesStore;
     private final KubernetesClient kubernetesClient;
     private final Environment environment;
+    private final ApolloNotifications apolloNotifications;
 
     @VisibleForTesting
     KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, KubernetesClient kubernetesClient,
-                      Environment environment) {
+                      Environment environment, ApolloNotifications apolloNotifications) {
         this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.kubernetesClient = requireNonNull(kubernetesClient);
         this.environment = requireNonNull(environment);
+        this.apolloNotifications = requireNonNull(apolloNotifications);
     }
 
-    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment) {
+    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment, ApolloNotifications apolloNotifications) {
         this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.environment = requireNonNull(environment);
+        this.apolloNotifications = requireNonNull(apolloNotifications);
 
         this.kubernetesClient = createKubernetesClient(environment);
     }
@@ -128,10 +133,12 @@ public class KubernetesHandler {
                 if (updatedReplicas == totalReplicas) {
                     if (deployment.getStatus().equals(Deployment.DeploymentStatus.STARTED)) {
                         logger.info("Deployment id {} is done deploying", deployment.getId());
+                        apolloNotifications.notify(Deployment.DeploymentStatus.DONE, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.DONE);
 
                     } else if (deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELING)) {
                         logger.info("Deployment id {} is done canceling", deployment.getId());
+                        apolloNotifications.notify(Deployment.DeploymentStatus.CANCELED, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.CANCELED);
                     }
                 }
@@ -329,11 +336,17 @@ public class KubernetesHandler {
     }
 
     private Optional<Integer> getPodJolokiaPort(String name) {
-        String jolokiaPort = kubernetesClient
+        Pod pod = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
                 .withName(name)
-                .get()
+                .get();
+
+        if (pod == null) {
+            return Optional.empty();
+        }
+
+        String jolokiaPort = pod
                 .getMetadata()
                 .getLabels()
                 .get(APOLLO_JOLOKIA_PORT_LABEL);

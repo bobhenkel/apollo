@@ -80,14 +80,14 @@ public class ApolloAdminClient {
         String requestBody = Common.generateJson("userEmail", userEmail,
                 "deploymentGroupId", String.valueOf(deploymentGroupId));
 
-        genericApolloClient.postAndGetResult("/add-user-to-deployment-group", requestBody, new TypeReference<Object>() {});
+        genericApolloClient.postAndGetResult("/notify-user-to-deployment-group", requestBody, new TypeReference<Object>() {});
     }
 
     public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId) throws ApolloClientException {
         String requestBody = Common.generateJson("deploymentGroupId", String.valueOf(deploymentGroupId),
                 "deploymentPermissionId", String.valueOf(deploymentPermissionId));
 
-        genericApolloClient.postAndGetResult("/add-deployment-permission-to-deployment-group", requestBody, new TypeReference<Object>() {});
+        genericApolloClient.postAndGetResult("/notify-deployment-permission-to-deployment-group", requestBody, new TypeReference<Object>() {});
     }
 
     public BlockerDefinition addBlocker(BlockerDefinition blockerDefinition) throws ApolloClientException {

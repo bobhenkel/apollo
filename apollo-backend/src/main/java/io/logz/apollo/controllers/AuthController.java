@@ -128,14 +128,14 @@ public class AuthController {
     }
 
     @Administrator
-    @POST("/add-user-to-deployment-group")
+    @POST("/notify-user-to-deployment-group")
     public void addUserToDeploymentGroup(String userEmail, int deploymentGroupId, Req req) {
         deploymentGroupDao.addUserToDeploymentGroup(userEmail, deploymentGroupId);
         assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
     }
 
     @Administrator
-    @POST("/add-deployment-permission-to-deployment-group")
+    @POST("/notify-deployment-permission-to-deployment-group")
     public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId, Req req) {
         deploymentGroupDao.addDeploymentPermissionToDeploymentGroup(deploymentGroupId, deploymentPermissionId);
         assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
