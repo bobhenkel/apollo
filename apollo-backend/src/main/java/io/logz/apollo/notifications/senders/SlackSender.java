@@ -48,7 +48,7 @@ public class SlackSender implements NotificationSender{
             "                },\n" +
             "\t\t\t\t                {\n" +
             "                    \"title\": \"Service\",\n" +
-            "                    \"value\": \"{{service}}\",\n" +
+            "                    \"value\": \"{{service-name}}\",\n" +
             "                    \"short\": true\n" +
             "                },                {\n" +
             "                    \"title\": \"User\",\n" +
@@ -77,7 +77,7 @@ public class SlackSender implements NotificationSender{
 
         params.put("time", DateFormat.getTimeInstance(DateFormat.SHORT).format(notificationTemplateMetadata.getLastUpdate()));
         params.put("phase", notificationTemplateMetadata.getStatus());
-        params.put("service", notificationTemplateMetadata.getServiceName());
+        params.put("service-name", notificationTemplateMetadata.getServiceName());
         params.put("environment", notificationTemplateMetadata.getEnvironmentName());
         params.put("username", notificationTemplateMetadata.getUserEmail());
         params.put("deployment-id", notificationTemplateMetadata.getDeploymentId());
