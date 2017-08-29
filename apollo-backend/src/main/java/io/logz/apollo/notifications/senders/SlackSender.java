@@ -77,7 +77,7 @@ public class SlackSender implements NotificationSender{
 
         params.put("time", DateFormat.getTimeInstance(DateFormat.SHORT).format(notificationTemplateMetadata.getLastUpdate()));
         params.put("phase", notificationTemplateMetadata.getStatus());
-        params.put("service-name", notificationTemplateMetadata.getServiceName());
+        params.put("service", notificationTemplateMetadata.getServiceName());
         params.put("environment", notificationTemplateMetadata.getEnvironmentName());
         params.put("username", notificationTemplateMetadata.getUserEmail());
         params.put("deployment-id", notificationTemplateMetadata.getDeploymentId());
