@@ -20,10 +20,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.Reader;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,7 +104,7 @@ public class ContainerExecEndpoint {
     }
 
     private void openReaderThreads(Session session, SessionExecModel sessionExecModel) {
-        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readFromStreamToSession(sessionExecModel.getExecWatch().getOutput(), session));
-        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readFromStreamToSession(sessionExecModel.getExecWatch().getError(), session));
+        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getOutput(), session));
+        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getError(), session));
     }
 }

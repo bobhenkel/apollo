@@ -75,18 +75,6 @@ public class DeploymentController {
     }
 
     @LoggedIn
-    @GET("/deployment/{id}/logs")
-    public String getDeploymentLogs(int id) {
-        // TODO: ideally i would not need a KubernetesHandler here, but since no DI and desired simplicity - i can live with this for now
-        Deployment deployment = deploymentDao.getDeployment(id);
-        Environment environment = environmentDao.getEnvironment(deployment.getEnvironmentId());
-        Service service = serviceDao.getService(deployment.getServiceId());
-        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
-
-        return kubernetesHandler.getDeploymentLogs(environment, service);
-    }
-
-    @LoggedIn
     @GET("/latest-deployments")
     public List<Deployment> getLatestDeployments() {
         return deploymentDao.getLatestDeployments();

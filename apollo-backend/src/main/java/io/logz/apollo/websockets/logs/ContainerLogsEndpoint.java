@@ -1,6 +1,5 @@
 package io.logz.apollo.websockets.logs;
 
-import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.logz.apollo.common.QueryStringParser;
 import io.logz.apollo.dao.EnvironmentDao;
@@ -10,7 +9,6 @@ import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.websockets.WebsocketWriter;
-import io.logz.apollo.websockets.exec.SessionExecModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +19,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.Reader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -91,6 +84,6 @@ public class ContainerLogsEndpoint {
     }
 
     private void openReaderThread(Session session, SessionLogWatchModel sessionLogWatchModel) {
-        sessionLogWatchModel.getExecutor().execute(() -> WebsocketWriter.readFromStreamToSession(sessionLogWatchModel.getLogWatch().getOutput(), session));
+        sessionLogWatchModel.getExecutor().execute(() -> WebsocketWriter.readLinesFromStreamToSession(sessionLogWatchModel.getLogWatch().getOutput(), session));
     }
 }

@@ -131,14 +131,6 @@ public class KubernetesHandlerTest {
         assertThat(currentFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELED);
     }
 
-    @Ignore("Cant mock this call. Ignoring this test until move to a different testing methods for kubernetes client.")
-    @Test
-    public void testGetLogs() {
-
-        String logs = notFinishedDeploymentHandler.getDeploymentLogs(notFinishedDeployment.getEnvironment(), notFinishedDeployment.getService());
-        assertThat(logs).contains(LOG_MESSAGE_IN_POD);
-    }
-
     @Test
     public void testGetStatus() {
 

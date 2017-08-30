@@ -62,12 +62,6 @@
                                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                                             </a>
                                         </div>
-                                        <div class="col-lg-6">
-                                            <a ng-click="setSelectedStatus(status) ; getLogs()" data-toggle="modal" data-target="#show-logs">
-                                                <span class="pull-left">View Logs</span>
-                                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                                            </a>
-                                        </div>
                                     </div>
                                     <div class="clearfix"></div>
                                 </div>
@@ -123,8 +117,12 @@
                                             <i class="fa fa-times"></i>
                                         </button>
                                         <button type="button" class="btn btn-success btn-circle" uib-tooltip="Live Terminal" data-toggle="modal" data-target="#select-container"
-                                        ng-click="selectPod(podStatus)">
+                                        ng-click="selectPod(podStatus);setWebsocketScope('exec')">
                                             <i class="fa fa-terminal"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-circle" uib-tooltip="Live Tail" data-toggle="modal" data-target="#select-container"
+                                        ng-click="selectPod(podStatus);setWebsocketScope('logs')">
+                                            <i class="fa fa-binoculars"></i>
                                         </button>
                                         <button type="button" class="btn btn-primary btn-circle" uib-tooltip="Hawt.io" ng-click="openHawtio(podStatus)" ng-show="podStatus.hasJolokia">
                                             <i class="fa fa-coffee"></i>
@@ -143,41 +141,18 @@
         </div>
     </div>
 
-    <div class="modal fade" id="show-logs" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" ng-click="stopLogs()" aria-hidden="true">×</button>
-                    <h4 class="modal-title">Logs from container</h4>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <pre class="apollo-logs">
-<!-- Not indenting since it will also idents what inside the code block-->
-<code ng-bind-html="dockerLogs">
-</code>
-                        </pre>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogs()">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="modal fade" id="select-container" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title">Select the container you want to open live session to</h4>
+                    <h4 class="modal-title">Select a container</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="row text-center">
                             <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector"
-                                    ng-repeat="container in selectedPodStatus.containers" ng-click="startLiveSession(container)" data-toggle="modal" data-target="#select-container,#live-session">
+                                    ng-repeat="container in selectedPodStatus.containers" ng-click="startWebSocket(container)" data-toggle="modal" data-target="#select-container,#live-session">
                                 {{container}}
                             </button>
                         </div>
@@ -194,15 +169,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="closeLiveSession()">×</button>
-                    <h4 class="modal-title">Live session! (Beta)</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="closeWebSocket()">×</button>
+                    <h4 class="modal-title" ng-bind-html="terminalHeader"></h4>
                 </div>
                 <div class="modal-body">
                     <div id="terminal" class="apollo-live-session">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="closeLiveSession()">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="closeWebSocket()">Close</button>
                 </div>
             </div>
         </div>
