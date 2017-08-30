@@ -104,6 +104,7 @@ public class ContainerExecEndpoint {
     }
 
     private void openReaderThreads(Session session, SessionExecModel sessionExecModel) {
+        // TODO: if there is a leak, this might be a suspect.. close those?
         sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getOutput(), session));
         sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getError(), session));
     }

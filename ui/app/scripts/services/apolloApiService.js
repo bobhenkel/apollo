@@ -159,7 +159,7 @@ function ApiService($q, $http){
     };
 
     var getWebsocketLogUrl = function (environment, service, podName, containerName) {
-      return CONFIG.wsUrl + "logs/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
+      return CONFIG.wsUrl + "logs/pod/" + podName + "/container/" + containerName + "?environment=" + environment;
     };
 
     var getAllBlockers = function () {
