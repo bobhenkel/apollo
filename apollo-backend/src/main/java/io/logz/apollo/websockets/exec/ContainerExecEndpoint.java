@@ -1,4 +1,4 @@
-package io.logz.apollo.websockets;
+package io.logz.apollo.websockets.exec;
 
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.logz.apollo.common.QueryStringParser;
@@ -8,6 +8,7 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.websockets.WebsocketWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +20,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.Reader;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -107,32 +104,8 @@ public class ContainerExecEndpoint {
     }
 
     private void openReaderThreads(Session session, SessionExecModel sessionExecModel) {
-        sessionExecModel.getExecutor().execute(() -> readFromStreamToSession(sessionExecModel.getExecWatch().getOutput(), session));
-        sessionExecModel.getExecutor().execute(() -> readFromStreamToSession(sessionExecModel.getExecWatch().getError(), session));
-    }
-
-    private void readFromStreamToSession(InputStream inputStream, Session session) {
-        try {
-            Reader reader = new InputStreamReader(inputStream);
-            while (!Thread.interrupted()) {
-                try {
-                    char character = (char) reader.read();
-                    session.getBasicRemote().sendObject(character);
-                } catch (InterruptedIOException e) {
-                    break;
-                } catch (IOException e) {
-                    if (!Thread.interrupted()) {
-                        logger.warn("Got IOException while writing to websocket, bailing..", e);
-                        break;
-                    } else {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (Exception e) {
-                    logger.warn("Got exception while reading and sending line to websocket, continuing.. ", e);
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Got unhandled exception while reading from input stream, swallowing", e);
-        }
+        // TODO: if there is a leak, this might be a suspect.. close those?
+        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getOutput(), session));
+        sessionExecModel.getExecutor().execute(() -> WebsocketWriter.readCharsFromStreamToSession(sessionExecModel.getExecWatch().getError(), session));
     }
 }

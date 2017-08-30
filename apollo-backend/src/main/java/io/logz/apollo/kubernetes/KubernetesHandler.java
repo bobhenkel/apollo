@@ -3,11 +3,13 @@ package io.logz.apollo.kubernetes;
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
@@ -26,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -155,43 +159,6 @@ public class KubernetesHandler {
         }
     }
 
-    public String getDeploymentLogs(Environment environment, Service service) {
-
-        try {
-            StringBuilder sb = new StringBuilder();
-            kubernetesClient
-                    .pods()
-                    .inNamespace(environment.getKubernetesNamespace())
-                    .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
-                    .list()
-                    .getItems()
-                    .stream()
-                    .map(pod -> pod.getMetadata().getName())
-                    .forEach(podName -> kubernetesClient
-                            .pods()
-                            .inNamespace(environment.getKubernetesNamespace())
-                            .withName(podName)
-                            .get()
-                            .getSpec()
-                            .getContainers()
-                            .forEach(container ->
-                                    sb.append("Logs from container ").append(container.getName()).append(" on pod ").append(podName).append(": \n").append(
-                                            kubernetesClient
-                                            .pods()
-                                            .inNamespace(environment.getKubernetesNamespace())
-                                            .withName(podName)
-                                            .inContainer(container.getName())
-                                            .tailingLines(NUMBER_OF_LOG_LINES_TO_FETCH)
-                                            .getLog(true)
-                                    ).append("\n")));
-
-            return sb.toString();
-        } catch (Exception e) {
-            logger.error("Got exception while getting logs for service {} on environment {}", service.getId(), environment.getId(), e);
-            return "Can't get logs!";
-        }
-    }
-
     public KubernetesDeploymentStatus getCurrentStatus(Service service) {
 
         io.fabric8.kubernetes.api.model.extensions.Deployment deployment = kubernetesClient
@@ -258,6 +225,17 @@ public class KubernetesHandler {
                 .exec(command);
     }
 
+    public LogWatch getLogWatch(String podName, String containerName) {
+
+        return kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(podName)
+                .inContainer(containerName)
+                .tailingLines(500)
+                .watchLog();
+    }
+
     public Optional<Response> proxyJolokia(String podName, String jolokiaPath, Req req) {
         try {
             Optional<Integer> podJolokiaPort = getPodJolokiaPort(podName);
@@ -304,42 +282,71 @@ public class KubernetesHandler {
         }
     }
 
-    private PodStatus getPodStatus(String name) {
-        io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
+    public Optional<String> getServiceLatestCreatedPodName(Service service) {
+        PodList podList = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withName(name)
-                .get()
-                .getStatus();
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
+                .list();
 
-        PodStatus podStatus = new PodStatus();
-        podStatus.setName(name);
-        podStatus.setHostIp(kubernetesPodStatus.getHostIP());
-        podStatus.setPodIp(kubernetesPodStatus.getPodIP());
-        podStatus.setPhase(kubernetesPodStatus.getPhase());
-        podStatus.setReason(kubernetesPodStatus.getReason());
-        podStatus.setStartTime(kubernetesPodStatus.getStartTime());
-        podStatus.setHasJolokia(getPodJolokiaPort(name).isPresent());
+        if (podList == null) {
+            return Optional.empty();
+        }
 
-        podStatus.setContainers(kubernetesClient
+        Optional<Pod> newestPod = podList.getItems()
+                .stream()
+                .sorted((o1, o2) -> {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                    LocalDateTime pod1 = LocalDateTime.parse(o1.getStatus().getStartTime(), formatter);
+                    LocalDateTime pod2 = LocalDateTime.parse(o2.getStatus().getStartTime(), formatter);
+                    return pod1.compareTo(pod2);
+                }).findFirst();
+
+        return newestPod.map(pod -> pod
+                .getMetadata()
+                .getName());
+    }
+
+    public List<String> getPodContainerNames(String podName) {
+        return kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withName(name)
+                .withName(podName)
                 .get()
                 .getSpec()
                 .getContainers()
                 .stream()
                 .map(Container::getName)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+    }
+
+    private PodStatus getPodStatus(String podName) {
+        io.fabric8.kubernetes.api.model.PodStatus kubernetesPodStatus = kubernetesClient
+                .pods()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(podName)
+                .get()
+                .getStatus();
+
+        PodStatus podStatus = new PodStatus();
+        podStatus.setName(podName);
+        podStatus.setHostIp(kubernetesPodStatus.getHostIP());
+        podStatus.setPodIp(kubernetesPodStatus.getPodIP());
+        podStatus.setPhase(kubernetesPodStatus.getPhase());
+        podStatus.setReason(kubernetesPodStatus.getReason());
+        podStatus.setStartTime(kubernetesPodStatus.getStartTime());
+        podStatus.setHasJolokia(getPodJolokiaPort(podName).isPresent());
+
+        podStatus.setContainers(getPodContainerNames(podName));
 
         return podStatus;
     }
 
-    private Optional<Integer> getPodJolokiaPort(String name) {
+    private Optional<Integer> getPodJolokiaPort(String podName) {
         Pod pod = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withName(name)
+                .withName(podName)
                 .get();
 
         if (pod == null) {

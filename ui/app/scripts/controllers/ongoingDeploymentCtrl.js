@@ -7,6 +7,10 @@ angular.module('apollo')
 
                 $scope.deploymentId = $stateParams.deploymentId;
                 $scope.selectedDeployment = null;
+                $scope.selectedDeploymentContainers = [];
+                $scope.selectedDeploymentLatestPod = null;
+                $scope.websocket = null;
+                $scope.term = null;
 
                 $scope.setSelectedDeployment = function(selectedDeployment) {
                     $scope.selectedDeployment = selectedDeployment;
@@ -25,20 +29,61 @@ angular.module('apollo')
 
                 };
 
-                $scope.getLogs = function() {
-                    fetchLatestLogs();
-                    $scope.logsInterval = $interval(fetchLatestLogs, 8000);
-                };
+                $scope.getContainersOfSelectedDeployment = function () {
+                  apolloApiService.latestCreatedPod($scope.selectedDeployment.environmentId,
+                      $scope.selectedDeployment.serviceId).then(function (latestPodResponse) {
+                          $scope.selectedDeploymentLatestPod = latestPodResponse.data;
+                          apolloApiService.podContainers($scope.selectedDeployment.environmentId,
+                              latestPodResponse.data).then(function (containersResponse) {
+                                  $scope.selectedDeploymentContainers = containersResponse.data;
+                          }, function (containerError) {
+                              growl.error("Could not fetch the containers of the latest running pod, try again!")
+                          })
 
-                $scope.stopLogs = function() {
-                    $interval.cancel($scope.logsInterval);
-                };
-
-                function fetchLatestLogs() {
-                    apolloApiService.getDeploymentLogs($scope.selectedDeployment.id).then(function(response) {
-                        $scope.dockerLogs = response.data;
+                  }, function(error) {
+                      growl.error("Could not find latest running pod for that deployment, try again!")
                     });
+                };
+
+                $scope.startLogsWebsocket = function (containerName) {
+                    setTimeout(function () {
+                    $scope.term = new Terminal({
+                        scrollback: 3000
+                    });
+
+                    var environmentId = $scope.selectedDeployment.environmentId;
+                    var serviceId = $scope.selectedDeployment.serviceId;
+                    var podName = $scope.selectedDeploymentLatestPod;
+                    var execUrl = apolloApiService.getWebsocketLogUrl(environmentId, serviceId, podName, containerName);
+
+                    $scope.websocket = new WebSocket(execUrl);
+
+                    $scope.websocket.onerror = function (event) {
+                        if (event.code) {
+                            growl.error("Unknown error occurred, error code: " + event.code, {ttl: 7000});
+                        }
+                    };
+
+                    $scope.term.open(document.getElementById('terminal'));
+                    $scope.term.fit();
+                    $scope.term.focus();
+
+                    $scope.term.attach($scope.websocket, true, false);
+                    $scope.term.writeln("Opening web socket, wait a sec!");
+
+                }, 300);
+                };
+
+                $scope.stopLogsWebsocket = function () {
+                    if ($scope.term !== null) {
+                    $scope.term.detach();
+                    $scope.term.destroy();
                 }
+
+                if ($scope.websocket !== null) {
+                    $scope.websocket.close();
+                }
+                };
 
                 $scope.getLabel = function(deploymentStatus) {
                     return apolloApiService.matchLabelToDeploymentStatus(deploymentStatus);

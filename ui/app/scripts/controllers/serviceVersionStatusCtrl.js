@@ -5,6 +5,9 @@ angular.module('apollo')
                                     '$timeout', '$state', '$interval', '$window','growl', 'usSpinnerService',
             function (apolloApiService, $scope, $timeout, $state, $interval, $window, growl, usSpinnerService) {
 
+            var execTypeName = "exec";
+            var logsTypeName = "logs";
+
             $scope.filteredResults = [];
             $scope.selectedStatus = null;
             $scope.selectedPodStatus = null;
@@ -13,6 +16,8 @@ angular.module('apollo')
             $scope.showingByValue = null;
             $scope.websocket = null;
             $scope.term = null;
+            $scope.websocketScope = null;
+            $scope.terminalHeader = null;
 
             $scope.showByService = function(service) {
                 usSpinnerService.spin('result-spinner');
@@ -50,13 +55,14 @@ angular.module('apollo')
                 $scope.selectedStatus = status;
             };
 
-            $scope.getLogs = function() {
-                fetchLatestLogs();
-                $scope.logsInterval = $interval(fetchLatestLogs, 10000);
-            };
+            $scope.setWebsocketScope = function (scope) {
+                $scope.websocketScope = scope;
 
-            $scope.stopLogs = function() {
-                $interval.cancel($scope.logsInterval);
+                if (scope === execTypeName) {
+                    $scope.terminalHeader = "Live Session to " + $scope.selectedPodStatus.name;
+                } else if (scope === logsTypeName) {
+                    $scope.terminalHeader = "Live Tail on " + $scope.selectedPodStatus.name;
+                }
             };
 
             $scope.restartPod = function (podName) {
@@ -84,7 +90,7 @@ angular.module('apollo')
                 $scope.selectedPodStatus = podStatus;
             };
 
-            $scope.startLiveSession = function (containerName) {
+            $scope.startWebSocket = function (containerName) {
                 setTimeout(function () {
                     $scope.term = new Terminal({
                         scrollback: 3000
@@ -93,13 +99,25 @@ angular.module('apollo')
                     var environmentId = $scope.selectedStatus.environmentId;
                     var serviceId = $scope.selectedStatus.serviceId;
                     var podName = $scope.selectedPodStatus.name;
-                    var execUrl = apolloApiService.getWebsocketExecUrl(environmentId, serviceId, podName, containerName);
+
+                    var execUrl = null;
+
+                    if ($scope.websocketScope === execTypeName) {
+                        execUrl = apolloApiService.getWebsocketExecUrl(environmentId, serviceId, podName, containerName);
+                    } else if ($scope.websocketScope === logsTypeName){
+                        execUrl = apolloApiService.getWebsocketLogUrl(environmentId, serviceId, podName, containerName);
+                    } else {
+                        growl.error("Unexpected error!");
+                        return;
+                    }
 
                     $scope.websocket = new WebSocket(execUrl);
 
-                    $scope.websocket.onopen = function () {
-                        $scope.websocket.send("export TERM=\"xterm\"\n");
-                    };
+                    if ($scope.websocketScope === execTypeName) {
+                        $scope.websocket.onopen = function () {
+                            $scope.websocket.send("export TERM=\"xterm\"\n");
+                        };
+                    }
 
                     $scope.websocket.onerror = function (event) {
                         if (event.code) {
@@ -114,12 +132,17 @@ angular.module('apollo')
                     $scope.term.focus();
 
                     $scope.term.attach($scope.websocket, true, false);
-                    $scope.term.writeln("Wait for the prompt, initializing...");
+
+                    if ($scope.websocketScope === execTypeName) {
+                        $scope.term.writeln("Wait for the prompt, initializing...");
+                    } else if ($scope.websocketScope === logsTypeName) {
+                        $scope.term.writeln("Opening web socket, wait a sec!");
+                    }
 
                 }, 300);
             };
 
-            $scope.closeLiveSession = function () {
+            $scope.closeWebSocket = function () {
                 if ($scope.term !== null) {
                     $scope.term.detach();
                     $scope.term.destroy();

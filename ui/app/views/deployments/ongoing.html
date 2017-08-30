@@ -34,8 +34,8 @@
                             <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
                             <td>
                                 <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
-                                        ng-click="setSelectedDeployment(deployment) ; getLogs()"
-                                        data-toggle="modal" data-target="#show-logs">
+                                        ng-click="setSelectedDeployment(deployment) ; getContainersOfSelectedDeployment()"
+                                        data-toggle="modal" data-target="#select-container">
                                     <i class="fa fa-binoculars"></i>
                                 </button>
                                 <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
@@ -75,24 +75,44 @@
         </div>
     </div>
 
-    <div class="modal fade" id="show-logs" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+
+    <div class="modal fade" id="select-container" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" ng-click="stopLogs()" aria-hidden="true">×</button>
-                    <h4 class="modal-title">Logs from container</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Select the container you want see its logs</h4>
                 </div>
                 <div class="modal-body">
-                    <div>
-                        <pre class="apollo-logs">
-<!-- Not indenting since it will also idents what inside the code block-->
-<code ng-bind-html="dockerLogs">
-</code>
-                        </pre>
+                    <div class="row">
+                        <div class="row text-center">
+                            <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector"
+                                    ng-repeat="container in selectedDeploymentContainers" ng-click="startLogsWebsocket(container)" data-toggle="modal" data-target="#select-container,#live-logs">
+                                {{container}}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogs()">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="live-logs" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="stopLogsWebsocket()">×</button>
+                    <h4 class="modal-title">Live tail! These are the logs from the <strong>latest created container</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <div id="terminal" class="apollo-live-session">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogsWebsocket()">Close</button>
                 </div>
             </div>
         </div>

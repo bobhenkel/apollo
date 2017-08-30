@@ -73,11 +73,6 @@ function ApiService($q, $http){
         return $http.delete(CONFIG.appUrl + "deployment/" + deploymentId + "/");
     };
 
-    var getDeploymentLogs = function(deploymentId) {
-        return $http.get(CONFIG.appUrl + "deployment/" + deploymentId + "/logs/");
-    };
-
-
     var matchLabelToDeploymentStatus = function(deploymentStatus) {
         var statusToLabel = {
             "PENDING": "label-default",
@@ -119,8 +114,12 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/");
     };
 
-    var logsFromStatus = function (environmentId, serviceId) {
-        return $http.get(CONFIG.appUrl + "status/logs/environment/" + environmentId + "/service/" + serviceId);
+    var latestCreatedPod = function (environmentId, serviceId) {
+        return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/service/" + serviceId + "/latestpod");
+    };
+
+    var podContainers = function (environmentId, podName) {
+        return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/pod/" + podName + "/containers");
     };
 
     var restartPod = function (environmentId, podName) {
@@ -158,7 +157,11 @@ function ApiService($q, $http){
     var getWebsocketExecUrl = function (environment, service, podName, containerName) {
       return CONFIG.wsUrl + "exec/pod/" + podName + "/container/" + containerName + "?environment=" + environment + "&service=" + service;
     };
-    
+
+    var getWebsocketLogUrl = function (environment, service, podName, containerName) {
+      return CONFIG.wsUrl + "logs/pod/" + podName + "/container/" + containerName + "?environment=" + environment;
+    };
+
     var getAllBlockers = function () {
         return $http.get(CONFIG.appUrl + "blocker-definition");
     };
@@ -224,19 +227,20 @@ function ApiService($q, $http){
         getDeployableVersion: getDeployableVersion,
         getLatestDeployments: getLatestDeployments,
         revertDeployment: revertDeployment,
-        getDeploymentLogs: getDeploymentLogs,
         matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
         isRevertDisabledBasedOnStatus: isRevertDisabledBasedOnStatus,
         signup: signup,
         login: login,
         serviceStatus: serviceStatus,
         environmentStatus: environmentStatus,
-        logsFromStatus: logsFromStatus,
+        latestCreatedPod: latestCreatedPod,
+        podContainers: podContainers,
         restartPod: restartPod,
         createService: createService,
         updateService: updateService,
         getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch,
         getWebsocketExecUrl: getWebsocketExecUrl,
+        getWebsocketLogUrl: getWebsocketLogUrl,
         getAllBlockers: getAllBlockers,
         addBlocker: addBlocker,
         updateBlocker: updateBlocker,

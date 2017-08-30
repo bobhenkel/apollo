@@ -55,6 +55,5 @@ public class playground {
 
         KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
-        System.out.println(kubernetesHandler.getDeploymentLogs(environment, service));
     }
 }

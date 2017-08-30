@@ -2,6 +2,9 @@ package io.logz.apollo.websockets;
 
 import com.google.inject.Injector;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.websockets.exec.AuthenticationFilter;
+import io.logz.apollo.websockets.exec.ContainerExecEndpoint;
+import io.logz.apollo.websockets.logs.ContainerLogsEndpoint;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -45,12 +48,13 @@ public class WebSocketServer {
         try {
             Server server = new Server(configuration.getWsPort());
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-            context.addFilter(new FilterHolder(authenticationFilter), "/*", null);
+            context.addFilter(new FilterHolder(authenticationFilter), "/exec/*", null);
             server.setHandler(context);
 
             ServerContainer wsContainer = WebSocketServerContainerInitializer.configureContext(context);
             wsContainer.setDefaultMaxSessionIdleTimeout(configuration.getWsIdleTimeoutSeconds() * 1000);
             wsContainer.addEndpoint(createEndpointConfig(ContainerExecEndpoint.class));
+            wsContainer.addEndpoint(createEndpointConfig(ContainerLogsEndpoint.class));
 
             return server;
         } catch (ServletException e) {

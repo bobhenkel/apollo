@@ -1,5 +1,7 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.common.ControllerCommon;
+import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.kubernetes.KubernetesHandler;
@@ -9,6 +11,7 @@ import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
+import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -73,12 +77,27 @@ public class StatusController {
     }
 
     @LoggedIn
-    @GET("/status/logs/environment/{environmentId}/service/{serviceId}")
-    public String getLogs(int environmentId, int serviceId) {
+    @GET("/status/environment/{environmentId}/service/{serviceId}/latestpod")
+    public String getLatestPodName(int environmentId, int serviceId, Req req) {
         Environment environment = environmentDao.getEnvironment(environmentId);
         Service service = serviceDao.getService(serviceId);
         KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
-        return kubernetesHandler.getDeploymentLogs(environment, service);
+        Optional<String> serviceLatestCreatedPodName = kubernetesHandler.getServiceLatestCreatedPodName(service);
+        if (serviceLatestCreatedPodName.isPresent()) {
+            return serviceLatestCreatedPodName.get();
+        } else {
+            ControllerCommon.assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, "Can't find pod");
+            return "";
+        }
+    }
+
+    @LoggedIn
+    @GET("/status/environment/{environmentId}/pod/{podName}/containers")
+    public List<String> getPodContainers(int environmentId, String podName) {
+        Environment environment = environmentDao.getEnvironment(environmentId);
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
+
+        return kubernetesHandler.getPodContainerNames(podName);
     }
 }
