@@ -132,6 +132,11 @@ angular.module('apollo')
                     $scope.allUsers = tempUsers;
                 });
 
+                function alert(message) {
+                    console.log("Caught alert: " + message);
+                    document.location.reload();
+                }
+
                 function refreshDeployments() {
                     apolloApiService.getRunningAndJustFinishedDeployments().then(function(response) {
                         $scope.runningAndJustFinishedDeployments = response.data;
