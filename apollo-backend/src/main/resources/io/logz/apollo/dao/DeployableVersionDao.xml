@@ -26,7 +26,7 @@
         FROM deployable_version
         WHERE service_id = #{serviceId}
         ORDER BY commit_date DESC
-        LIMIT 500
+        LIMIT 200
     </select>
 
     <insert id="addDeployableVersion" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
