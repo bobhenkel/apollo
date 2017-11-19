@@ -42,6 +42,18 @@
         LIMIT 1
     </select>
 
+    <select id="getDeploymentEnvStatus" resultType="String">
+        SELECT env_status
+        FROM deployment
+        WHERE id=#{id}
+    </select>
+
+    <select id="getServicesDeployedOnEnv" resultType="Integer">
+        SELECT DISTINCT(service_id)
+        FROM deployment
+        WHERE environment_id=#{environmentId};
+    </select>
+
     <insert id="addDeployment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO deployment (environment_id, service_id, deployable_version_id, user_email, status, source_version)
         VALUES (#{environmentId}, #{serviceId}, #{deployableVersionId}, #{userEmail}, #{status}, #{sourceVersion})
@@ -52,4 +64,11 @@
         SET status=#{status}
         WHERE id=#{id}
     </update>
+
+    <update id="updateDeploymentEnvStatus">
+        UPDATE deployment
+        SET env_status=#{envStatus}
+        WHERE id=#{id}
+    </update>
+
 </mapper>

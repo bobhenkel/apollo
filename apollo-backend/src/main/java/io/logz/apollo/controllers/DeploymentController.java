@@ -93,6 +93,12 @@ public class DeploymentController {
     }
 
     @LoggedIn
+    @GET("/deployment/{id}/envstatus")
+    public String getDeploymentEnvStatus(int id) {
+        return deploymentDao.getDeploymentEnvStatus(id);
+    }
+
+    @LoggedIn
     @POST("/deployment")
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId, Req req) {
         // Get the username from the token

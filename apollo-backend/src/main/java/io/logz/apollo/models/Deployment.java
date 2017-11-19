@@ -25,6 +25,7 @@ public class Deployment {
     private String sourceVersion;
     private Date startedAt;
     private Date lastUpdate;
+    private String envStatus;
 
     public Deployment() {
     }
@@ -99,5 +100,13 @@ public class Deployment {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public String getEnvStatus() {
+        return envStatus;
+    }
+
+    public void setEnvStatus(String envStatus) {
+        this.envStatus = envStatus;
     }
 }

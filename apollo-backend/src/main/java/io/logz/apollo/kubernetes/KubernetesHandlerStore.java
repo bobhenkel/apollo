@@ -2,6 +2,8 @@ package io.logz.apollo.kubernetes;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.notifications.ApolloNotifications;
 

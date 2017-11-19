@@ -1,0 +1,1 @@
+ALTER TABLE deployment ADD env_status TEXT DEFAULT NULL

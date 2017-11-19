@@ -18,4 +18,7 @@ public interface DeploymentDao {
     String getCurrentGitCommitSha(@Param("serviceId") int serviceId, @Param("environmentId") int environmentId);
     void addDeployment(Deployment deployment);
     void updateDeploymentStatus(@Param("id") int id, @Param("status") Deployment.DeploymentStatus status);
+    void updateDeploymentEnvStatus(@Param("id") int id, @Param("envStatus") String envStatus);
+    String getDeploymentEnvStatus(@Param("id") int id);
+    List<Integer> getServicesDeployedOnEnv(@Param("environmentId") int environmentId);
 }

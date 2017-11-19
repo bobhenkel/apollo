@@ -1,11 +1,14 @@
 package io.logz.apollo.kubernetes;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -35,14 +41,16 @@ public class KubernetesMonitor {
     private final ApolloConfiguration apolloConfiguration;
     private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
+    private final ServiceDao serviceDao;
 
     @Inject
     public KubernetesMonitor(KubernetesHandlerStore kubernetesHandlerStore, ApolloConfiguration apolloConfiguration,
-                             EnvironmentDao environmentDao, DeploymentDao deploymentDao) {
+                             EnvironmentDao environmentDao, DeploymentDao deploymentDao, ServiceDao serviceDao) {
         this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.apolloConfiguration = requireNonNull(apolloConfiguration);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
+        this.serviceDao = requireNonNull(serviceDao);
 
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("kubernetes-monitor-%d").build();
         scheduledExecutorService = Executors.newScheduledThreadPool(1, namedThreadFactory);
@@ -102,6 +110,9 @@ public class KubernetesMonitor {
 
                 deploymentDao.updateDeploymentStatus(deployment.getId(), returnedDeployment.getStatus());
 
+                if (deployment.getStatus().equals(Deployment.DeploymentStatus.DONE) || deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELED)) {
+                    updateDeploymentEnvStatus(deployment, getDeploymentCurrentEnvStatus(deployment, kubernetesHandler));
+                }
             });
         } catch (Exception e) {
             logger.error("Got unexpected exception in the monitoring thread! swallow and moving on..", e);
@@ -110,5 +121,27 @@ public class KubernetesMonitor {
 
     private boolean isLocalRun() {
         return Boolean.valueOf(System.getenv(LOCAL_RUN_PROPERTY)) || Boolean.valueOf(System.getProperty(LOCAL_RUN_PROPERTY));
+    }
+
+    private void updateDeploymentEnvStatus(Deployment deployment, Map envStatus) {
+        try {
+            deploymentDao.updateDeploymentEnvStatus(deployment.getId(), envStatus.toString());
+        } catch (Exception e) {
+            logger.error("Can't update environment status for deployment", e);
+        }
+    }
+
+    private HashMap<Integer, String> getDeploymentCurrentEnvStatus(Deployment deployment, KubernetesHandler kubernetesHandler) {
+        HashMap<Integer, String> envStatus = new HashMap<>();
+        List<Integer> servicesDeployedOnEnv = deploymentDao.getServicesDeployedOnEnv(deployment.getEnvironmentId());
+        for (int serviceId : servicesDeployedOnEnv) {
+            Service service = serviceDao.getService(serviceId);
+            try {
+                envStatus.put(service.getId(), kubernetesHandler.getCurrentStatus(service).getGitCommitSha());
+            } catch (Exception e) {
+                logger.warn("Can't add service status to environment status", e);
+            }
+        }
+        return envStatus;
     }
 }

@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
@@ -86,10 +87,11 @@ public class KubernetesHandlerTest {
         podStatus.setStartTime("Beginning of humanity");
 
 
-        // Set the logs and status mock on arbitrary one
+        // Set the logs and status mock to all deployments
         setMockPodLogsAndStatus(notFinishedDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
-
-        // And we need the mocks on the pod level again on the status check mock
+        setMockPodLogsAndStatus(finishedDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedDeployment.getDeployment()));
+        setMockPodLogsAndStatus(notFinishedCanceledDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
+        setMockPodLogsAndStatus(finishedCanceledDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
         setMockPodLogsAndStatus(statusDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
 
         // Get an instance of the client
@@ -116,6 +118,7 @@ public class KubernetesHandlerTest {
     @Test
     public void testDeploymentMonitor() {
         DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
+        DeployableVersionDao deployableVersionDao = standaloneApollo.getInstance(DeployableVersionDao.class);
 
         // We need to wait at least 2 iterations of the monitoring thread + 1 buffer
         Common.waitABit(3);
@@ -129,6 +132,11 @@ public class KubernetesHandlerTest {
         assertThat(currentFinishedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.DONE);
         assertThat(currentNotFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELING);
         assertThat(currentFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELED);
+
+        String envStatusFromObject = currentFinishedCanceledDeployment.getEnvStatus();
+        String commitShaFromDeployableVersion = deployableVersionDao.getDeployableVersion(currentFinishedCanceledDeployment.
+                getDeployableVersionId()).getGitCommitSha();
+        assertThat(envStatusFromObject).contains(commitShaFromDeployableVersion);
     }
 
     @Test
@@ -169,6 +177,20 @@ public class KubernetesHandlerTest {
 
         assertThat(apolloTestClient.getDeployment(restDeployment.getId()).getSourceVersion())
                 .isEqualTo(statusDeployment.getDeployableVersion().getGitCommitSha());
+    }
+
+    @Test
+    public void testUpdateDeploymentEnvStatus() throws Exception {
+
+        DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
+        Deployment firstDeployedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
+        Common.waitABit(2);
+
+        Deployment secondDeployedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
+        Common.waitABit(2);
+
+        String envStatus = deploymentDao.getDeploymentEnvStatus(secondDeployedDeployment.getId());
+        assertThat(envStatus).isNotBlank();
     }
 
     private static void setMockDeploymentStatus(RealDeploymentGenerator realDeploymentGenerator, boolean finished, ApolloToKubernetes apolloToKubernetes) {

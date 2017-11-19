@@ -55,7 +55,8 @@ public class KubernetesHandler {
         this.apolloNotifications = requireNonNull(apolloNotifications);
     }
 
-    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment, ApolloNotifications apolloNotifications) {
+    public KubernetesHandler(ApolloToKubernetesStore apolloToKubernetesStore, Environment environment,
+                             ApolloNotifications apolloNotifications) {
         this.apolloToKubernetesStore = requireNonNull(apolloToKubernetesStore);
         this.environment = requireNonNull(environment);
         this.apolloNotifications = requireNonNull(apolloNotifications);
@@ -139,7 +140,6 @@ public class KubernetesHandler {
                         logger.info("Deployment id {} is done deploying", deployment.getId());
                         apolloNotifications.notify(Deployment.DeploymentStatus.DONE, deployment);
                         deployment.setStatus(Deployment.DeploymentStatus.DONE);
-
                     } else if (deployment.getStatus().equals(Deployment.DeploymentStatus.CANCELING)) {
                         logger.info("Deployment id {} is done canceling", deployment.getId());
                         apolloNotifications.notify(Deployment.DeploymentStatus.CANCELED, deployment);
@@ -382,5 +382,4 @@ public class KubernetesHandler {
             throw new RuntimeException();
         }
     }
-
 }
