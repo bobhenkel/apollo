@@ -9,6 +9,7 @@ import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
+import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -26,6 +27,10 @@ public class DeployableVersionController {
 
     private final DeployableVersionDao deployableVersionDao;
     private final GithubConnector githubConnector;
+
+    public static int MAX_COMMIT_FIELDS_LENGTH = 1000;
+    public static int MAX_COMMIT_MESSAGE_LENGTH = 10000;
+    public static String UNKNOWN_COMMIT_FIELD = "Unknown";
 
     @Inject
     public DeployableVersionController(DeployableVersionDao deployableVersionDao, GithubConnector githubConnector) {
@@ -101,9 +106,26 @@ public class DeployableVersionController {
                 newDeployableVersion.setCommitDate(commitDetails.getCommitDate());
                 newDeployableVersion.setCommitterAvatarUrl(commitDetails.getCommitterAvatarUrl());
                 newDeployableVersion.setCommitterName(commitDetails.getCommitterName());
+
+                String commitMessage = newDeployableVersion.getCommitMessage();
+                newDeployableVersion.setCommitMessage(commitMessage == null ? UNKNOWN_COMMIT_FIELD : StringUtils.abbreviate(commitMessage, MAX_COMMIT_MESSAGE_LENGTH));
+
+                String commitSha = newDeployableVersion.getGitCommitSha();
+                newDeployableVersion.setGitCommitSha(commitSha == null ? UNKNOWN_COMMIT_FIELD : StringUtils.abbreviate(commitSha, MAX_COMMIT_FIELDS_LENGTH));
+
+                String commitUrl = newDeployableVersion.getCommitUrl();
+                newDeployableVersion.setCommitUrl(commitUrl == null ? UNKNOWN_COMMIT_FIELD : StringUtils.abbreviate(commitUrl, MAX_COMMIT_FIELDS_LENGTH));
+
+                String commitGithubRepositoryUrl = newDeployableVersion.getGithubRepositoryUrl();
+                newDeployableVersion.setGithubRepositoryUrl(commitGithubRepositoryUrl == null ? UNKNOWN_COMMIT_FIELD : StringUtils.abbreviate(commitGithubRepositoryUrl, MAX_COMMIT_FIELDS_LENGTH));
+
+                String committerAvatarUrl = newDeployableVersion.getCommitterAvatarUrl();
+                newDeployableVersion.setCommitterAvatarUrl(committerAvatarUrl == null ? UNKNOWN_COMMIT_FIELD : StringUtils.abbreviate(committerAvatarUrl, MAX_COMMIT_FIELDS_LENGTH));
+
+                String committerName = newDeployableVersion.getCommitterName();
+                newDeployableVersion.setCommitterName(committerName == null ? UNKNOWN_COMMIT_FIELD :StringUtils.abbreviate(committerName, MAX_COMMIT_FIELDS_LENGTH));
             });
         }
-
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
         assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
     }

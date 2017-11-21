@@ -49,7 +49,7 @@ public class GithubConnector {
             GHCommit commit = gitHub.getRepository(githubRepo).getCommit(sha);
 
             GHUser author = commit.getAuthor();
-            String committerName = author.getName();
+            String committerName = (author == null) ? null : author.getName();
             if (committerName == null || committerName.isEmpty()) {
                 committerName = author.getLogin();
             }
