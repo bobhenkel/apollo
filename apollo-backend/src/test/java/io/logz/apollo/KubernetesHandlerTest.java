@@ -179,20 +179,6 @@ public class KubernetesHandlerTest {
                 .isEqualTo(statusDeployment.getDeployableVersion().getGitCommitSha());
     }
 
-    @Test
-    public void testUpdateDeploymentEnvStatus() throws Exception {
-
-        DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
-        Deployment firstDeployedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
-        Common.waitABit(2);
-
-        Deployment secondDeployedDeployment = deploymentDao.getDeployment(finishedDeployment.getDeployment().getId());
-        Common.waitABit(2);
-
-        String envStatus = deploymentDao.getDeploymentEnvStatus(secondDeployedDeployment.getId());
-        assertThat(envStatus).isNotBlank();
-    }
-
     private static void setMockDeploymentStatus(RealDeploymentGenerator realDeploymentGenerator, boolean finished, ApolloToKubernetes apolloToKubernetes) {
 
         DeploymentStatus deploymentStatus;

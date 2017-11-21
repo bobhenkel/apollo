@@ -1,6 +1,5 @@
 package io.logz.apollo.kubernetes;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.DeploymentDao;
@@ -9,6 +8,7 @@ import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +125,8 @@ public class KubernetesMonitor {
 
     private void updateDeploymentEnvStatus(Deployment deployment, Map envStatus) {
         try {
-            deploymentDao.updateDeploymentEnvStatus(deployment.getId(), envStatus.toString());
+            JSONObject envStatusJson = new JSONObject(envStatus);
+            deploymentDao.updateDeploymentEnvStatus(deployment.getId(), envStatusJson.toString());
         } catch (Exception e) {
             logger.error("Can't update environment status for deployment", e);
         }
