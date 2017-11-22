@@ -126,6 +126,14 @@ public class DeployableVersionController {
                 newDeployableVersion.setCommitterName(committerName == null ? UNKNOWN_COMMIT_FIELD :StringUtils.abbreviate(committerName, MAX_COMMIT_FIELDS_LENGTH));
             });
         }
+
+        // Avoid duplicate entry errors
+        DeployableVersion existingDeployableVersion = deployableVersionDao.getDeployableVersionFromSha(newDeployableVersion.getGitCommitSha(), newDeployableVersion.getServiceId());
+        if (existingDeployableVersion != null) {
+            assignJsonResponseToReq(req, HttpStatus.CREATED, existingDeployableVersion);
+            return;
+        }
+
         deployableVersionDao.addDeployableVersion(newDeployableVersion);
         assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployableVersion);
     }

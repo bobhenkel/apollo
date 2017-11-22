@@ -54,7 +54,9 @@ public class DeployableVersionTest {
         deployableVersion.setId(apolloTestClient.addDeployableVersion(deployableVersion).getId());
 
         DeployableVersion returnedDeployableVersion = apolloTestClient.getDeployableVersion(deployableVersion.getId());
+        DeployableVersion sameReturnedDeployableVersion = apolloTestClient.addDeployableVersion(returnedDeployableVersion);
 
+        assertThat(returnedDeployableVersion).isEqualToIgnoringGivenFields(sameReturnedDeployableVersion, "commitDate");
         assertThat(returnedDeployableVersion.getCommitMessage()).contains("Improved code coverage");
         assertThat(returnedDeployableVersion.getCommitUrl()).isEqualTo("https://github.com/kubernetes/kubernetes/commit/b3d627c2e2a801e442b7a75ee8cddc33c7663812");
         assertThat(returnedDeployableVersion.getCommitterName()).isEqualTo("Kubernetes Submit Queue");
