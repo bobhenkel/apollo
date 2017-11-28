@@ -3,6 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.scm.CommitDetails;
 import io.logz.apollo.scm.GithubConnector;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
@@ -99,8 +100,12 @@ public class DeployableVersionController {
         // Just to protect tests from reaching github rate limit
         if (githubRepositoryUrl.contains("github.com")) {
 
-            // Not failing if this is null
-            githubConnector.getCommitDetails(actualRepo, gitCommitSha).ifPresent(commitDetails -> {
+            Optional<CommitDetails> commit = githubConnector.getCommitDetails(actualRepo, gitCommitSha);
+
+            if (commit.isPresent()) {
+
+                CommitDetails commitDetails = commit.get();
+
                 newDeployableVersion.setCommitUrl(commitDetails.getCommitUrl());
                 newDeployableVersion.setCommitMessage(commitDetails.getCommitMessage());
                 newDeployableVersion.setCommitDate(commitDetails.getCommitDate());
@@ -124,7 +129,10 @@ public class DeployableVersionController {
 
                 String committerName = newDeployableVersion.getCommitterName();
                 newDeployableVersion.setCommitterName(committerName == null ? UNKNOWN_COMMIT_FIELD :StringUtils.abbreviate(committerName, MAX_COMMIT_FIELDS_LENGTH));
-            });
+            } else {
+                assignJsonResponseToReq(req, HttpStatus.INTERNAL_SERVER_ERROR, "Could not get commit details from GitHub, make sure your GitHub user is well defined.");
+                return;
+            }
         }
 
         // Avoid duplicate entry errors

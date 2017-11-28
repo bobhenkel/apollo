@@ -64,6 +64,24 @@ public class DeployableVersionTest {
     }
 
     @Test
+    public void testAddDeployableVersionWithBadGithubUser() throws ApolloClientException {
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
+        DeployableVersion deployableVersion = new DeployableVersion();
+        deployableVersion.setGithubRepositoryUrl("https://url.github.com");
+        deployableVersion.setGitCommitSha("anycommitsha1234");
+        deployableVersion.setServiceId(3);
+
+        try {
+            DeployableVersion returnedDeployableVersion = apolloTestClient.addDeployableVersion(deployableVersion);
+        } catch (ApolloClientException e) {
+            assertThat(e.getMessage()).isEqualTo("Got HTTP return code 500 with text: \"Could not get commit details from GitHub, make sure your GitHub user is well defined.\"");
+            return;
+        }
+        System.out.println("addDeployableVersion should have thrown ApolloClientException due to incorrect github details. Failing test.");
+        assertThat(1).isEqualTo(2);
+    }
+
+    @Test
     public void testGetAllDeployableVersions() throws ApolloClientException {
 
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
