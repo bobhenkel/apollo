@@ -19,6 +19,7 @@ import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
+import org.rapidoid.annotation.PUT;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;

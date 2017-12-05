@@ -129,19 +129,21 @@ function ApiService($q, $http){
         });
     };
 
-    var createService = function(name, deploymentYaml, serviceYaml) {
+    var createService = function(name, deploymentYaml, serviceYaml, isPartOfGroup) {
         return $http.post(CONFIG.appUrl + "service/", {
             name: name,
             deploymentYaml: deploymentYaml,
-            serviceYaml: serviceYaml
+            serviceYaml: serviceYaml,
+            isPartOfGroup: isPartOfGroup
         });
     };
 
-    var updateService = function(id, name, deploymentYaml, serviceYaml) {
+    var updateService = function(id, name, deploymentYaml, serviceYaml, isPartOfGroup) {
         return $http.put(CONFIG.appUrl + "service/" + id, {
             name: name,
             deploymentYaml: deploymentYaml,
-            serviceYaml: serviceYaml
+            serviceYaml: serviceYaml,
+            isPartOfGroup: isPartOfGroup
         });
     };
 

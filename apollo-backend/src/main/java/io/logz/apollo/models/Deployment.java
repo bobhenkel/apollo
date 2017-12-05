@@ -26,6 +26,8 @@ public class Deployment {
     private Date startedAt;
     private Date lastUpdate;
     private String envStatus;
+    private String groupName;
+    private String deploymentParams;
 
     public Deployment() {
     }
@@ -109,4 +111,12 @@ public class Deployment {
     public void setEnvStatus(String envStatus) {
         this.envStatus = envStatus;
     }
+
+    public String getGroupName() { return groupName; }
+
+    public void setGroupName(String groupName) { this.groupName = groupName; }
+
+    public String getDeploymentParams() { return deploymentParams; }
+
+    public void setDeploymentParams(String deploymentParams) { this.deploymentParams = deploymentParams; }
 }

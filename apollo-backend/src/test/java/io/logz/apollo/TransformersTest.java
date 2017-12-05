@@ -12,6 +12,7 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -30,7 +31,7 @@ public class TransformersTest {
     }
 
     @Test
-    public void testImageNameTransformer() throws ApolloParseException {
+    public void testImageNameTransformer() throws ApolloParseException, IOException {
         String imageNameWithRepoAndVersion = "repo:1234/image:version";
         String imageNameWithRepoAndNoVersion = "repo:1234/image";
         String imageNameWithSimpleRepoAndNoVersion = "repo/image";
@@ -73,7 +74,7 @@ public class TransformersTest {
     }
 
     @Test
-    public void testDeploymentLabelsTransformer() throws ApolloParseException {
+    public void testDeploymentLabelsTransformer() throws ApolloParseException, IOException {
 
         RealDeploymentGenerator realDeploymentGenerator;
         ApolloToKubernetes apolloToKubernetes;
@@ -115,7 +116,7 @@ public class TransformersTest {
     }
 
     @Test
-    public void testDeploymentEnvironmentVariablesTransformer() throws ApolloParseException {
+    public void testDeploymentEnvironmentVariablesTransformer() throws ApolloParseException, IOException {
 
         RealDeploymentGenerator realDeploymentGenerator;
         ApolloToKubernetes apolloToKubernetes;

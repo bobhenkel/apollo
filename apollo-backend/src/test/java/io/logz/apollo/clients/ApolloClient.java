@@ -145,6 +145,11 @@ public class ApolloClient {
         return genericApolloClient.getResult("/scaling/apollo-factor/" + groupId, new TypeReference<Integer>() {});
     }
 
+    public Service updateService(int id, String name, String deploymentYaml, String serviceYaml, Boolean isPartOfGroup) throws ApolloClientException {
+        String requestBody = Common.generateJson("id", String.valueOf(id), "name", name, "deploymentYaml", deploymentYaml, "serviceYaml", serviceYaml, "isPartOfGroup", isPartOfGroup.toString());
+        return genericApolloClient.putAndGetResult("/service/" + id, requestBody, new TypeReference<Service>() {});
+    }
+
     public BlockerDefinition getBlockerDefinition(int id) throws ApolloClientException {
         return genericApolloClient.getResult("/blocker-definition/" + id, new TypeReference<BlockerDefinition>() {});
     }

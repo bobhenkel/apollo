@@ -26,7 +26,6 @@ public class GroupTest {
     public void testAddAndGetGroup() throws ApolloClientException {
         // Add group
         Group testGroup = createAndSubmitGroup(apolloTestClient);
-
         // Make sure we can't add it again
         assertThatThrownBy(() -> apolloTestClient.addGroup(testGroup)).isInstanceOf(ApolloClientException.class);
 

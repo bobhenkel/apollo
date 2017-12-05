@@ -55,8 +55,8 @@
     </select>
 
     <insert id="addDeployment" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO deployment (environment_id, service_id, deployable_version_id, user_email, status, source_version)
-        VALUES (#{environmentId}, #{serviceId}, #{deployableVersionId}, #{userEmail}, #{status}, #{sourceVersion})
+        INSERT INTO deployment (environment_id, service_id, deployable_version_id, user_email, status, source_version, group_name, deployment_params)
+        VALUES (#{environmentId}, #{serviceId}, #{deployableVersionId}, #{userEmail}, #{status}, #{sourceVersion}, #{groupName}, #{deploymentParams})
     </insert>
 
     <update id="updateDeploymentStatus">
@@ -70,5 +70,4 @@
         SET env_status=#{envStatus}
         WHERE id=#{id}
     </update>
-
 </mapper>

@@ -31,6 +31,10 @@ public class RealDeploymentGenerator {
     private final Deployment deployment;
 
     public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient) {
+        this(deploymentImageName, extraLabelKey, extraLabelValue, servicePortCoefficient, null);
+    }
+
+    public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient, String deploymentParams) {
         try {
             standaloneApollo = StandaloneApollo.getOrCreateServer();
             DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
@@ -59,6 +63,7 @@ public class RealDeploymentGenerator {
             deployment.setStatus(Deployment.DeploymentStatus.PENDING);
             deployment.setSourceVersion("abc" + Common.randomStr(5));
             deployment.setUserEmail(user.getUserEmail());
+            deployment.setDeploymentParams(deploymentParams);
             deploymentDao.addDeployment(deployment);
         } catch (Exception e) {
             throw new RuntimeException(e);

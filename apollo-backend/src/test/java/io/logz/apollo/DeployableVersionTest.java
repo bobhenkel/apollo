@@ -69,7 +69,7 @@ public class DeployableVersionTest {
         DeployableVersion deployableVersion = new DeployableVersion();
         deployableVersion.setGithubRepositoryUrl("https://url.github.com");
         deployableVersion.setGitCommitSha("anycommitsha1234");
-        deployableVersion.setServiceId(3);
+        deployableVersion.setServiceId(createAndSubmitService(apolloTestClient).getId());
 
         try {
             DeployableVersion returnedDeployableVersion = apolloTestClient.addDeployableVersion(deployableVersion);
