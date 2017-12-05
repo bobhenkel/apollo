@@ -1,0 +1,1 @@
+ALTER TABLE service ADD is_part_of_group tinyint(1) DEFAULT 0

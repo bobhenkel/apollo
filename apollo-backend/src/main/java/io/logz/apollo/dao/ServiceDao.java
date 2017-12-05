@@ -13,5 +13,4 @@ public interface ServiceDao {
     List<Service> getAllServices();
     void addService(Service service);
     void updateService(Service service);
-
 }

@@ -22,10 +22,10 @@
 
     <update id="updateService">
         UPDATE service SET
-            name=#{name},
-            deployment_yaml=#{deploymentYaml},
-            service_yaml=#{serviceYaml}
-        WHERE
-            id=#{id}
+        name=#{name},
+        deployment_yaml=#{deploymentYaml},
+        service_yaml=#{serviceYaml},
+        is_part_of_group=#{isPartOfGroup}
+        WHERE id=#{id}
     </update>
 </mapper>

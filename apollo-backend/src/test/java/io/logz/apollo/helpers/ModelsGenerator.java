@@ -12,6 +12,7 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.notifications.ApolloNotifications;
 import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
 import io.logz.apollo.notifications.Notification;
@@ -42,6 +43,15 @@ public class ModelsGenerator {
         Environment testEnvironment = ModelsGenerator.createEnvironment();
         testEnvironment.setId(apolloTestClient.addEnvironment(testEnvironment).getId());
         return testEnvironment;
+    }
+
+    public static Group createGroup() {
+        Group testGroup = new Group();
+        testGroup.setName("group-name-" + Common.randomStr(5));
+        testGroup.setScalingFactor(3);
+        testGroup.setJsonParams(Common.generateJson("json", "params"));
+
+        return testGroup;
     }
 
     public static DeployableVersion createDeployableVersion(Service relatedService) {
@@ -87,6 +97,17 @@ public class ModelsGenerator {
         Service testService = ModelsGenerator.createService();
         testService.setId(apolloTestClient.addService(testService).getId());
         return testService;
+    }
+
+    public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        Group testGroup = createGroup();
+
+        testGroup.setServiceId(createAndSubmitService(apolloTestClient).getId());
+        testGroup.setEnvironmentId(createAndSubmitEnvironment(apolloTestClient).getId());
+
+        apolloTestClient.addGroup(testGroup);
+
+        return testGroup;
     }
 
     public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,

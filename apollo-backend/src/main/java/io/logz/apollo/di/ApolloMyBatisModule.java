@@ -7,6 +7,7 @@ import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeploymentGroupDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.GroupDao;
 import io.logz.apollo.dao.NotificationDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
@@ -42,6 +43,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
         addMapperClass(EnvironmentDao.class);
         addMapperClass(ServiceDao.class);
         addMapperClass(UserDao.class);
+        addMapperClass(GroupDao.class);
         addMapperClass(BlockerDefinitionDao.class);
         addMapperClass(NotificationDao.class);
     }

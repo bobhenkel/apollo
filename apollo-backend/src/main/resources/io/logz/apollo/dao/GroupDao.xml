@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.GroupDao">
+    <select id="getGroup" resultType="io.logz.apollo.models.Group">
+        SELECT *
+        FROM groups
+        WHERE id=#{id}
+    </select>
+
+    <select id="getGroupByName" resultType="io.logz.apollo.models.Group">
+        SELECT *
+        FROM groups
+        WHERE name=#{name}
+    </select>
+
+    <select id="getAllGroups" resultType="io.logz.apollo.models.Group">
+        SELECT *
+        FROM groups
+    </select>
+
+    <select id="getScalingFactor" resultType="int">
+        SELECT scaling_factor
+        FROM groups
+        WHERE id=#{id}
+    </select>
+
+    <insert id="addGroup">
+        INSERT INTO groups (name, service_id, environment_id, scaling_factor, json_params)
+        VALUES (#{name}, #{serviceId}, #{environmentId}, #{scalingFactor}, #{jsonParams})
+    </insert>
+
+    <update id="updateGroup">
+        UPDATE groups SET
+        name=#{name},
+        service_id=#{serviceId},
+        environment_id=#{environmentId},
+        scaling_factor=#{scalingFactor},
+        json_params=#{jsonParams}
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateScalingFactor">
+        UPDATE groups SET
+        scaling_factor=#{scalingFactor}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteGroup">
+        DELETE FROM groups
+        WHERE id=#{id}
+    </delete>
+</mapper>

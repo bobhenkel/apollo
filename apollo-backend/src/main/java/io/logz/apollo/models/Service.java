@@ -10,6 +10,7 @@ public class Service {
     private String deploymentYaml;
     private String serviceYaml;
     private String defaultShell;
+    private int isPartOfGroup;
 
     public Service() {
 
@@ -54,4 +55,8 @@ public class Service {
     public void setDefaultShell(String defaultShell) {
         this.defaultShell = defaultShell;
     }
+
+    public int getIsPartOfGroup() { return isPartOfGroup; }
+
+    public void setIsPartOfGroup(int isPartOfGroup) { this.isPartOfGroup = isPartOfGroup; }
 }

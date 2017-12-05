@@ -74,5 +74,4 @@ public class ServiceController {
         serviceDao.updateService(service);
         assignJsonResponseToReq(req, HttpStatus.OK, service);
     }
-
 }

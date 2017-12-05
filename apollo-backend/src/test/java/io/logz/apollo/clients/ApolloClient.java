@@ -11,6 +11,7 @@ import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.notifications.Notification;
 
 import java.io.IOException;
@@ -111,6 +112,37 @@ public class ApolloClient {
 
     public List<Deployment> getAllDeployments() throws ApolloClientException {
         return genericApolloClient.getResult("/deployment", new TypeReference<List<Deployment>>() {});
+    }
+
+    public Group addGroup(Group group) throws ApolloClientException {
+        String requestBody = Common.generateJson("name", String.valueOf(group.getName()),
+                "serviceId", String.valueOf(group.getServiceId()),
+                "environmentId", String.valueOf(group.getEnvironmentId()),
+                "scalingFactor", String.valueOf(group.getScalingFactor()),
+                "jsonParams", group.getJsonParams());
+
+        return  genericApolloClient.postAndGetResult("/group", requestBody, new TypeReference<Group>() {});
+    }
+
+    public Group getGroup(int id) throws ApolloClientException {
+        return genericApolloClient.getResult("/group/" + id, new TypeReference<Group>() {});
+    }
+
+    public Group getGroupByName(String name) throws ApolloClientException {
+        return genericApolloClient.getResult("/group/" + name, new TypeReference<Group>() {});
+    }
+
+    public List<Group> getAllGroups() throws ApolloClientException {
+        return genericApolloClient.getResult("/group", new TypeReference<List<Group>>() {});
+    }
+
+    public Group updateScalingFactor(int groupId, int scalingFactor) throws ApolloClientException {
+        String requestBody = Common.generateJson("id", String.valueOf(groupId), "scalingFactor", String.valueOf(scalingFactor));
+        return genericApolloClient.putAndGetResult("/scaling/" + groupId, requestBody, new TypeReference<Group>() {});
+    }
+
+    public int getScalingFactor(int groupId) throws ApolloClientException {
+        return genericApolloClient.getResult("/scaling/apollo-factor/" + groupId, new TypeReference<Integer>() {});
     }
 
     public BlockerDefinition getBlockerDefinition(int id) throws ApolloClientException {
