@@ -18,6 +18,9 @@ import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
 import io.logz.apollo.notifications.Notification;
 import org.rapidoid.serialize.Ser;
 
+import javax.script.ScriptException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -101,18 +104,29 @@ public class ModelsGenerator {
     }
 
     public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient) throws ApolloClientException {
+        return createAndSubmitGroup(apolloTestClient, createAndSubmitService(apolloTestClient), createAndSubmitEnvironment(apolloTestClient));
+    }
+
+    public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient, Service service, Environment environment) throws ApolloClientException {
         Group testGroup = createGroup();
 
-        testGroup.setServiceId(createAndSubmitService(apolloTestClient).getId());
-        testGroup.setEnvironmentId(createAndSubmitEnvironment(apolloTestClient).getId());
+        testGroup.setServiceId(service.getId());
+        testGroup.setEnvironmentId(environment.getId());
 
         apolloTestClient.addGroup(testGroup);
+
+        testGroup.setId(apolloTestClient.getGroupByName(testGroup.getName()).getId());
 
         return testGroup;
     }
 
     public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
                                               DeployableVersion relatedDeployableVersion) {
+        return createDeployment(relatedService, relatedEnvironment, relatedDeployableVersion, null);
+    }
+
+    public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
+                                              DeployableVersion relatedDeployableVersion, String groupName) {
 
         Deployment testDeployment = new Deployment();
         testDeployment.setEnvironmentId(relatedEnvironment.getId());
@@ -120,6 +134,7 @@ public class ModelsGenerator {
         testDeployment.setDeployableVersionId(relatedDeployableVersion.getId());
         testDeployment.setLastUpdate(new Date());
         testDeployment.setUserEmail("user-" + Common.randomStr(5));
+        testDeployment.setGroupName(groupName);
         return testDeployment;
     }
 
@@ -260,5 +275,26 @@ public class ModelsGenerator {
         testUser.setAdmin(admin);
 
         return testUser;
+    }
+
+    public static void createAndSubmitPermissions(ApolloTestClient apolloTestClient, Optional<Environment> testEnvironment,
+                                                  Optional<Service> testService, DeploymentPermission.PermissionType permissionType) throws ScriptException, IOException, SQLException, ApolloClientException {
+        // Associate user with group, and permission to the first env
+        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
+        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
+        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
+
+        DeploymentPermission newDeploymentPermission;
+
+        if (permissionType == DeploymentPermission.PermissionType.ALLOW) {
+            newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(testEnvironment, testService);
+        } else {
+            newDeploymentPermission = ModelsGenerator.createDenyDeploymentPermission(testEnvironment, testService);
+        }
+
+        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
+
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

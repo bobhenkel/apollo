@@ -1,11 +1,11 @@
 package io.logz.apollo;
 
+import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.controllers.DeploymentGroupsController;
+import io.logz.apollo.deployment.DeploymenGroupsResponseObject;
+import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.kubernetes.ApolloToKubernetesStore;
 import io.logz.apollo.clients.ApolloTestClient;
-import io.logz.apollo.dao.DeployableVersionDao;
-import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
 import io.logz.apollo.helpers.StandaloneApollo;
@@ -13,11 +13,16 @@ import io.logz.apollo.kubernetes.ApolloToKubernetes;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.models.Service;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.util.HashMap;
+import java.util.Optional;
+
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitGroup;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -25,6 +30,7 @@ public class DeploymentGroupsTest {
 
     private static ApolloTestClient apolloTestClient;
     private static ApolloToKubernetesStore apolloToKubernetesStore;
+    private String GROUP_STRING = "group";
 
     @BeforeClass
     public static void init() throws Exception {
@@ -55,6 +61,46 @@ public class DeploymentGroupsTest {
         assertDeploymentLabelExists(apolloToKubernetes.getKubernetesDeployment(), "such key", "much value");
     }
 
+    @Test
+    public void testAddDeploymentForGroups() throws Exception {
+        // Prepare groups
+        Group goodGroup1 = createAndSubmitGroup(apolloTestClient);
+        Group goodGroup2 = createAndSubmitGroup(apolloTestClient, apolloTestClient.getService(goodGroup1.getServiceId()),
+                apolloTestClient.getEnvironment(goodGroup1.getEnvironmentId()));
+        Group groupWithDifferentServiceId = createAndSubmitGroup(apolloTestClient);
+
+        String[] groupIdsArr = {"0", String.valueOf(goodGroup1.getId()), String.valueOf(goodGroup2.getId()), String.valueOf(groupWithDifferentServiceId.getId())};
+        String groupIdsCsv = String.join(",", groupIdsArr);
+
+        // Prepare deployment
+        Service service = apolloTestClient.getService(goodGroup1.getServiceId());
+        Environment environment = apolloTestClient.getEnvironment(goodGroup1.getEnvironmentId());
+
+        DeployableVersion deployableVersion = ModelsGenerator.createDeployableVersion(service);
+        deployableVersion.setId(apolloTestClient.addDeployableVersion(deployableVersion).getId());
+
+        Deployment deployment = ModelsGenerator.createDeployment(service, environment, deployableVersion);
+
+        // Create expected response object
+        DeploymenGroupsResponseObject expectedResponse = new DeploymenGroupsResponseObject();
+        expectedResponse.addSuccessfulGroup(goodGroup1.getId(), deployment);
+        expectedResponse.addSuccessfulGroup(goodGroup2.getId(), deployment);
+        expectedResponse.addUnsuccessfulGroup(0, "Non existing group.");
+        expectedResponse.addUnsuccessfulGroup(groupWithDifferentServiceId.getId(),"The deployment service ID " + deployment.getServiceId() +
+                " doesn't match the group service ID " + groupWithDifferentServiceId.getServiceId());
+
+        // Grant permissions
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(environment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
+
+        // Get results
+        DeploymenGroupsResponseObject result = apolloTestClient.addDeployment(deployment, groupIdsCsv);
+
+        assertThat(result.getUnsuccessful()).isEqualTo(expectedResponse.getUnsuccessful());
+        assertThat(result.getSuccessful().get(0).get(GROUP_STRING))
+                .isEqualTo(expectedResponse.getSuccessful().get(0).get(GROUP_STRING));
+        assertThat(result.getSuccessful().get(1).get(GROUP_STRING))
+                .isEqualTo(expectedResponse.getSuccessful().get(1).get(GROUP_STRING));
+    }
 
     private void assertImageName(io.fabric8.kubernetes.api.model.extensions.Deployment deployment, String imageName) {
         assertThat(deployment.getSpec().getTemplate().getSpec().getContainers().stream().findFirst().get().getImage()).contains(imageName);

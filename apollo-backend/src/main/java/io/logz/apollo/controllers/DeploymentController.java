@@ -1,25 +1,17 @@
 package io.logz.apollo.controllers;
 
+import io.logz.apollo.deployment.DeploymentHandler;
 import io.logz.apollo.LockService;
-import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.PermissionsValidator;
-import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.DeploymentPermissionDao;
-import io.logz.apollo.dao.EnvironmentDao;
-import io.logz.apollo.dao.ServiceDao;
-import io.logz.apollo.kubernetes.KubernetesHandler;
-import io.logz.apollo.kubernetes.KubernetesHandlerStore;
+import io.logz.apollo.excpetions.ApolloDeploymentBlockedException;
+import io.logz.apollo.excpetions.ApolloDeploymentConflictException;
+import io.logz.apollo.excpetions.ApolloDeploymentTooManyRequestsException;
 import io.logz.apollo.models.Deployment;
-import io.logz.apollo.models.Environment;
-import io.logz.apollo.models.KubernetesDeploymentStatus;
-import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.DELETE;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
-import org.rapidoid.annotation.PUT;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
 import org.slf4j.Logger;
@@ -28,7 +20,6 @@ import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 
 import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
 import static java.util.Objects.requireNonNull;
@@ -41,26 +32,15 @@ public class DeploymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentController.class);
 
-    private final KubernetesHandlerStore kubernetesHandlerStore;
-    private final DeploymentPermissionDao deploymentPermissionDao;
-    private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
-    private final ServiceDao serviceDao;
     private final LockService lockService;
-    private final BlockerService blockerService;
+    private final DeploymentHandler deploymentHandler;
 
     @Inject
-    public DeploymentController(KubernetesHandlerStore kubernetesHandlerStore,
-                                DeploymentPermissionDao deploymentPermissionDao, EnvironmentDao environmentDao,
-                                DeploymentDao deploymentDao, ServiceDao serviceDao, LockService lockService,
-                                BlockerService blockerService) {
-        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
-        this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
-        this.environmentDao = requireNonNull(environmentDao);
+    public DeploymentController(DeploymentDao deploymentDao, LockService lockService, DeploymentHandler deploymentHandler) {
         this.deploymentDao = requireNonNull(deploymentDao);
-        this.serviceDao = requireNonNull(serviceDao);
         this.lockService = requireNonNull(lockService);
-        this.blockerService = requireNonNull(blockerService);
+        this.deploymentHandler = requireNonNull(deploymentHandler);
     }
 
     @LoggedIn
@@ -102,86 +82,18 @@ public class DeploymentController {
     @LoggedIn
     @POST("/deployment")
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId, Req req) {
-        // Get the username from the token
-        String userEmail = req.token().get("_user").toString();
-        String sourceVersion = null;
-
         try {
-            // Get the current commit sha from kubernetes so we can revert if necessary
-            Environment environment = environmentDao.getEnvironment(environmentId);
-            Service service = serviceDao.getService(serviceId);
-            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
-
-            if (kubernetesDeploymentStatus != null)
-                sourceVersion = kubernetesDeploymentStatus.getGitCommitSha();
-
+            Deployment deployment = deploymentHandler.addDeployment(environmentId, serviceId, deployableVersionId, req);
+            assignJsonResponseToReq(req, HttpStatus.CREATED, deployment);
+        } catch (ApolloDeploymentBlockedException e) {
+            assignJsonResponseToReq(req, HttpStatus.FORBIDDEN, e.getMessage());
+        } catch (ApolloDeploymentConflictException e) {
+            assignJsonResponseToReq(req, HttpStatus.CONFLICT, e.getMessage());
+        } catch (ApolloDeploymentTooManyRequestsException e) {
+            assignJsonResponseToReq(req, HttpStatus.NOT_ACCEPTABLE, e.getMessage());
         } catch (Exception e) {
-            logger.error("Got exception while getting the current gitCommitSha from kubernetes. That means no revert.", e);
+            assignJsonResponseToReq(req, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-
-        MDC.put("environmentId", String.valueOf(environmentId));
-        MDC.put("serviceId", String.valueOf(serviceId));
-        MDC.put("deployableVersionId", String.valueOf(deployableVersionId));
-        MDC.put("userEmail", userEmail);
-        MDC.put("sourceVersion", sourceVersion);
-
-        logger.info("Got request for a new deployment");
-
-        List<DeploymentPermission> userPermissions = deploymentPermissionDao.getPermissionsByUser(userEmail);
-        if (!PermissionsValidator.isAllowedToDeploy(serviceId, environmentId, userPermissions)) {
-            logger.info("User is not authorized to perform this deployment!");
-            assignJsonResponseToReq(req, HttpStatus.FORBIDDEN, "Not Authorized!");
-            return;
-        }
-
-        String lockName = lockService.getDeploymentLockName(serviceId, environmentId);
-        if (!lockService.getAndObtainLock(lockName)) {
-            logger.warn("A deployment request of this sort is currently being run");
-            assignJsonResponseToReq(req, HttpStatus.TOO_MANY_REQUESTS, "A deployment request is currently running for this service and environment! Wait until its done");
-            return;
-        }
-
-        try {
-            logger.info("Permissions verified, Checking that no other deployment is currently running");
-
-            Optional<Deployment> runningDeployment = deploymentDao.getAllRunningDeployments()
-                    .stream()
-                    .filter(deployment ->
-                            deployment.getServiceId() == serviceId &&
-                                    deployment.getEnvironmentId() == environmentId)
-                    .findAny();
-
-            if (runningDeployment.isPresent()) {
-                logger.warn("There is already a running deployment that initiated by {}. Can't start a new one",
-                        runningDeployment.get().getUserEmail());
-
-                assignJsonResponseToReq(req, HttpStatus.CONFLICT, "There is an on-going deployment for this service in this environment");
-                return;
-            }
-
-            Deployment newDeployment = new Deployment();
-            newDeployment.setEnvironmentId(environmentId);
-            newDeployment.setServiceId(serviceId);
-            newDeployment.setDeployableVersionId(deployableVersionId);
-            newDeployment.setUserEmail(userEmail);
-            newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
-            newDeployment.setSourceVersion(sourceVersion);
-
-
-            logger.info("Checking for blockers");
-            if (blockerService.shouldBlock(newDeployment)) {
-                logger.info("Deployment is blocked!");
-                assignJsonResponseToReq(req, HttpStatus.NOT_ACCEPTABLE, "There is a blocker currently blocking this deployment");
-                return;
-            }
-
-            logger.info("All checks passed. Running deployment");
-            deploymentDao.addDeployment(newDeployment);
-            assignJsonResponseToReq(req, HttpStatus.CREATED, newDeployment);
-        } finally {
-            lockService.releaseLock(lockName);
-        }
-
     }
 
     @LoggedIn

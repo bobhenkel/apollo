@@ -13,7 +13,7 @@ import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.Group;
 import io.logz.apollo.notifications.Notification;
-
+import io.logz.apollo.deployment.DeploymenGroupsResponseObject;
 import java.io.IOException;
 import java.util.List;
 
@@ -104,6 +104,15 @@ public class ApolloClient {
                 "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()));
 
         return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
+    }
+
+    public DeploymenGroupsResponseObject addDeployment(Deployment deployment, String groupIdsCsv) throws ApolloClientException {
+        String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
+                "serviceId", String.valueOf(deployment.getServiceId()),
+                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
+                "groupIdsCsv", groupIdsCsv);
+
+        return genericApolloClient.postAndGetResult("/deployment-groups", requestBody, new TypeReference<DeploymenGroupsResponseObject>() {});
     }
 
     public Deployment getDeployment(int id) throws ApolloClientException {

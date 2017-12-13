@@ -141,7 +141,7 @@ public class AuthTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Create the permission
-        createAndSubmitPermissions(apolloTestClient, Optional.of(firstTestEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(firstTestEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
 
         Deployment okDeployment = ModelsGenerator.createDeployment(testService, firstTestEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(okDeployment);
@@ -168,7 +168,7 @@ public class AuthTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Associate user with group, and permission to the first service
-        createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(firstTestService), DeploymentPermission.PermissionType.ALLOW);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(firstTestService), DeploymentPermission.PermissionType.ALLOW);
 
         Deployment okDeployment = ModelsGenerator.createDeployment(firstTestService, testEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(okDeployment);
@@ -193,10 +193,10 @@ public class AuthTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Set broad permissions
-        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
 
         // And block the specific service
-        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
 
         Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
@@ -217,10 +217,10 @@ public class AuthTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Set broad deny permissions
-        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.DENY);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.DENY);
 
         // And allow the specific service
-        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.ALLOW);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.of(testService), DeploymentPermission.PermissionType.ALLOW);
 
         Deployment successfulDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         apolloTestClient.addDeployment(successfulDeployment);
@@ -241,33 +241,12 @@ public class AuthTest {
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         // Set broad allow permission
-        createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(testEnvironment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
 
         // Set broad deny permission
-        createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
+        ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.empty(), Optional.of(testService), DeploymentPermission.PermissionType.DENY);
 
         Deployment failDeployment = ModelsGenerator.createDeployment(testService, testEnvironment, testDeployableVersion);
         assertThatThrownBy(() -> apolloTestClient.addDeployment(failDeployment)).isInstanceOf(ApolloNotAuthorizedException.class);
-    }
-
-    private void createAndSubmitPermissions(ApolloTestClient apolloTestClient, Optional<Environment> testEnvironment,
-                                            Optional<Service> testService, DeploymentPermission.PermissionType permissionType) throws ScriptException, IOException, SQLException, ApolloClientException {
-        // Associate user with group, and permission to the first env
-        ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
-        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
-        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
-
-        DeploymentPermission newDeploymentPermission;
-
-        if (permissionType == DeploymentPermission.PermissionType.ALLOW) {
-            newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(testEnvironment, testService);
-        } else {
-            newDeploymentPermission = ModelsGenerator.createDenyDeploymentPermission(testEnvironment, testService);
-        }
-
-        newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
-
-        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }
