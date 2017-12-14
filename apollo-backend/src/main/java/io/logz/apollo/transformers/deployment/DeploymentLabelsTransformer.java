@@ -6,6 +6,7 @@ import io.logz.apollo.kubernetes.ApolloToKubernetes;
 import io.logz.apollo.transformers.LabelsNormalizer;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by roiravhon on 1/31/17.
@@ -25,7 +26,8 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
                 .put("service", LabelsNormalizer.normalize(apolloService.getName()))
                 .put("availability", LabelsNormalizer.normalize(apolloEnvironment.getAvailability()))
                 .put(ApolloToKubernetes.getApolloCommitShaKey(), LabelsNormalizer.normalize(apolloDeployableVersion.getGitCommitSha()))
-                .put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService))
+                .put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                        ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService, Optional.ofNullable(apolloDeployment.getGroupName())))
                 .build();
 
         // Get the deployment labels
@@ -43,7 +45,8 @@ public class DeploymentLabelsTransformer implements BaseDeploymentTransformer {
 
         // We also need to tag the pod
         Map<String, String> labelsFromDeploymentPod = deployment.getSpec().getTemplate().getMetadata().getLabels();
-        labelsFromDeploymentPod.put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(apolloEnvironment, apolloService));
+        labelsFromDeploymentPod.put(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                ApolloToKubernetes.getApolloPodUniqueIdentifier(apolloEnvironment, apolloService, Optional.ofNullable(apolloDeployment.getGroupName())));
         deployment.getSpec().getTemplate().getMetadata().setLabels(labelsFromDeploymentPod);
 
         return deployment;

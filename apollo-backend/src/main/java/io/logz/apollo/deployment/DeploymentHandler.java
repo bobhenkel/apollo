@@ -68,7 +68,13 @@ public class DeploymentHandler {
             // Get the current commit sha from kubernetes so we can revert if necessary
             Environment environment = environmentDao.getEnvironment(environmentId);
             Service service = serviceDao.getService(serviceId);
-            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+            KubernetesDeploymentStatus kubernetesDeploymentStatus;
+
+            if (group.isPresent()) {
+                kubernetesDeploymentStatus = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service, Optional.of(group.get().getName()));
+            } else {
+                kubernetesDeploymentStatus = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service);
+            }
 
             if (kubernetesDeploymentStatus != null)
                 sourceVersion = kubernetesDeploymentStatus.getGitCommitSha();

@@ -15,6 +15,7 @@ public class KubernetesDeploymentStatus {
     private Integer updatedReplicas;
     private Integer unavailableReplicas;
     private List<PodStatus> podStatuses;
+    private String groupName;
 
     public KubernetesDeploymentStatus() {
     }
@@ -81,5 +82,13 @@ public class KubernetesDeploymentStatus {
 
     public void setPodStatuses(List<PodStatus> podStatuses) {
         this.podStatuses = podStatuses;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 }

@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -138,7 +139,7 @@ public class KubernetesMonitor {
         for (int serviceId : servicesDeployedOnEnv) {
             Service service = serviceDao.getService(serviceId);
             try {
-                envStatus.put(service.getId(), kubernetesHandler.getCurrentStatus(service).getGitCommitSha());
+                envStatus.put(service.getId(), kubernetesHandler.getCurrentStatus(service, Optional.ofNullable(deployment.getGroupName())).getGitCommitSha());
             } catch (Exception e) {
                 logger.warn("Can't add service status to environment status", e);
             }

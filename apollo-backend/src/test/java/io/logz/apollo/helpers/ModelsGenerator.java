@@ -120,6 +120,17 @@ public class ModelsGenerator {
         return testGroup;
     }
 
+    public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient, int serviceId, int environmentId) throws ApolloClientException {
+        Group testGroup = createGroup();
+
+        testGroup.setServiceId(serviceId);
+        testGroup.setEnvironmentId(environmentId);
+
+        apolloTestClient.addGroup(testGroup);
+
+        return testGroup;
+    }
+
     public static Deployment createDeployment(Service relatedService, Environment relatedEnvironment,
                                               DeployableVersion relatedDeployableVersion) {
         return createDeployment(relatedService, relatedEnvironment, relatedDeployableVersion, null);

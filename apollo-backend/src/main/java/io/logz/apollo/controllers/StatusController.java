@@ -3,10 +3,12 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.common.ControllerCommon;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.GroupDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import org.rapidoid.annotation.Controller;
@@ -34,25 +36,40 @@ public class StatusController {
     private final KubernetesHandlerStore kubernetesHandlerStore;
     private final EnvironmentDao environmentDao;
     private final ServiceDao serviceDao;
+    private final GroupDao groupDao;
 
     @Inject
     public StatusController(KubernetesHandlerStore kubernetesHandlerStore, EnvironmentDao environmentDao,
-                            ServiceDao serviceDao) {
+                            ServiceDao serviceDao, GroupDao groupDao) {
         this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.environmentDao = requireNonNull(environmentDao);
         this.serviceDao = requireNonNull(serviceDao);
+        this.groupDao = requireNonNull(groupDao);
     }
 
     @GET("/status/service/{id}")
     public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int id) {
-        List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
         Service service = serviceDao.getService(id);
+        List<KubernetesDeploymentStatus> kubernetesDeploymentStatusList = new ArrayList<>();
 
         environmentDao.getAllEnvironments().forEach(environment -> {
-            try {
-                kubernetesDeploymentStatusList.add(kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).getCurrentStatus(service));
-            } catch (Exception e) {
-                logger.warn("Could not get status of service {} on environment {}! trying others..", id, environment.getId(), e);
+            KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
+            if (service.getIsPartOfGroup()) {
+                List<Group> relatedGroups = groupDao.getGroupsPerServiceAndEnvironment(id, environment.getId());
+                relatedGroups.forEach(group -> {
+                    String groupName = group.getName();
+                    try {
+                        kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service, Optional.of(groupName)));
+                    } catch (Exception e) {
+                        logger.warn("Could not get status of service {}, on environment {}, group {}! trying others..", id, environment.getId(), groupName, e);
+                    }
+                });
+            } else {
+                try {
+                    kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service));
+                } catch (Exception e) {
+                    logger.warn("Could not get status of service {}, on environment {}! trying others..", id, environment.getId(), e);
+                }
             }
         });
 
@@ -66,10 +83,22 @@ public class StatusController {
         KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         serviceDao.getAllServices().forEach(service -> {
-            try {
-                kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service));
-            } catch (Exception e) {
-                logger.warn("Could not get status of service {} on environment {}! trying others..", service.getId(), id, e);
+            if (service.getIsPartOfGroup()) {
+                List<Group> relatedGroups = groupDao.getGroupsPerServiceAndEnvironment(service.getId(), id);
+                relatedGroups.forEach(group -> {
+                    String groupName = group.getName();
+                    try {
+                        kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service, Optional.of(groupName)));
+                    } catch (Exception e) {
+                        logger.warn("Could not get status of service {}, on environment {}, group {}! trying others..", service.getId(), id, groupName, e);
+                    }
+                });
+            } else {
+                try {
+                    kubernetesDeploymentStatusList.add(kubernetesHandler.getCurrentStatus(service));
+                } catch (Exception e) {
+                    logger.warn("Could not get status of service {} on environment {}! trying others..", service.getId(), id, e);
+                }
             }
         });
 
@@ -81,9 +110,37 @@ public class StatusController {
     public String getLatestPodName(int environmentId, int serviceId, Req req) {
         Environment environment = environmentDao.getEnvironment(environmentId);
         Service service = serviceDao.getService(serviceId);
+
+        if (service.getIsPartOfGroup()) {
+            ControllerCommon.assignJsonResponseToReq(req, HttpStatus.NOT_ACCEPTABLE, "Missing group ID for service " + service.getId());
+            return "";
+        }
+
         KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
 
         Optional<String> serviceLatestCreatedPodName = kubernetesHandler.getServiceLatestCreatedPodName(service);
+        if (serviceLatestCreatedPodName.isPresent()) {
+            return serviceLatestCreatedPodName.get();
+        } else {
+            ControllerCommon.assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, "Can't find pod");
+            return "";
+        }
+    }
+
+    @LoggedIn
+    @GET("/status/environment/{environmentId}/service/{serviceId}/group/{groupName}/latestpod")
+    public String getLatestPodName(int environmentId, int serviceId, String groupName, Req req) {
+        Environment environment = environmentDao.getEnvironment(environmentId);
+        Service service = serviceDao.getService(serviceId);
+
+        if (!service.getIsPartOfGroup()) {
+            ControllerCommon.assignJsonResponseToReq(req, HttpStatus.NOT_ACCEPTABLE, "Service " + service.getId() + " can't have group ID");
+            return "";
+        }
+
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
+
+        Optional<String> serviceLatestCreatedPodName = kubernetesHandler.getServiceLatestCreatedPodName(service, Optional.of(groupName));
         if (serviceLatestCreatedPodName.isPresent()) {
             return serviceLatestCreatedPodName.get();
         } else {

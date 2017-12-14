@@ -160,12 +160,17 @@ public class KubernetesHandler {
     }
 
     public KubernetesDeploymentStatus getCurrentStatus(Service service) {
+        return getCurrentStatus(service, Optional.empty());
+    }
+
+    public KubernetesDeploymentStatus getCurrentStatus(Service service, Optional<String> groupName) {
 
         io.fabric8.kubernetes.api.model.extensions.Deployment deployment = kubernetesClient
                 .extensions()
                 .deployments()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(environment, service))
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                        ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(environment, service, groupName))
                 .list()
                 .getItems()
                 .stream()
@@ -180,7 +185,8 @@ public class KubernetesHandler {
         List<PodStatus> podStatusList = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                        ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service, groupName))
                 .list()
                 .getItems()
                 .stream()
@@ -197,6 +203,7 @@ public class KubernetesHandler {
         kubernetesDeploymentStatus.setUpdatedReplicas(deployment.getStatus().getUpdatedReplicas());
         kubernetesDeploymentStatus.setUnavailableReplicas(deployment.getStatus().getUnavailableReplicas());
         kubernetesDeploymentStatus.setPodStatuses(podStatusList);
+        groupName.ifPresent(kubernetesDeploymentStatus::setGroupName);
 
         return kubernetesDeploymentStatus;
     }
@@ -283,10 +290,15 @@ public class KubernetesHandler {
     }
 
     public Optional<String> getServiceLatestCreatedPodName(Service service) {
+        return getServiceLatestCreatedPodName(service, Optional.empty());
+    }
+
+    public Optional<String> getServiceLatestCreatedPodName(Service service, Optional<String> groupName) {
         PodList podList = kubernetesClient
                 .pods()
                 .inNamespace(environment.getKubernetesNamespace())
-                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(), ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service))
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                        ApolloToKubernetes.getApolloPodUniqueIdentifier(environment, service, groupName))
                 .list();
 
         if (podList == null) {

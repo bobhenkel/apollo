@@ -10,6 +10,7 @@ import io.logz.apollo.helpers.Common;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.Group;
 import io.logz.apollo.notifications.Notification;
@@ -194,5 +195,9 @@ public class ApolloClient {
 
     public List<Notification> getAllNotifications() throws ApolloClientException {
         return genericApolloClient.getResult("/notification/", new TypeReference<List<Notification>>() {});
+    }
+
+    public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int serviceId) throws ApolloClientException {
+        return genericApolloClient.getResult("/status/service/" + serviceId, new TypeReference<List<KubernetesDeploymentStatus>>() {});
     }
 }

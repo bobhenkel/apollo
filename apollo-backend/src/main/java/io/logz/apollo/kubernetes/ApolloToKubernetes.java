@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
+import io.logz.apollo.common.Encryptor;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.excpetions.ApolloParseException;
 import io.logz.apollo.notifications.mustache.TemplateInjector;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.HashMap;
 
@@ -40,6 +42,7 @@ public class ApolloToKubernetes {
     private final io.logz.apollo.models.DeployableVersion apolloDeployableVersion;
     private final ObjectMapper mapper;
     private io.logz.apollo.models.Deployment apolloDeployment;
+    private final String groupName;
 
     private final Set<BaseDeploymentTransformer> deploymentTransformers;
     private final Set<BaseServiceTransformer> serviceTransformers;
@@ -58,6 +61,7 @@ public class ApolloToKubernetes {
         this.apolloDeployment = requireNonNull(apolloDeployment);
         this.apolloService = requireNonNull(apolloService);
         this.deploymentDao = requireNonNull(deploymentDao);
+        this.groupName = apolloDeployment.getGroupName();
 
         mapper = new ObjectMapper(new YAMLFactory());
 
@@ -132,11 +136,13 @@ public class ApolloToKubernetes {
     }
 
     public String getApolloDeploymentUniqueIdentifierValue() {
-        return getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService);
+        // there's a deployment here
+        return getApolloDeploymentUniqueIdentifierValue(apolloEnvironment, apolloService, Optional.ofNullable(groupName));
     }
 
     public String getApolloDeploymentPodUniqueIdentifierValue() {
-        return getApolloPodUniqueIdentifier(apolloEnvironment, apolloService);
+        // there's a deployment here
+        return getApolloPodUniqueIdentifier(apolloEnvironment, apolloService, Optional.ofNullable(groupName));
     }
 
     public static String getApolloDeploymentUniqueIdentifierKey() {
@@ -148,25 +154,30 @@ public class ApolloToKubernetes {
     }
 
     public static String getApolloDeploymentUniqueIdentifierValue(io.logz.apollo.models.Environment apolloEnvironment,
-                                                                  io.logz.apollo.models.Service apolloService) {
+                                                                  io.logz.apollo.models.Service apolloService, Optional<String> groupName) {
 
-        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "deployment");
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, groupName, "deployment");
     }
 
     public static String getApolloServiceUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
-                                                           io.logz.apollo.models.Service apolloService) {
-        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "service");
+                                                           io.logz.apollo.models.Service apolloService, Optional<String> groupName) {
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, groupName, "service");
     }
 
     public static String getApolloPodUniqueIdentifier(io.logz.apollo.models.Environment apolloEnvironment,
-                                                          io.logz.apollo.models.Service apolloService) {
-        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, "pod");
+                                                          io.logz.apollo.models.Service apolloService, Optional<String> groupName) {
+        return getApolloUniqueIdentifierWithPrefix(apolloEnvironment, apolloService, groupName, "pod");
     }
 
     private static String getApolloUniqueIdentifierWithPrefix(io.logz.apollo.models.Environment apolloEnvironment,
                                                               io.logz.apollo.models.Service apolloService,
+                                                              Optional<String> groupName,
                                                               String prefix) {
-        return LabelsNormalizer.normalize("apollo_" + prefix + "_" + apolloEnvironment.getName() + "_" + apolloService.getName());
+        String naiveUniqueIdentofier = "apollo_" + prefix + "_env_" + apolloEnvironment.getId() + "_service_" + apolloService.getId();
+        if (groupName.isPresent()) {
+            naiveUniqueIdentofier += "_group_" + groupName.get();
+        }
+        return Encryptor.encryptString(LabelsNormalizer.normalize(naiveUniqueIdentofier));
     }
 
     private String fillDeploymentYamlWithParams(String deploymentYaml, HashMap deploymentParams) {

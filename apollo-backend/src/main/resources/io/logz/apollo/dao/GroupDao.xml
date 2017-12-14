@@ -21,6 +21,13 @@
         FROM groups
     </select>
 
+    <select id="getGroupsPerServiceAndEnvironment" resultType="io.logz.apollo.models.Group">
+        SELECT *
+        FROM groups
+        WHERE service_id=#{serviceId}
+        AND environment_id=#{environmentId}
+    </select>
+
     <select id="getScalingFactor" resultType="int">
         SELECT scaling_factor
         FROM groups
