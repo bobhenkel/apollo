@@ -65,8 +65,8 @@ public class DeploymentGroupsTest {
     public void testAddDeploymentForGroups() throws Exception {
         // Prepare groups
         Group goodGroup1 = createAndSubmitGroup(apolloTestClient);
-        Group goodGroup2 = createAndSubmitGroup(apolloTestClient, apolloTestClient.getService(goodGroup1.getServiceId()),
-                apolloTestClient.getEnvironment(goodGroup1.getEnvironmentId()));
+        Group goodGroup2 = createAndSubmitGroup(apolloTestClient, apolloTestClient.getService(goodGroup1.getServiceId()).getId(),
+                apolloTestClient.getEnvironment(goodGroup1.getEnvironmentId()).getId());
         Group groupWithDifferentServiceId = createAndSubmitGroup(apolloTestClient);
 
         String[] groupIdsArr = {"0", String.valueOf(goodGroup1.getId()), String.valueOf(goodGroup2.getId()), String.valueOf(groupWithDifferentServiceId.getId())};

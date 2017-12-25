@@ -62,14 +62,4 @@ public class GroupTest {
         }
         assertThat(found).isTrue();
     }
-
-    @Test
-    public void testGetAndUpdateScalingFactor() throws ApolloClientException {
-        Group testGroup = createAndSubmitGroup(apolloTestClient);
-        int groupId = apolloTestClient.getGroupByName(testGroup.getName()).getId();
-
-        int newScalingFactor = 8;
-        apolloTestClient.updateScalingFactor(groupId, newScalingFactor);
-        assertThat(apolloTestClient.getScalingFactor(groupId)).isEqualTo(newScalingFactor);
-    }
 }

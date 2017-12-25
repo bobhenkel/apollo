@@ -10,6 +10,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.logz.apollo.excpetions.ApolloNotFoundException;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
@@ -165,17 +166,7 @@ public class KubernetesHandler {
 
     public KubernetesDeploymentStatus getCurrentStatus(Service service, Optional<String> groupName) {
 
-        io.fabric8.kubernetes.api.model.extensions.Deployment deployment = kubernetesClient
-                .extensions()
-                .deployments()
-                .inNamespace(environment.getKubernetesNamespace())
-                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
-                        ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(environment, service, groupName))
-                .list()
-                .getItems()
-                .stream()
-                .findFirst()
-                .orElse(null);
+        io.fabric8.kubernetes.api.model.extensions.Deployment deployment = getKubernetesDeployment(service, groupName);
 
         if (deployment == null) {
             logger.warn("Could not find deployment for environment {} and service {}, can't return the status!", environment.getId(), service.getId());
@@ -393,5 +384,47 @@ public class KubernetesHandler {
             logger.error("Could not create kubernetes client for environment {}", environment.getId(), e);
             throw new RuntimeException();
         }
+    }
+
+    public int getScalingFactor(Service service, String groupName) throws ApolloNotFoundException {
+        io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = getKubernetesDeployment(service, Optional.of(groupName));
+
+        if (kubernetesDeployment == null) {
+            throw new ApolloNotFoundException("Could not find deployment for environment " + environment.getId() + ", service "
+                    + service.getId() + " and group " + groupName + ", can't return the status!");
+        }
+
+        return kubernetesDeployment.getStatus().getAvailableReplicas();
+    }
+
+    public void setScalingFactor(Service service, String groupName, int scalingFactor) throws ApolloNotFoundException {
+        io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = getKubernetesDeployment(service, Optional.of(groupName));
+
+        if (kubernetesDeployment == null) {
+            throw new ApolloNotFoundException("Could not find deployment for environment " + environment.getId() + ", service "
+                    + service.getId() + " and group " + groupName + ", can't return the status!");
+        }
+
+        kubernetesClient
+                .extensions()
+                .deployments()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withName(kubernetesDeployment.getMetadata().getName())
+                .scale(scalingFactor);
+    }
+
+    private io.fabric8.kubernetes.api.model.extensions.Deployment getKubernetesDeployment(Service service, Optional<String> groupName) {
+
+        return kubernetesClient
+                .extensions()
+                .deployments()
+                .inNamespace(environment.getKubernetesNamespace())
+                .withLabel(ApolloToKubernetes.getApolloDeploymentUniqueIdentifierKey(),
+                        ApolloToKubernetes.getApolloDeploymentUniqueIdentifierValue(environment, service, groupName))
+                .list()
+                .getItems()
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 }

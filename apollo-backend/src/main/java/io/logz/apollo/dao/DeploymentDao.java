@@ -19,6 +19,7 @@ public interface DeploymentDao {
     void addDeployment(Deployment deployment);
     void updateDeploymentStatus(@Param("id") int id, @Param("status") Deployment.DeploymentStatus status);
     void updateDeploymentEnvStatus(@Param("id") int id, @Param("envStatus") String envStatus);
+    void updateDeployment(Deployment deployment);
     String getDeploymentEnvStatus(@Param("id") int id);
     List<Integer> getServicesDeployedOnEnv(@Param("environmentId") int environmentId);
 }

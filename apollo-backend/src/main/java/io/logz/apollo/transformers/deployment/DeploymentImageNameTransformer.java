@@ -19,7 +19,8 @@ public class DeploymentImageNameTransformer implements BaseDeploymentTransformer
                                 io.logz.apollo.models.Deployment apolloDeployment,
                                 io.logz.apollo.models.Service apolloService,
                                 io.logz.apollo.models.Environment apolloEnvironment,
-                                io.logz.apollo.models.DeployableVersion apolloDeployableVersion) {
+                                io.logz.apollo.models.DeployableVersion apolloDeployableVersion,
+                                io.logz.apollo.models.Group group) {
 
         // Each deployment can have multiple containers
         deployment.getSpec().getTemplate().getSpec().getContainers().forEach(container -> {

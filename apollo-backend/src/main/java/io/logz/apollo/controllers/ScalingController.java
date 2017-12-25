@@ -1,17 +1,21 @@
 package io.logz.apollo.controllers;
 
-import com.google.common.collect.ImmutableMap;
 import io.logz.apollo.common.HttpStatus;
+import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.GroupDao;
+import io.logz.apollo.dao.ServiceDao;
+import io.logz.apollo.excpetions.ApolloNotFoundException;
+import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Group;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.PUT;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.LoggedIn;
+import io.logz.apollo.kubernetes.KubernetesHandler;
+import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 
 import javax.inject.Inject;
-import java.util.Map;
 
 import static io.logz.apollo.common.ControllerCommon.assignJsonResponseToReq;
 import static java.util.Objects.requireNonNull;
@@ -19,10 +23,16 @@ import static java.util.Objects.requireNonNull;
 @Controller
 public class ScalingController {
 
+    private final KubernetesHandlerStore kubernetesHandlerStore;
+    private final EnvironmentDao environmentDao;
+    private final ServiceDao serviceDao;
     private final GroupDao groupDao;
 
     @Inject
-    public ScalingController(GroupDao groupDao) {
+    public ScalingController(KubernetesHandlerStore kubernetesHandlerStore, GroupDao groupDao, EnvironmentDao environmentDao, ServiceDao serviceDao) {
+        this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
+        this.environmentDao = requireNonNull(environmentDao);
+        this.serviceDao = requireNonNull(serviceDao);
         this.groupDao = requireNonNull(groupDao);
     }
 
@@ -34,9 +44,22 @@ public class ScalingController {
 
     @LoggedIn
     @GET("/scaling/kubernetes-factor/{groupId}")
-    public int getKubeScalingFactor(int groupId) {
-        // TODO: implement
-        return 0;
+    public void getKubeScalingFactor(int groupId, Req req) {
+        Group group = groupDao.getGroup(groupId);
+
+        if (group == null) {
+            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, groupId);
+            return;
+        }
+
+        Environment environment = environmentDao.getEnvironment(group.getEnvironmentId());
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
+        try {
+            int scalingFactor = kubernetesHandler.getScalingFactor(serviceDao.getService(group.getServiceId()), group.getName());
+            assignJsonResponseToReq(req, HttpStatus.OK, scalingFactor);
+        } catch (ApolloNotFoundException e) {
+            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @LoggedIn
@@ -45,15 +68,20 @@ public class ScalingController {
         Group group = groupDao.getGroup(groupId);
 
         if (group == null) {
-            Map<String, String> message = ImmutableMap.of("message", "Group not found");
-            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, message);
+            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, groupId);
             return;
         }
 
         group.setScalingFactor(scalingFactor);
-        // TODO: change in kube too
-
         groupDao.updateScalingFactor(group);
-        assignJsonResponseToReq(req, HttpStatus.OK, group);
+
+        Environment environment = environmentDao.getEnvironment(group.getEnvironmentId());
+        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
+        try {
+            kubernetesHandler.setScalingFactor(serviceDao.getService(group.getServiceId()), group.getName(), scalingFactor);
+            assignJsonResponseToReq(req, HttpStatus.OK, group);
+        } catch (ApolloNotFoundException e) {
+            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

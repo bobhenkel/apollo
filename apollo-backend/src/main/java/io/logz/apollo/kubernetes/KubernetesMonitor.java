@@ -4,9 +4,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.dao.GroupDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Group;
+import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ public class KubernetesMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(KubernetesMonitor.class);
     private static final int TIMEOUT_TERMINATION = 60;
+    private static final String UNKNOWN_GIT_COMMIT_SHA = "unknown";
     public static final String LOCAL_RUN_PROPERTY = "localrun";
 
     private final ScheduledExecutorService scheduledExecutorService;
@@ -43,15 +47,17 @@ public class KubernetesMonitor {
     private final EnvironmentDao environmentDao;
     private final DeploymentDao deploymentDao;
     private final ServiceDao serviceDao;
+    private final GroupDao groupDao;
 
     @Inject
     public KubernetesMonitor(KubernetesHandlerStore kubernetesHandlerStore, ApolloConfiguration apolloConfiguration,
-                             EnvironmentDao environmentDao, DeploymentDao deploymentDao, ServiceDao serviceDao) {
+                             EnvironmentDao environmentDao, DeploymentDao deploymentDao, ServiceDao serviceDao, GroupDao groupDao) {
         this.kubernetesHandlerStore = requireNonNull(kubernetesHandlerStore);
         this.apolloConfiguration = requireNonNull(apolloConfiguration);
         this.environmentDao = requireNonNull(environmentDao);
         this.deploymentDao = requireNonNull(deploymentDao);
         this.serviceDao = requireNonNull(serviceDao);
+        this.groupDao = requireNonNull(groupDao);
 
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("kubernetes-monitor-%d").build();
         scheduledExecutorService = Executors.newScheduledThreadPool(1, namedThreadFactory);
@@ -133,17 +139,62 @@ public class KubernetesMonitor {
         }
     }
 
-    private HashMap<Integer, String> getDeploymentCurrentEnvStatus(Deployment deployment, KubernetesHandler kubernetesHandler) {
-        HashMap<Integer, String> envStatus = new HashMap<>();
+    private HashMap<Integer, Object> getDeploymentCurrentEnvStatus(Deployment deployment, KubernetesHandler kubernetesHandler) {
+
+        HashMap<Integer, Object> envStatus = new HashMap<>();
         List<Integer> servicesDeployedOnEnv = deploymentDao.getServicesDeployedOnEnv(deployment.getEnvironmentId());
-        for (int serviceId : servicesDeployedOnEnv) {
+
+        servicesDeployedOnEnv.forEach(serviceId -> {
             Service service = serviceDao.getService(serviceId);
-            try {
-                envStatus.put(service.getId(), kubernetesHandler.getCurrentStatus(service, Optional.ofNullable(deployment.getGroupName())).getGitCommitSha());
-            } catch (Exception e) {
-                logger.warn("Can't add service status to environment status", e);
+            if (service != null) {
+                if (service.getIsPartOfGroup() != null && service.getIsPartOfGroup()) {
+                    envStatus.put(serviceId, getServiceCommitShaWithGroup(kubernetesHandler, deployment, service));
+
+                } else {
+                    envStatus.put(serviceId, getServiceCommitSha(kubernetesHandler, deployment, service));
+                }
             }
-        }
+        });
+
         return envStatus;
+    }
+
+    private JSONObject getServiceCommitShaWithGroup(KubernetesHandler kubernetesHandler, Deployment deployment, Service service) {
+        HashMap<Integer, String> serviceStatus = new HashMap<>();
+        List<Group> relatedGroups = groupDao.getGroupsPerServiceAndEnvironment(service.getId(), deployment.getEnvironmentId());
+
+        relatedGroups.forEach(group -> {
+            if (group != null) {
+                try {
+                    KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandler.getCurrentStatus(service, Optional.of(group.getName()));
+                    if (kubernetesDeploymentStatus != null) {
+                        serviceStatus.put(group.getId(), kubernetesDeploymentStatus.getGitCommitSha());
+                    } else {
+                        serviceStatus.put(group.getId(), UNKNOWN_GIT_COMMIT_SHA);
+                        logger.warn("Can't get kubernetesDeploymentStatus for deployment {} and service {}", deployment.getId(), service.getId());
+                    }
+                } catch (Exception | Error e) {
+                    serviceStatus.put(group.getId(), UNKNOWN_GIT_COMMIT_SHA);
+                    logger.warn("Can't add service status to environment status for deployment " + deployment.getId() + " and service " + service.getId(), e);
+                }
+            }
+        });
+
+        return new JSONObject(serviceStatus);
+    }
+
+    private String getServiceCommitSha(KubernetesHandler kubernetesHandler, Deployment deployment, Service service) {
+        try {
+            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandler.getCurrentStatus(service, Optional.ofNullable(deployment.getGroupName()));
+            if (kubernetesDeploymentStatus != null) {
+                return kubernetesDeploymentStatus.getGitCommitSha();
+            } else {
+                logger.warn("Can't get kubernetesDeploymentStatus for deployment {} and service {}", deployment.getId(), service.getId());
+            }
+        } catch (Exception e) {
+            logger.warn("Can't add service status to environment status for deployment " + deployment.getId() + " and service " + service.getId(), e);
+        }
+
+        return UNKNOWN_GIT_COMMIT_SHA;
     }
 }

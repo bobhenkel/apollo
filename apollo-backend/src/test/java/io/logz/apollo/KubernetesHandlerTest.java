@@ -12,6 +12,8 @@ import io.fabric8.kubernetes.client.mock.KubernetesMockClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.DeployableVersionDao;
+import io.logz.apollo.dao.GroupDao;
+import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.helpers.RealDeploymentGenerator;
@@ -22,10 +24,12 @@ import io.logz.apollo.kubernetes.KubernetesHandler;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Deployment;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.PodStatus;
+import io.logz.apollo.models.Service;
+import org.json.JSONException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -33,6 +37,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitGroup;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -45,23 +50,30 @@ public class KubernetesHandlerTest {
     private static KubernetesMockClient kubernetesMockClient;
     private static RealDeploymentGenerator notFinishedDeployment;
     private static RealDeploymentGenerator finishedDeployment;
+    private static RealDeploymentGenerator finishedDeploymentForEnvTest;
     private static RealDeploymentGenerator notFinishedCanceledDeployment;
     private static RealDeploymentGenerator finishedCanceledDeployment;
     private static RealDeploymentGenerator statusDeployment;
     private static PodStatus podStatus;
 
+    private static DeploymentDao deploymentDao;
+    private static Group group;
+
     private static KubernetesHandler notFinishedDeploymentHandler;
     private static StandaloneApollo standaloneApollo;
 
     @BeforeClass
-    public static void initialize() throws ScriptException, IOException, SQLException {
+    public static void initialize() throws ScriptException, IOException, SQLException, ApolloClientException {
 
         // We need a server here
         standaloneApollo = StandaloneApollo.getOrCreateServer();
         ApolloToKubernetesStore apolloToKubernetesStore = standaloneApollo.getInstance(ApolloToKubernetesStore.class);
         KubernetesHandlerStore kubernetesHandlerStore = standaloneApollo.getInstance(KubernetesHandlerStore.class);
+        deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
+        GroupDao groupDao = standaloneApollo.getInstance(GroupDao.class);
 
         kubernetesMockClient = new KubernetesMockClient();
+        ApolloTestClient apolloTestClient = Common.signupAndLogin();
 
         // Create deployments
         notFinishedDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
@@ -70,12 +82,23 @@ public class KubernetesHandlerTest {
         finishedCanceledDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
         statusDeployment = new RealDeploymentGenerator("image", "key", "value", 0);
 
+        // Prepare env for env_test
+        group = createAndSubmitGroup(apolloTestClient, finishedDeployment.getEnvironment().getId());
+        group.setEnvironmentId(finishedDeployment.getEnvironment().getId());
+        groupDao.updateGroup(group);
+        Service service = apolloTestClient.getService(group.getServiceId());
+        apolloTestClient.updateService(service.getId(), service.getName(), service.getDeploymentYaml(), service.getServiceYaml(), true);
+
+        finishedDeploymentForEnvTest = new RealDeploymentGenerator("image", "key", "value", 0,
+                null, apolloTestClient.getService(group.getServiceId()), null, group.getName());
+
         // Set mock endpoints
         setMockDeploymentStatus(notFinishedDeployment, false, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedDeployment.getDeployment()));
         setMockDeploymentStatus(finishedDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedDeployment.getDeployment()));
         setMockDeploymentStatus(notFinishedCanceledDeployment, false, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
         setMockDeploymentStatus(finishedCanceledDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
         setMockDeploymentStatus(statusDeployment, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
+        setMockDeploymentStatus(finishedDeploymentForEnvTest, true, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedDeploymentForEnvTest.getDeployment()));
 
         // Setting a mock pod status
         podStatus = new PodStatus();
@@ -93,6 +116,12 @@ public class KubernetesHandlerTest {
         setMockPodLogsAndStatus(notFinishedCanceledDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(notFinishedCanceledDeployment.getDeployment()));
         setMockPodLogsAndStatus(finishedCanceledDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedCanceledDeployment.getDeployment()));
         setMockPodLogsAndStatus(statusDeployment, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(statusDeployment.getDeployment()));
+        setMockPodLogsAndStatus(finishedDeploymentForEnvTest, LOG_MESSAGE_IN_POD, podStatus, apolloToKubernetesStore.getOrCreateApolloToKubernetes(finishedDeploymentForEnvTest.getDeployment()));
+
+        // Prepare deployment for env_test
+        finishedDeploymentForEnvTest.getDeployment().setEnvironmentId(finishedDeployment.getEnvironment().getId());
+        finishedDeploymentForEnvTest.setEnvironment(finishedDeployment.getEnvironment());
+        deploymentDao.updateDeployment(finishedDeploymentForEnvTest.getDeployment());
 
         // Get an instance of the client
         KubernetesClient kubernetesClient = kubernetesMockClient.replay();
@@ -103,6 +132,7 @@ public class KubernetesHandlerTest {
         kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(notFinishedCanceledDeployment.getEnvironment(), kubernetesClient);
         kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(finishedCanceledDeployment.getEnvironment(), kubernetesClient);
         kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(statusDeployment.getEnvironment(), kubernetesClient);
+        kubernetesHandlerStore.getOrCreateKubernetesHandlerWithSpecificClient(finishedDeploymentForEnvTest.getEnvironment(), kubernetesClient);
 
         // Since the mock library does not support "createOrReplace" we can't mock this phase (and its fine to neglect it since its fabric8 code)
         notFinishedDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.STARTED);
@@ -110,16 +140,14 @@ public class KubernetesHandlerTest {
         notFinishedCanceledDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
         finishedCanceledDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.CANCELING);
         statusDeployment.updateDeploymentStatus(Deployment.DeploymentStatus.DONE);
+        finishedDeploymentForEnvTest.updateDeploymentStatus(Deployment.DeploymentStatus.STARTED);
 
         // TODO: This can cause test concurrency issues in case we will want to run this in parallel. In the current singleton nature of those tests, no other way unfortunately
         standaloneApollo.startKubernetesMonitor();
     }
 
     @Test
-    public void testDeploymentMonitor() {
-        DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
-        DeployableVersionDao deployableVersionDao = standaloneApollo.getInstance(DeployableVersionDao.class);
-
+    public void testDeploymentMonitor() throws JSONException {
         // We need to wait at least 2 iterations of the monitoring thread + 1 buffer
         Common.waitABit(3);
 
@@ -133,10 +161,11 @@ public class KubernetesHandlerTest {
         assertThat(currentNotFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELING);
         assertThat(currentFinishedCanceledDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.CANCELED);
 
-        String envStatusFromObject = currentFinishedCanceledDeployment.getEnvStatus();
-        String commitShaFromDeployableVersion = deployableVersionDao.getDeployableVersion(currentFinishedCanceledDeployment.
-                getDeployableVersionId()).getGitCommitSha();
-        assertThat(envStatusFromObject).contains(commitShaFromDeployableVersion);
+        // Test envStatus
+        String envStatusFromObject = currentFinishedDeployment.getEnvStatus();
+        String expectedEnvStatus = getExpectedEnvStatus(currentFinishedDeployment);
+
+        assertThat(envStatusFromObject.replaceAll("\\\\", "")).isEqualTo(expectedEnvStatus);
     }
 
     @Test
@@ -177,6 +206,23 @@ public class KubernetesHandlerTest {
 
         assertThat(apolloTestClient.getDeployment(restDeployment.getId()).getSourceVersion())
                 .isEqualTo(statusDeployment.getDeployableVersion().getGitCommitSha());
+    }
+
+    private String getExpectedEnvStatus(Deployment deployment) {
+        DeployableVersionDao deployableVersionDao = standaloneApollo.getInstance(DeployableVersionDao.class);
+
+        String commitShaFromDeployableVersion = deployableVersionDao.getDeployableVersion(deployment.
+                getDeployableVersionId()).getGitCommitSha();
+        // String commitShaFromOtherDeployableVersion = deployableVersionDao.getDeployableVersion(finishedDeploymentForEnvTest.getDeployment()
+        //         .getDeployableVersionId()).getGitCommitSha();
+
+        return "{\"" + String.valueOf(deployment.getServiceId()) + "\":\"" + commitShaFromDeployableVersion + "\",\"" +
+                String.valueOf(finishedDeploymentForEnvTest.getService().getId()) + "\":{\"" + String.valueOf(group.getId()) + "\":\"unknown\"}}";
+
+        // TODO: Should be this when we can test with real env and not mocks.
+        // return "{\"" + String.valueOf(deployment.getServiceId()) + "\":\"" + commitShaFromDeployableVersion + "\",\"" +
+        //         String.valueOf(finishedDeploymentForEnvTest.getService().getId()) + "\":{\"" + String.valueOf(group.getId()) + "\":\"" +
+        //         commitShaFromOtherDeployableVersion + "\"}}";
     }
 
     private static void setMockDeploymentStatus(RealDeploymentGenerator realDeploymentGenerator, boolean finished, ApolloToKubernetes apolloToKubernetes) {

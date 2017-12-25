@@ -5,6 +5,7 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Group;
 import io.logz.apollo.models.Service;
 
 import java.util.List;
@@ -16,7 +17,11 @@ import java.util.Map;
 public class DeploymentEnvironmentVariableTransformer implements BaseDeploymentTransformer {
 
     @Override
-    public Deployment transform(Deployment deployment, io.logz.apollo.models.Deployment apolloDeployment, Service apolloService, Environment apolloEnvironment, DeployableVersion apolloDeployableVersion) {
+    public Deployment transform(Deployment deployment,
+                                io.logz.apollo.models.Deployment apolloDeployment,
+                                Service apolloService, Environment apolloEnvironment,
+                                DeployableVersion apolloDeployableVersion,
+                                Group group) {
 
         // TODO: This should probably be an externally configured map of key names and desired dynamic values
         // TODO: Keeping this logz.io specific at the moment

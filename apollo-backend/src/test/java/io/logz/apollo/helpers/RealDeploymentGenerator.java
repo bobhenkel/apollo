@@ -24,17 +24,22 @@ public class RealDeploymentGenerator {
     private final String DEFAULT_ENVIRONMENT_VARIABLE_VALUE = "enval";
 
     private final StandaloneApollo standaloneApollo;
-    private final Environment environment;
     private final Service service;
     private final DeployableVersion deployableVersion;
     private final User user;
     private final Deployment deployment;
+    private Environment environment;
 
     public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient) {
-        this(deploymentImageName, extraLabelKey, extraLabelValue, servicePortCoefficient, null);
+        this(deploymentImageName, extraLabelKey, extraLabelValue, servicePortCoefficient, null, null, null, null);
     }
 
     public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue, int servicePortCoefficient, String deploymentParams) {
+        this(deploymentImageName, extraLabelKey, extraLabelValue, servicePortCoefficient, deploymentParams, null, null, null);
+    }
+
+    public RealDeploymentGenerator(String deploymentImageName, String extraLabelKey, String extraLabelValue,
+                                   int servicePortCoefficient, String deploymentParams, Service serviceParam, Environment environmentParam, String groupName) {
         try {
             standaloneApollo = StandaloneApollo.getOrCreateServer();
             DeploymentDao deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
@@ -44,14 +49,25 @@ public class RealDeploymentGenerator {
             UserDao userDao = standaloneApollo.getInstance(UserDao.class);
 
             // Create all models in DB
-            environment = ModelsGenerator.createEnvironment();
-            environment.setServicePortCoefficient(servicePortCoefficient);
-            environmentDao.addEnvironment(environment);
+            if (environmentParam == null) {
+                environment = ModelsGenerator.createEnvironment();
+                environment.setServicePortCoefficient(servicePortCoefficient);
+                environmentDao.addEnvironment(environment);
+            } else {
+                environment = environmentParam;
+            }
 
-            service = ModelsGenerator.createService();
-            service.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
-            service.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
-            serviceDao.addService(service);
+            if (serviceParam == null) {
+                service = ModelsGenerator.createService();
+                service.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
+                service.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
+                serviceDao.addService(service);
+            } else {
+                serviceParam.setDeploymentYaml(getDeploymentKubernetesYaml(deploymentImageName, extraLabelKey, extraLabelValue));
+                serviceParam.setServiceYaml(getServiceDeploymentYaml(extraLabelKey, extraLabelValue));
+                serviceDao.updateService(serviceParam);
+                service = serviceDao.getService(serviceParam.getId());
+            }
 
             deployableVersion = ModelsGenerator.createDeployableVersion(service);
             deployableVersionDao.addDeployableVersion(deployableVersion);
@@ -64,6 +80,7 @@ public class RealDeploymentGenerator {
             deployment.setSourceVersion("abc" + Common.randomStr(5));
             deployment.setUserEmail(user.getUserEmail());
             deployment.setDeploymentParams(deploymentParams);
+            deployment.setGroupName(groupName);
             deploymentDao.addDeployment(deployment);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -94,6 +111,8 @@ public class RealDeploymentGenerator {
         return environment;
     }
 
+    public void setEnvironment(Environment environment) { this.environment = environment; }
+
     public Service getService() {
         return service;
     }
@@ -121,6 +140,7 @@ public class RealDeploymentGenerator {
                 "kind: Deployment\n" +
                 "metadata:\n" +
                 "  labels:\n" +
+                "    name: nginx\n" +
                 "    tahat: nginx\n" +
                 "    " + DEFAULT_LABEL_KEY + ": " + DEFAULT_LABEL_VALUE + "\n" +
                 "    " + extraLabelKey + ": " + extraLabelValue + "\n" +

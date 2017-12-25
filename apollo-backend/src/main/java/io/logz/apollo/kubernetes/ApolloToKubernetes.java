@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.logz.apollo.common.Encryptor;
 import io.logz.apollo.dao.DeploymentDao;
+import io.logz.apollo.dao.GroupDao;
 import io.logz.apollo.excpetions.ApolloParseException;
 import io.logz.apollo.notifications.mustache.TemplateInjector;
 import io.logz.apollo.transformers.LabelsNormalizer;
@@ -15,6 +16,8 @@ import io.logz.apollo.transformers.deployment.BaseDeploymentTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentEnvironmentVariableTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentImageNameTransformer;
 import io.logz.apollo.transformers.deployment.DeploymentLabelsTransformer;
+import io.logz.apollo.transformers.deployment.DeploymentNameTransformer;
+import io.logz.apollo.transformers.deployment.DeploymentScalingFactorTransformer;
 import io.logz.apollo.transformers.service.BaseServiceTransformer;
 import io.logz.apollo.transformers.service.ServiceLabelTransformer;
 import io.logz.apollo.transformers.service.ServiceNodePortCoefficientTransformer;
@@ -48,6 +51,7 @@ public class ApolloToKubernetes {
     private final Set<BaseServiceTransformer> serviceTransformers;
 
     private final DeploymentDao deploymentDao;
+    private final GroupDao groupDao;
 
     private final TemplateInjector templateInjector;
 
@@ -55,12 +59,14 @@ public class ApolloToKubernetes {
                               io.logz.apollo.models.DeployableVersion apolloDeployableVersion,
                               io.logz.apollo.models.Environment apolloEnvironment,
                               io.logz.apollo.models.Deployment apolloDeployment,
-                              io.logz.apollo.models.Service apolloService) {
+                              io.logz.apollo.models.Service apolloService,
+                              GroupDao groupDao) {
         this.apolloDeployableVersion = requireNonNull(apolloDeployableVersion);
         this.apolloEnvironment = requireNonNull(apolloEnvironment);
         this.apolloDeployment = requireNonNull(apolloDeployment);
         this.apolloService = requireNonNull(apolloService);
         this.deploymentDao = requireNonNull(deploymentDao);
+        this.groupDao = requireNonNull(groupDao);
         this.groupName = apolloDeployment.getGroupName();
 
         mapper = new ObjectMapper(new YAMLFactory());
@@ -71,6 +77,11 @@ public class ApolloToKubernetes {
                 new DeploymentLabelsTransformer(),
                 new DeploymentEnvironmentVariableTransformer()
         ));
+
+        if (apolloService.getIsPartOfGroup() != null && apolloService.getIsPartOfGroup()) {
+            deploymentTransformers.add(new DeploymentScalingFactorTransformer());
+            deploymentTransformers.add(new DeploymentNameTransformer());
+        }
 
         // Define the set of transformers the service object will go through
         serviceTransformers = Sets.newHashSet(Arrays.asList(
@@ -100,7 +111,7 @@ public class ApolloToKubernetes {
             logger.debug("About to run {} transformations on the deployment yaml of deployment id {}",
                     deploymentTransformers.size(), apolloDeployment.getId());
             deploymentTransformers.forEach(transformer ->
-                    transformer.transform(deployment, apolloDeployment, apolloService, apolloEnvironment, apolloDeployableVersion));
+                    transformer.transform(deployment, apolloDeployment, apolloService, apolloEnvironment, apolloDeployableVersion, groupDao.getGroupByName(groupName)));
 
             return deployment;
 
@@ -185,6 +196,9 @@ public class ApolloToKubernetes {
     }
 
     private HashMap<String, String> jsonToMap(String deploymentParams) throws IOException {
+        if (deploymentParams == null) {
+            return new HashMap<>();
+        }
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(deploymentParams, new TypeReference<HashMap<String, String>>() {});
     }

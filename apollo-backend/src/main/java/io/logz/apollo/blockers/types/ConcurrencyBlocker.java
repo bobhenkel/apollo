@@ -27,6 +27,10 @@ public class ConcurrencyBlocker implements BlockerFunction {
     @Override
     public boolean shouldBlock(BlockerInjectableCommons blockerInjectableCommons, Deployment deployment) {
 
+        if (deployment.getGroupName() != null) {
+            return false;
+        }
+
         if (concurrencyBlockerConfiguration.getExcludeServices().contains(deployment.getServiceId())) {
             return false;
         }

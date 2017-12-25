@@ -70,4 +70,17 @@
         SET env_status=#{envStatus}
         WHERE id=#{id}
     </update>
+
+    <update id="updateDeployment">
+        UPDATE deployment SET
+        environment_id=#{environmentId},
+        service_id=#{serviceId},
+        deployable_version_id=#{deployableVersionId},
+        user_email=#{userEmail},
+        status=#{status},
+        source_version=#{sourceVersion},
+        group_name=#{groupName},
+        deployment_params=#{deploymentParams}
+        WHERE id=#{id}
+    </update>
 </mapper>

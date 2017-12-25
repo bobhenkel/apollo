@@ -29,6 +29,8 @@ import java.util.Optional;
  */
 public class ModelsGenerator {
 
+    public static int DEFAULT_SCALING_FACTOR = 3;
+
     public static Environment createEnvironment() {
         Environment testEnvironment = new Environment();
         testEnvironment.setName("env-name-" + Common.randomStr(5));
@@ -51,7 +53,7 @@ public class ModelsGenerator {
     public static Group createGroup() {
         Group testGroup = new Group();
         testGroup.setName("group-name-" + Common.randomStr(5));
-        testGroup.setScalingFactor(3);
+        testGroup.setScalingFactor(DEFAULT_SCALING_FACTOR);
         testGroup.setJsonParams(Common.generateJson("json", "params"));
 
         return testGroup;
@@ -104,20 +106,11 @@ public class ModelsGenerator {
     }
 
     public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient) throws ApolloClientException {
-        return createAndSubmitGroup(apolloTestClient, createAndSubmitService(apolloTestClient), createAndSubmitEnvironment(apolloTestClient));
+        return createAndSubmitGroup(apolloTestClient, createAndSubmitService(apolloTestClient).getId(), createAndSubmitEnvironment(apolloTestClient).getId());
     }
 
-    public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient, Service service, Environment environment) throws ApolloClientException {
-        Group testGroup = createGroup();
-
-        testGroup.setServiceId(service.getId());
-        testGroup.setEnvironmentId(environment.getId());
-
-        apolloTestClient.addGroup(testGroup);
-
-        testGroup.setId(apolloTestClient.getGroupByName(testGroup.getName()).getId());
-
-        return testGroup;
+    public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient, int environmentId) throws ApolloClientException {
+        return createAndSubmitGroup(apolloTestClient, createAndSubmitService(apolloTestClient).getId(), environmentId);
     }
 
     public static Group createAndSubmitGroup(ApolloTestClient apolloTestClient, int serviceId, int environmentId) throws ApolloClientException {
@@ -127,6 +120,8 @@ public class ModelsGenerator {
         testGroup.setEnvironmentId(environmentId);
 
         apolloTestClient.addGroup(testGroup);
+
+        testGroup.setId(apolloTestClient.getGroupByName(testGroup.getName()).getId());
 
         return testGroup;
     }

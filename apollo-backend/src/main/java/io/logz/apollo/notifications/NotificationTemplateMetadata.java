@@ -7,6 +7,7 @@ public class NotificationTemplateMetadata {
     private final Date lastUpdate;
     private final String status;
     private final String serviceName;
+    private final String groupName;
     private final String environmentName;
     private final String userEmail;
     private int deploymentId;
@@ -14,7 +15,7 @@ public class NotificationTemplateMetadata {
     private String notificationJsonConfiguration;
 
     NotificationTemplateMetadata(Date lastUpdate, String status, String serviceName,
-                                 String environmentName, String userEmail, int deploymentId,
+                                 String environmentName, String userEmail, int deploymentId, String groupName,
                                  ApolloNotifications.NotificationType type, String notificationJsonConfiguration) {
         this.lastUpdate = lastUpdate;
         this.status = status;
@@ -22,6 +23,7 @@ public class NotificationTemplateMetadata {
         this.environmentName = environmentName;
         this.userEmail = userEmail;
         this.deploymentId = deploymentId;
+        this.groupName = groupName;
         this.type = type;
         this.notificationJsonConfiguration = notificationJsonConfiguration;
     }
@@ -49,6 +51,8 @@ public class NotificationTemplateMetadata {
     public int getDeploymentId() {
         return deploymentId;
     }
+
+    public String getGroupName() { return groupName; }
 
     public ApolloNotifications.NotificationType getType() {
         return type;

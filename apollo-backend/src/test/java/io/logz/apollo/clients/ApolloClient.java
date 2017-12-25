@@ -146,6 +146,12 @@ public class ApolloClient {
         return genericApolloClient.getResult("/group", new TypeReference<List<Group>>() {});
     }
 
+    public Group updateGroup(int groupId, String name, int serviceId, int environmentId, int scalingFactor, String jsonParams) throws ApolloClientException {
+        String requestBody = Common.generateJson("id", String.valueOf(groupId), "name", name, "serviceId", String.valueOf(serviceId),
+                "environmentId", String.valueOf(environmentId), "scalingFactor", String.valueOf(scalingFactor), "jsonParams", jsonParams);
+        return genericApolloClient.putAndGetResult("/group/" + groupId, requestBody, new TypeReference<Group>() {});
+    }
+
     public Group updateScalingFactor(int groupId, int scalingFactor) throws ApolloClientException {
         String requestBody = Common.generateJson("id", String.valueOf(groupId), "scalingFactor", String.valueOf(scalingFactor));
         return genericApolloClient.putAndGetResult("/scaling/" + groupId, requestBody, new TypeReference<Group>() {});
@@ -153,6 +159,10 @@ public class ApolloClient {
 
     public int getScalingFactor(int groupId) throws ApolloClientException {
         return genericApolloClient.getResult("/scaling/apollo-factor/" + groupId, new TypeReference<Integer>() {});
+    }
+
+    public int getKubeScalingFactor(int groupId) throws ApolloClientException {
+        return genericApolloClient.getResult("/scaling/kubernetes-factor/" + groupId, new TypeReference<Integer>() {});
     }
 
     public Service updateService(int id, String name, String deploymentYaml, String serviceYaml, Boolean isPartOfGroup) throws ApolloClientException {

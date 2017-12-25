@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class SlackSender implements NotificationSender{
@@ -29,41 +30,7 @@ public class SlackSender implements NotificationSender{
     private final OkHttpClient httpClient = new OkHttpClient();
     private final TemplateInjector templateInjector = new TemplateInjector();
 
-    private static String slackBodyTemplate = "{\n" +
-            "\t\"icon_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Putin-pictogram.svg/2000px-Putin-pictogram.svg.png\",\n" +
-            "    \"username\": \"Apollo\",\n" +
-            "    \"channel\": \"{{ channel }}\",\n" +
-            "    \"attachments\": [\n" +
-            "        {\n" +
-            "            \"fallback\": \"Apollo deployment of {{ service-name }}@{{ environment }} is {{ phase }}\",\n" +
-            "            \"color\": \"#36a64f\",\n" +
-            "            \"title\": \"Apollo Deployments\",\n" +
-            "            \"title_link\": \"https://apollo.internal.logz.io/#/deployments/ongoing\",\n" +
-            "            \"text\": \"Deployment id {{deployment-id}} finished at {{time}}\",\n" +
-            "            \"fields\": [\n" +
-            "                {\n" +
-            "                    \"title\": \"Environment\",\n" +
-            "                    \"value\": \"{{environment}}\",\n" +
-            "                    \"short\": true\n" +
-            "                },\n" +
-            "\t\t\t\t                {\n" +
-            "                    \"title\": \"Service\",\n" +
-            "                    \"value\": \"{{service-name}}\",\n" +
-            "                    \"short\": true\n" +
-            "                },                {\n" +
-            "                    \"title\": \"User\",\n" +
-            "                    \"value\": \"{{username}}\",\n" +
-            "                    \"short\": true\n" +
-            "                }\n" +
-            "\t\t\t\t,                {\n" +
-            "                    \"title\": \"Phase\",\n" +
-            "                    \"value\": \"{{phase}}\",\n" +
-            "                    \"short\": true\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        }\n" +
-            "    ]\n" +
-            "}";
+    private String slackBodyTemplate;
 
     public SlackSender(String notificationJsonConfiguration) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -73,6 +40,8 @@ public class SlackSender implements NotificationSender{
     @Override
     public boolean send(NotificationTemplateMetadata notificationTemplateMetadata) {
 
+        updateSlackBodyTemplate(Optional.ofNullable(notificationTemplateMetadata.getGroupName()));
+
         HashMap<String, Object> params = new HashMap<>();
 
         params.put("time", DateFormat.getTimeInstance(DateFormat.SHORT).format(notificationTemplateMetadata.getLastUpdate()));
@@ -81,6 +50,7 @@ public class SlackSender implements NotificationSender{
         params.put("environment", notificationTemplateMetadata.getEnvironmentName());
         params.put("username", notificationTemplateMetadata.getUserEmail());
         params.put("deployment-id", notificationTemplateMetadata.getDeploymentId());
+        params.put("group-name", notificationTemplateMetadata.getGroupName());
         params.put("channel", slackSenderConfiguration.getChannel());
 
         String body = generateRequestBody(slackBodyTemplate, params);
@@ -142,5 +112,52 @@ public class SlackSender implements NotificationSender{
         public void setChannel(String channel) {
             this.channel = channel;
         }
+    }
+
+    private void updateSlackBodyTemplate(Optional<String> groupName) {
+        slackBodyTemplate = "{\n" +
+                "\t\"icon_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Putin-pictogram.svg/2000px-Putin-pictogram.svg.png\",\n" +
+                "    \"username\": \"Apollo\",\n" +
+                "    \"channel\": \"{{ channel }}\",\n" +
+                "    \"attachments\": [\n" +
+                "        {\n" +
+                "            \"fallback\": \"Apollo deployment of {{ service-name }}@{{ environment }} is {{ phase }}\",\n" +
+                "            \"color\": \"#36a64f\",\n" +
+                "            \"title\": \"Apollo Deployments\",\n" +
+                "            \"title_link\": \"https://apollo.internal.logz.io/#/deployments/ongoing\",\n" +
+                "            \"text\": \"Deployment id {{deployment-id}} finished at {{time}}\",\n" +
+                "            \"fields\": [\n" +
+                "                {\n" +
+                "                    \"title\": \"Environment\",\n" +
+                "                    \"value\": \"{{environment}}\",\n" +
+                "                    \"short\": true\n" +
+                "                },\n" +
+                "\t\t\t\t                {\n" +
+                "                    \"title\": \"Service\",\n" +
+                "                    \"value\": \"{{service-name}}\",\n" +
+                "                    \"short\": true\n" +
+                "                },                {\n" +
+                "                    \"title\": \"User\",\n" +
+                "                    \"value\": \"{{username}}\",\n" +
+                "                    \"short\": true\n" +
+                "                }\n" +
+                "\t\t\t\t,                {\n" +
+                "                    \"title\": \"Phase\",\n" +
+                "                    \"value\": \"{{phase}}\",\n" +
+                "                    \"short\": true\n}";
+
+        if (groupName.isPresent()) {
+            slackBodyTemplate +=   ", {\n" +
+                    "                   \"title\": \"Group\",\n" +
+                    "                   \"value\": \"{{group-name}}\",\n" +
+                    "                   \"short\": true\n" +
+                    "               }\n";
+        }
+
+        slackBodyTemplate +=  "  \n" +
+                "            ]\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
     }
 }

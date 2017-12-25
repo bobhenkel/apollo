@@ -66,7 +66,7 @@ public class ApolloNotifications {
                 .forEach(notification -> {
                     NotificationTemplateMetadata notificationTemplateMetadata = new NotificationTemplateMetadata(deployment.getLastUpdate(),
                             status.toString(), service.getName(), environment.getName(),
-                            deployment.getUserEmail(), deployment.getId(), notification.getType(),
+                            deployment.getUserEmail(), deployment.getId(), deployment.getGroupName(), notification.getType(),
                             notification.getNotificationJsonConfiguration());
 
                     queue.add(notificationTemplateMetadata);
