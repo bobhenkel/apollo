@@ -19,6 +19,7 @@
                             <th>Last Updated</th>
                             <th>Service</th>
                             <th>Environment</th>
+                            <th>Group</th>
                             <th>Initiated By</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -30,20 +31,30 @@
                             <td>{{deployment.lastUpdate | date:'dd/MM/yy HH:mm:ss'}}</td>
                             <td>{{allServices[deployment.serviceId].name}}</td>
                             <td>{{allEnvironments[deployment.environmentId].name}}</td>
+                            <td>{{deployment.nestedDeployments.length > 0 ? 'Yes' : 'No'}}</td>
                             <td>{{allUsers[deployment.userEmail].userEmail}}</td>
-                            <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
+                            <td ng-if="deployment.nestedDeployments.length == 0"><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
+                            <td ng-if="deployment.nestedDeployments.length > 0"><span class="label label-info">
+                                {{((deployment.nestedDeployments | filter:{status:'DONE'}).length + (deployment.nestedDeployments | filter:{status:'CANCELED'}).length) + ' / ' + deployment.nestedDeployments.length }}
+                            </span></td>
                             <td>
-                                <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
+                                <button ng-if="deployment.nestedDeployments.length == 0" type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
                                         ng-click="setSelectedDeployment(deployment) ; getContainersOfSelectedDeployment()"
                                         data-toggle="modal" data-target="#select-container">
                                     <i class="fa fa-binoculars"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
+                                <button ng-if="deployment.nestedDeployments.length == 0" type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
                                         ng-click="setSelectedDeployment(deployment)"
                                         data-toggle="modal" data-target="#confirm-revert"
                                         ng-class="getRevertClass(deployment.status)"
                                         ng-disabled="isRevertDisabledBasedOnStatus(deployment.status)">
                                     <i class="fa fa-undo"></i>
+                                </button>
+                                <button type="button" class="btn btn-success btn-circle" uib-tooltip="Status Per Group"
+                                        ng-click="setSelectedDeployment(deployment)"
+                                        data-toggle="modal" data-target="#status-per-group"
+                                        ng-disabled="deployment.nestedDeployments.length == 0">
+                                    <i class="fa fa-eye"></i>
                                 </button>
                             </td>
                         </tr>
@@ -113,6 +124,52 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="stopLogsWebsocket()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="status-per-group" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Status Per Group</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-responsive" datatable="ng" dt-options="dtOptions" dt-column-defs="dtColumnDefs">
+                        <thead>
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="deployment in selectedDeployment.nestedDeployments">
+                                <td>{{deployment.groupName}}</td>
+                                <td><span class="label" ng-class="getLabel(deployment.status)">{{deployment.status}}</span></td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-circle" uib-tooltip="See Logs"
+                                        ng-click="setSelectedDeployment(deployment) ; getContainersOfSelectedDeploymentWithGroup()"
+                                        data-toggle="modal"
+                                        data-target="#select-container">
+                                    <i class="fa fa-binoculars"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-circle" uib-tooltip="Revert Deployment"
+                                            ng-click="hideStatusPerGroupModal(); setSelectedDeployment(deployment)"
+                                            data-toggle="modal" data-target="#confirm-revert"
+                                            ng-class="getRevertClass(deployment.status)"
+                                            ng-disabled="isRevertDisabledBasedOnStatus(deployment.status)">
+                                        <i class="fa fa-undo"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

@@ -22,10 +22,34 @@ angular.module('apollo')
             $scope.showByService = function(service) {
                 usSpinnerService.spin('result-spinner');
                 $scope.filteredResults = [];
-                apolloApiService.serviceStatus(service).then(function (response) {
+                apolloApiService.serviceStatus(service.id).then(function (response) {
                     $scope.filteredResults = response.data;
+                    $scope.filteredResults = $scope.filteredResults.filter(function(x){ return x !== null; });
                     populateDeployableVersions();
                     refreshPreSelectedStatus();
+
+                    if (service.isPartOfGroup) {
+                        var groupedByEnvironment = [];
+                        $scope.filteredResults.forEach(function (kubeDeploymentStatus) {
+                            var first = true;
+                            groupedByEnvironment.forEach(function (existingKubeDeploymentStatus) {
+                                if (existingKubeDeploymentStatus.environmentId === kubeDeploymentStatus.environmentId) {
+                                    first = false;
+                                    existingKubeDeploymentStatus.nestedKubeDeploymentStatuses.push(kubeDeploymentStatus);
+                                }
+                            });
+                            if (first) {
+                                kubeDeploymentStatus.nestedKubeDeploymentStatuses = [kubeDeploymentStatus];
+                                groupedByEnvironment.push(kubeDeploymentStatus);
+                            }
+                        });
+                        $scope.filteredResults = groupedByEnvironment;
+                    } else {
+                        $scope.filteredResults.forEach(function (kubeDeploymentStatus) {
+                            kubeDeploymentStatus.nestedKubeDeploymentStatuses = [];
+                        });
+                    }
+
                     usSpinnerService.stop('result-spinner');
                 });
                 $scope.currentScreen = "results";
@@ -33,18 +57,40 @@ angular.module('apollo')
                 $scope.showingByValue = service;
             };
 
-            $scope.showByEnvironment = function(environment) {
+            $scope.showByEnvironment = function(environmentId) {
                 usSpinnerService.spin('result-spinner');
                 $scope.filteredResults = [];
-                apolloApiService.environmentStatus(environment).then(function (response) {
+                apolloApiService.environmentStatus(environmentId).then(function (response) {
                     $scope.filteredResults = response.data;
+                    $scope.filteredResults = $scope.filteredResults.filter(function(x){ return x !== null; });
                     populateDeployableVersions();
                     refreshPreSelectedStatus();
+
+                    var groupedByService = [];
+                    $scope.filteredResults.forEach(function (kubeDeploymentStatus) {
+                        if (kubeDeploymentStatus.groupName === null) {
+                            kubeDeploymentStatus.nestedKubeDeploymentStatuses = [];
+                            groupedByService.push(kubeDeploymentStatus);
+                        } else {
+                            var first = true;
+                            groupedByService.forEach(function (existingKubeDeploymentStatus) {
+                                if (existingKubeDeploymentStatus.serviceId === kubeDeploymentStatus.serviceId) {
+                                    first = false;
+                                    existingKubeDeploymentStatus.nestedKubeDeploymentStatuses.push(kubeDeploymentStatus);
+                                }
+                            });
+                            if (first) {
+                                kubeDeploymentStatus.nestedKubeDeploymentStatuses = [kubeDeploymentStatus];
+                                groupedByService.push(kubeDeploymentStatus);
+                            }
+                        }
+                    });
+                    $scope.filteredResults = groupedByService;
                     usSpinnerService.stop('result-spinner');
                 });
                 $scope.currentScreen = "results";
                 $scope.showingBy = "environment";
-                $scope.showingByValue = environment;
+                $scope.showingByValue = environmentId;
             };
 
             $scope.backToFilter = function() {
@@ -74,7 +120,7 @@ angular.module('apollo')
                     growl.success("Successfully restarted pod " + podName + "!");
                 }, function (error) {
                     usSpinnerService.stop('result-spinner');
-                    growl.error("Could not restart pod! got: " + error.statusText)
+                    growl.error("Could not restart pod! got: " + error.statusText);
                 });
             };
 
@@ -163,9 +209,9 @@ angular.module('apollo')
                     // Refresh the view for the user
                     $scope.selectedStatus = $scope.filteredResults.filter(function (filtered) {
                         if (filtered) {
-                            return (filtered.serviceId === $scope.selectedStatus.serviceId && filtered.environmentId === $scope.selectedStatus.environmentId)
+                            return (filtered.serviceId === $scope.selectedStatus.serviceId && filtered.environmentId === $scope.selectedStatus.environmentId);
                         }
-                    })[0]
+                    })[0];
                 }
             }
 
@@ -181,9 +227,9 @@ angular.module('apollo')
                     if (status !== null) {
                         apolloApiService.getDeployableVersionBasedOnSha(status.gitCommitSha, status.serviceId).then(function (response) {
                             $scope.deployableVersions[response.data.gitCommitSha] = response.data;
-                        })
+                        });
                     }
-                })
+                });
             }
 
             // Data fetching

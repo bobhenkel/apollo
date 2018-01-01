@@ -139,7 +139,7 @@ public class ApolloClient {
     }
 
     public Group getGroupByName(String name) throws ApolloClientException {
-        return genericApolloClient.getResult("/group/" + name, new TypeReference<Group>() {});
+        return genericApolloClient.getResult("/group/name/" + name, new TypeReference<Group>() {});
     }
 
     public List<Group> getAllGroups() throws ApolloClientException {

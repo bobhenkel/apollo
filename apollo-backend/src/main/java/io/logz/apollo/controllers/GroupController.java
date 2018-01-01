@@ -36,14 +36,20 @@ public class GroupController {
     }
 
     @LoggedIn
+    @GET("/group/environment/{environmentId}/service/{serviceId}")
+    public List<Group> getGroupsPerServiceAndEnvironment(int environmentId, int serviceId) {
+        return groupDao.getGroupsPerServiceAndEnvironment(serviceId, environmentId);
+    }
+
+    @LoggedIn
     @GET("/group/{id}")
     public Group getGroup(int id) {
         return groupDao.getGroup(id);
     }
 
     @LoggedIn
-    @GET("/group/{name}")
-    public Group getGroup(String name) {
+    @GET("/group/name/{name}")
+    public Group getGroupByName(String name) {
         return groupDao.getGroupByName(name);
     }
 

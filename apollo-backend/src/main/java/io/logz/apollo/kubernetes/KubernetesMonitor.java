@@ -149,9 +149,11 @@ public class KubernetesMonitor {
             if (service != null) {
                 if (service.getIsPartOfGroup() != null && service.getIsPartOfGroup()) {
                     envStatus.put(serviceId, getServiceCommitShaWithGroup(kubernetesHandler, deployment, service));
-
                 } else {
-                    envStatus.put(serviceId, getServiceCommitSha(kubernetesHandler, deployment, service));
+                    String commitSha = getServiceCommitSha(kubernetesHandler, deployment, service);
+                    if (!commitSha.equals(UNKNOWN_GIT_COMMIT_SHA)) {
+                        envStatus.put(serviceId, commitSha);
+                    }
                 }
             }
         });
@@ -170,11 +172,9 @@ public class KubernetesMonitor {
                     if (kubernetesDeploymentStatus != null) {
                         serviceStatus.put(group.getId(), kubernetesDeploymentStatus.getGitCommitSha());
                     } else {
-                        serviceStatus.put(group.getId(), UNKNOWN_GIT_COMMIT_SHA);
                         logger.warn("Can't get kubernetesDeploymentStatus for deployment {} and service {}", deployment.getId(), service.getId());
                     }
                 } catch (Exception | Error e) {
-                    serviceStatus.put(group.getId(), UNKNOWN_GIT_COMMIT_SHA);
                     logger.warn("Can't add service status to environment status for deployment " + deployment.getId() + " and service " + service.getId(), e);
                 }
             }
@@ -185,7 +185,7 @@ public class KubernetesMonitor {
 
     private String getServiceCommitSha(KubernetesHandler kubernetesHandler, Deployment deployment, Service service) {
         try {
-            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandler.getCurrentStatus(service, Optional.ofNullable(deployment.getGroupName()));
+            KubernetesDeploymentStatus kubernetesDeploymentStatus = kubernetesHandler.getCurrentStatus(service);
             if (kubernetesDeploymentStatus != null) {
                 return kubernetesDeploymentStatus.getGitCommitSha();
             } else {

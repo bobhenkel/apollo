@@ -25,8 +25,16 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'deployable-version/');
     };
 
+    var getAllGroups = function() {
+        return $http.get(CONFIG.appUrl + 'group/');
+    };
+
+    var getGroupsPerServiceAndEnvironment = function (environmentId, serviceId) {
+        return $http.get(CONFIG.appUrl + 'group/environment/' + environmentId + '/service/' + serviceId);
+    };
+
     var getDeployableVersionBasedOnSha = function (sha, serviceId) {
-        return $http.get(CONFIG.appUrl + "deployable-version/sha/" + sha + "/service/" + serviceId)
+        return $http.get(CONFIG.appUrl + 'deployable-version/sha/' + sha + '/service/' + serviceId);
     };
 
     var getAllRunningDeployments = function() {
@@ -57,6 +65,18 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'deployable-version/' + deployableVerisonId + "/");
     };
 
+    var getGroup = function(groupId) {
+        return $http.get(CONFIG.appUrl + 'group/' + groupId + "/");
+    };
+
+    var getGroupByName = function(groupName) {
+        return $http.get(CONFIG.appUrl + 'group/name/' + groupName + "/");
+    };
+
+    var getDeploymentEnvStatus = function (deploymentId) {
+        return $http.get(CONFIG.appUrl + 'deployment/' + deploymentId + '/envstatus');
+    };
+
     var getLatestDeployments = function() {
         return $http.get(CONFIG.appUrl + 'latest-deployments/');
     };
@@ -66,7 +86,16 @@ function ApiService($q, $http){
             serviceId: deployedService,
             environmentId: deployedEnvironment,
             deployableVersionId: deployableVersionId
-        })
+        });
+    };
+
+    var createNewDeploymentWithGroup = function(deployableVersionId, deployedService, deployedEnvironment, groupIdsCsv) {
+        return $http.post(CONFIG.appUrl + "deployment-groups/", {
+            serviceId: deployedService,
+            environmentId: deployedEnvironment,
+            deployableVersionId: deployableVersionId,
+            groupIdsCsv: groupIdsCsv
+        });
     };
 
     var revertDeployment = function(deploymentId) {
@@ -83,11 +112,11 @@ function ApiService($q, $http){
             "CANCELED": "label-danger"
         };
 
-        return statusToLabel[deploymentStatus]
+        return statusToLabel[deploymentStatus];
     };
 
     var isRevertDisabledBasedOnStatus = function(deploymentStatus) {
-        return deploymentStatus == "DONE" || deploymentStatus == "CANCELED";
+        return deploymentStatus === "DONE" || deploymentStatus === "CANCELED";
     };
 
     var signup = function(userEmail, firstName, lastName, password) {
@@ -103,7 +132,7 @@ function ApiService($q, $http){
         return $http.post(CONFIG.appUrl + "_login/", {
             username: email,
             password: password
-        })
+        });
     };
 
     var serviceStatus = function (serviceId) {
@@ -116,6 +145,10 @@ function ApiService($q, $http){
 
     var latestCreatedPod = function (environmentId, serviceId) {
         return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/service/" + serviceId + "/latestpod");
+    };
+
+    var latestCreatedPodWithGroup = function (environmentId, serviceId, groupName) {
+        return $http.get(CONFIG.appUrl + "status/environment/" + environmentId + "/service/" + serviceId + "/group/" + groupName + "/latestpod");
     };
 
     var podContainers = function (environmentId, podName) {
@@ -145,6 +178,40 @@ function ApiService($q, $http){
             serviceYaml: serviceYaml,
             isPartOfGroup: isPartOfGroup
         });
+    };
+
+    var createGroup = function(name, serviceId, environmentId, scalingFactor, jsonParams) {
+        return $http.post(CONFIG.appUrl + "group/", {
+            name: name,
+            serviceId: serviceId,
+            environmentId: environmentId,
+            scalingFactor: scalingFactor,
+            jsonParams: jsonParams
+        });
+    };
+
+    var updateGroup = function(id, name, serviceId, environmentId, scalingFactor, jsonParams) {
+        return $http.put(CONFIG.appUrl + "group/" + id, {
+            name: name,
+            serviceId: serviceId,
+            environmentId: environmentId,
+            scalingFactor: scalingFactor,
+            jsonParams: jsonParams
+        });
+    };
+
+    var updateScalingFactorForGroup = function (groupId, scalingFactor) {
+        return $http.put(CONFIG.appUrl + "scaling/" + groupId, {
+           scalingFactor: scalingFactor
+        });
+    };
+
+    var getApolloScalingFactorForGroup = function (groupId) {
+        return $http.get(CONFIG.appUrl + "scaling/apollo-factor/" + groupId);
+    };
+
+    var getK8sScalingFactorForGroup = function (groupId) {
+        return $http.get(CONFIG.appUrl + "scaling/kubernetes-factor/" + groupId);
     };
 
     var getLatestDeployableVersionsByServiceId = function (serviceId) {
@@ -217,9 +284,12 @@ function ApiService($q, $http){
         getAllEnvironments: getAllEnvironments,
         getAllServices: getAllServices,
         getAllDeployableVersions: getAllDeployableVersions,
+        getAllGroups: getAllGroups,
+        getGroupsPerServiceAndEnvironment: getGroupsPerServiceAndEnvironment,
         getDeployableVersionBasedOnSha: getDeployableVersionBasedOnSha,
         getLatestDeployableVersionsByServiceId: getLatestDeployableVersionsByServiceId,
         createNewDeployment: createNewDeployment,
+        createNewDeploymentWithGroup: createNewDeploymentWithGroup,
         getAllRunningDeployments: getAllRunningDeployments,
         getRunningAndJustFinishedDeployments: getRunningAndJustFinishedDeployments,
         getAllDeployments: getAllDeployments,
@@ -227,6 +297,9 @@ function ApiService($q, $http){
         getEnvironment: getEnvironment,
         getUser: getUser,
         getDeployableVersion: getDeployableVersion,
+        getGroup: getGroup,
+        getGroupByName: getGroupByName,
+        getDeploymentEnvStatus: getDeploymentEnvStatus,
         getLatestDeployments: getLatestDeployments,
         revertDeployment: revertDeployment,
         matchLabelToDeploymentStatus: matchLabelToDeploymentStatus,
@@ -236,10 +309,16 @@ function ApiService($q, $http){
         serviceStatus: serviceStatus,
         environmentStatus: environmentStatus,
         latestCreatedPod: latestCreatedPod,
+        latestCreatedPodWithGroup: latestCreatedPodWithGroup,
         podContainers: podContainers,
         restartPod: restartPod,
         createService: createService,
         updateService: updateService,
+        createGroup: createGroup,
+        updateGroup: updateGroup,
+        updateScalingFactorForGroup: updateScalingFactorForGroup,
+        getApolloScalingFactorForGroup: getApolloScalingFactorForGroup,
+        getK8sScalingFactorForGroup: getK8sScalingFactorForGroup,
         getDeployableVersionFromLatestCommitOnBranch: getDeployableVersionFromLatestCommitOnBranch,
         getWebsocketExecUrl: getWebsocketExecUrl,
         getWebsocketLogUrl: getWebsocketLogUrl,

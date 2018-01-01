@@ -34,7 +34,7 @@ angular.module('apollo')
                     usSpinnerService.spin('details-spinner');
 
                     apolloApiService.getDeployableVersion(
-                    $scope.allDeployments.filter(function(a){return a.id == $scope.selectedDeployment.id})[0].deployableVersionId)
+                    $scope.allDeployments.filter(function(a){return a.id === $scope.selectedDeployment.id;})[0].deployableVersionId)
                     .then(function(response) {
                         $scope.deployableVersion = response.data;
                         usSpinnerService.stop('details-spinner');
@@ -42,6 +42,50 @@ angular.module('apollo')
                     function(error){
                             usSpinnerService.stop('details-spinner');
                             growl.error("Could not fetch data from apollo! error: " + error.data);
+                    });
+                };
+
+                $scope.showEnvStatus = function(deployment) {
+
+                    if (typeof(deployment) === 'undefined') {
+                        return;
+                    }
+
+                    if (deployment.status !== 'DONE' && deployment.status !== 'CANCELED') {
+                        $scope.envStatus = 'The environment status is not available while the deployment status is "' + deployment.status + '".';
+                        return;
+                    }
+
+                    $scope.envStatus = undefined;
+                    $scope.envStatusWithServiceNames = {};
+                    usSpinnerService.spin('details-spinner');
+
+                    apolloApiService.getDeploymentEnvStatus(deployment.id)
+                    .then(function(response) {
+                        $scope.envStatus = response.data;
+                        $scope.envStatus = JSON.parse($scope.envStatus);
+
+                        for (var serviceId in $scope.envStatus) {
+
+                            if(typeof($scope.envStatus[serviceId]) === 'object') {
+                                var groupsWithNames = {};
+
+                                for (var groupId in $scope.envStatus[serviceId]) {
+                                    groupsWithNames[$scope.allGroups[groupId].name] = $scope.envStatus[serviceId][groupId];
+                                }
+
+                                $scope.envStatusWithServiceNames[$scope.allServices[serviceId].name] = groupsWithNames;
+
+                            } else {
+                                $scope.envStatusWithServiceNames[$scope.allServices[serviceId].name] = $scope.envStatus[serviceId];
+                            }
+                        }
+
+                        usSpinnerService.stop('details-spinner');
+                    },
+                    function(error){
+                            usSpinnerService.stop('details-spinner');
+                            growl.error("Could not fetch environment status data! error: " + error.data);
                     });
                 };
 
@@ -67,7 +111,7 @@ angular.module('apollo')
                         usSpinnerService.stop('revert-spinner');
 
                         // 403 are handled generically on the interceptor
-                        if (error.status != 403) {
+                        if (error.status !== 403) {
                             growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
                         }
                     });
@@ -120,5 +164,14 @@ angular.module('apollo')
 
                 apolloApiService.getAllDeployments().then(function(response) {
                    $scope.allDeployments = response.data;
+                });
+
+                apolloApiService.getAllGroups().then(function(response) {
+                    var tempGroups = {};
+                    response.data.forEach(function(group) {
+                        tempGroups[group.id] = group;
+                    });
+
+                    $scope.allGroups = tempGroups;
                 });
             }]);

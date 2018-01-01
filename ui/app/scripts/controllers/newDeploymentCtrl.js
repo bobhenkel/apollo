@@ -28,11 +28,15 @@ angular.module('apollo')
         // Define validation functions.. //TODO: something better?
         var deploymentValidators = {"choose-environment" : validateEnvironment,
                                     "choose-service" : validateService,
+                                    "choose-groups" : validateGroups,
                                     "choose-version" : validateVersion};
 
         // Scope variables
 		$scope.environmentSelected = null;
 		$scope.serviceSelected = null;
+		$scope.possibleGroups = null;
+		$scope.selectedGroups = [];
+		$scope.groupNames = null;
 		$scope.versionSelected = null;
 		$scope.showNextStep = true;
 
@@ -48,8 +52,15 @@ angular.module('apollo')
             // If we already pre-fetched the data since we have it in the localstorage, no need to do so again
             if ($scope.serviceSelected !== serviceSelected) {
                 $scope.serviceSelected = serviceSelected;
+                if (typeof(serviceSelected) !== 'undefined' && serviceSelected.isPartOfGroup) {
+                    deploymentSteps = ["choose-environment", "choose-service", "choose-groups", "choose-version", "confirmation"];
+                    loadGroups($scope.environmentSelected.id, serviceSelected.id);
+                } else if (typeof(serviceSelected) !== 'undefined' && !serviceSelected.isPartOfGroup) {
+                    deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
+                    loadGroups($scope.environmentSelected.id, serviceSelected.id);
+                }
                 if (serviceSelected !== undefined) {
-                    loadDeployableVersions(serviceSelected.id)
+                    loadDeployableVersions(serviceSelected.id);
                 }
             }
         };
@@ -77,7 +88,7 @@ angular.module('apollo')
                 $scope.globalSearch = "";
 
                 // Finish flow if in last step
-                if (currIndex == deploymentSteps.length - 1) {
+                if (currIndex === deploymentSteps.length - 1) {
                     $scope.showNextStep = false;
                 }
             }
@@ -92,41 +103,81 @@ angular.module('apollo')
             angular.forEach(deploymentValidators, function(validateFunction, name) {
 
                   if (!validateFunction()) {
-                    growl.error("Something unexpected has occurred! Try again.")
-                    return;
+                    growl.error("Something unexpected has occurred! Try again.");
                   }
              });
 
             // Set spinner
             usSpinnerService.spin('deployment-spinner');
 
-            // Now we can deploy
-            apolloApiService.createNewDeployment(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
-                    $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
+            // Now we can deploy!
 
-                        // Wait a bit to let the deployment be in the DB
-                        setTimeout(function () {
-                            usSpinnerService.stop('deployment-spinner');
+            // Valid groups deployment
+            if ($scope.selectedGroups.length > 0 && $scope.serviceSelected.isPartOfGroup) {
+                apolloApiService.createNewDeploymentWithGroup(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
+                    $scope.serviceSelected.id, $scope.environmentSelected.id, $scope.selectedGroups.map(function (group) { return group.id; }).join(','))
+                    .then(function (response) {
 
-                            // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
-                            // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
-                            $('#confirm-modal').modal('hide');
-                            $('body').removeClass('modal-open');
-                            $('.modal-backdrop').remove();
-
-                            // Redirect user to ongoing deployments
-                            $state.go('deployments.ongoing', {deploymentId: response.data.id});
-                        }, 500);
-
-                    }, function(error) {
-                        // End spinner
+                    // Wait a bit to let the deployment be in the DB
+                    setTimeout(function () {
                         usSpinnerService.stop('deployment-spinner');
 
-                        // 403 are handled generically on the interceptor
-                        if (error.status != 403) {
-                            growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
-                        }
-                    });
+                        // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
+                        // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
+                        $('#confirm-modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+
+                        // Redirect user to ongoing deployments
+                        $state.go('deployments.ongoing', {deploymentId: response.data.id});
+                    }, 500);
+
+                }, function (error) {
+                    // End spinner
+                    usSpinnerService.stop('deployment-spinner');
+
+                    // 403 are handled generically on the interceptor
+                    if (error.status !== 403) {
+                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000});
+                    }
+                });
+            }
+
+            // Not clear if deployment is with or without groups
+            else if (($scope.selectedGroups.length > 0 && !$scope.serviceSelected.isPartOfGroup) ||
+                    ($scope.selectedGroups.length === 0 && $scope.serviceSelected.isPartOfGroup)) {
+                growl.error("It is unclear if your deployment should be deployed with or without groups. Try again.");
+            }
+
+            // No-groups deployment
+            else {
+                apolloApiService.createNewDeployment(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
+                    $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
+
+                    // Wait a bit to let the deployment be in the DB
+                    setTimeout(function () {
+                        usSpinnerService.stop('deployment-spinner');
+
+                        // Due to bug with angular-bootstrap and angular 1.4, the modal is not closing when redirecting.
+                        // So just forcing it to :)   TODO: after the bug is fixed, remove this shit
+                        $('#confirm-modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+
+                        // Redirect user to ongoing deployments
+                        $state.go('deployments.ongoing', {deploymentId: response.data.id});
+                    }, 500);
+
+                }, function (error) {
+                    // End spinner
+                    usSpinnerService.stop('deployment-spinner');
+
+                    // 403 are handled generically on the interceptor
+                    if (error.status !== 403) {
+                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000});
+                    }
+                });
+            }
 
             // Set the current selection on local storage, for pre-selection on the next run
             localStorageService.set(previouseEnvironmentLocalStorageKey, $scope.environmentSelected.id);
@@ -154,7 +205,25 @@ angular.module('apollo')
                 $scope.allDeployableVersions[0] = response.data;
             }, function (error) {
                     growl.error("Could not get latest commit on this branch!");
-                })
+                });
+        };
+
+        $scope.toggleSelectedGroup = function(group) {
+            var index = $scope.selectedGroups.indexOf(group);
+		    if (index > -1) {
+		        $scope.selectedGroups.splice(index, 1);
+		    }
+		    else {
+		        $scope.selectedGroups.push(group);
+		    }
+        };
+
+        $scope.selectAllGroups = function() {
+            $scope.selectedGroups = [];
+            angular.forEach($scope.possibleGroups, function(group) {
+                $scope.selectedGroups.push(group);
+            });
+            $scope.groupNames = $scope.selectedGroups.map(function (group) { return group.name; }).join(', ');
         };
 
         $scope.dtOptions = {
@@ -177,23 +246,27 @@ angular.module('apollo')
 
         // Validators
         function validateEnvironment() {
-            return $scope.environmentSelected != null;
+            return $scope.environmentSelected !== null;
         }
 
         function validateService() {
-            return $scope.serviceSelected != null;
+            return $scope.serviceSelected !== null;
         }
 
         function validateVersion() {
-            if ($scope.versionSelected == null) {
+            if ($scope.versionSelected === null) {
                 return false;
             }
             // TODO: add more checks here.. (service can get the version etc..)
             return true;
         }
 
+        function validateGroups() {
+            return !($scope.selectedGroups === null || $scope.selectedGroups.length === 0);
+        }
+
         function getDeployableVersionFromCommit(sha) {
-            return $scope.allDeployableVersions.filter(function(a){return a.gitCommitSha == sha})[0].id
+            return $scope.allDeployableVersions.filter(function(a){return a.gitCommitSha === sha})[0].id
         }
 
         // Data fetching
@@ -223,6 +296,12 @@ angular.module('apollo')
             });
         }
 
+        function loadGroups(environmentId, serviceId) {
+            apolloApiService.getGroupsPerServiceAndEnvironment(environmentId, serviceId).then(function (response) {
+               $scope.possibleGroups = response.data;
+            });
+        }
+
         hotkeys.bindTo($scope)
             .add({
                 combo: "enter",
@@ -230,5 +309,5 @@ angular.module('apollo')
                 callback: function () {
                     $scope.nextStep();
                 }
-            })
+            });
 }]);

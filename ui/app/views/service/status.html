@@ -11,7 +11,7 @@
             <div>
                 <h2 class="text-center">Select Service</h2>
                 <div class="row text-center">
-                    <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector" ng-repeat="service in allServices" ng-click="showByService(service.id)">
+                    <button type="button" class="btn btn-outline btn-primary btn-lg apollo-version-selector" ng-repeat="service in allServices" ng-click="showByService(service)">
                         {{service.name}}
                     </button>
                 </div>
@@ -46,15 +46,26 @@
                                 </div>
                             </div>
                             <div class="panel-body">
-                                <table class="table">
+                                <table class="table" ng-if="status.nestedKubeDeploymentStatuses.length === 0">
                                     <tr><td colspan="2">Environment</td><td colspan="2">{{allEnvironments[status.environmentId].name}}</td></tr>
                                     <tr><td colspan="2">Commit</td><td colspan="2"><a target="_blank" href="{{deployableVersions[status.gitCommitSha].commitUrl}}">{{status.gitCommitSha | limitTo: 7}}</a></td></tr>
                                     <tr><td>Replicas</td><td>{{status.replicas || 0}}</td><td>Available Replicas</td><td>{{status.availableReplicas || 0}}</td></tr>
                                     <tr><td>Updated Replicas</td><td>{{status.updatedReplicas || 0}}</td><td>Unavailable Replicas</td><td>{{status.unavailableReplicas || 0}}</td></tr>
                                 </table>
+                                <table class="table apollo-table" ng-if="status.nestedKubeDeploymentStatuses.length > 0">
+                                    <tr><td colspan="2">Environment</td><td colspan="2">{{allEnvironments[status.environmentId].name}}</td></tr>
+                                    <tr><td colspan="2"><b>Groups:</b></td><td></td></tr>
+                                </table>
+                                <div class="apollo-pic-container col-lg-12" ng-if="status.nestedKubeDeploymentStatuses.length > 0">
+                                    <div class="col-lg-4" ng-repeat="subStatus in status.nestedKubeDeploymentStatuses">
+                                        <a ng-click="setSelectedStatus(subStatus)" data-toggle="modal" data-target="#view-group">
+                                            <span>{{subStatus.groupName}}</span>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                             <div>
-                                <div class="panel-footer">
+                                <div class="panel-footer" ng-if="status.nestedKubeDeploymentStatuses.length === 0">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <a ng-click="setSelectedStatus(status)" data-toggle="modal" data-target="#view-pods">
@@ -136,6 +147,38 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" ng-click="refreshStatus()">Refresh</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="view-group" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">{{status.groupName}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr><td colspan="2">Commit</td><td colspan="2">
+                                <a target="_blank" href="{{deployableVersions[selectedStatus.gitCommitSha].commitUrl}}">{{selectedStatus.gitCommitSha | limitTo: 7}}</a>
+                            </td></tr>
+                            <tr><td>Replicas</td><td>{{selectedStatus.replicas || 0}}</td><td>Available Replicas</td><td>{{selectedStatus.availableReplicas || 0}}</td></tr>
+                            <tr><td>Updated Replicas</td><td>{{selectedStatus.updatedReplicas || 0}}</td><td>Unavailable Replicas</td><td>{{selectedStatus.unavailableReplicas || 0}}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <a data-toggle="modal" data-dismiss="modal" data-target="#view-pods">
+                                <span class="pull-left">View Pods</span>
+                            </a>
+                            <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

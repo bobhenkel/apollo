@@ -20,11 +20,11 @@ angular.module('apollo')
                     usSpinnerService.spin('ongoing-spinner');
                     apolloApiService.revertDeployment($scope.selectedDeployment.id).then(function(response) {
                         usSpinnerService.stop('ongoing-spinner');
-                        growl.success("Successfully reverted deployment!", {ttl: 7000})
+                        growl.success("Successfully reverted deployment!", {ttl: 7000});
 
                     }, function(error) {
                         usSpinnerService.stop('ongoing-spinner');
-                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000})
+                        growl.error("Got from apollo API: " + error.status + " (" + error.statusText + ")", {ttl: 7000});
                     });
 
                 };
@@ -37,12 +37,33 @@ angular.module('apollo')
                               latestPodResponse.data).then(function (containersResponse) {
                                   $scope.selectedDeploymentContainers = containersResponse.data;
                           }, function (containerError) {
-                              growl.error("Could not fetch the containers of the latest running pod, try again!")
-                          })
+                              growl.error("Could not fetch the containers of the latest running pod, try again!");
+                          });
 
                   }, function(error) {
-                      growl.error("Could not find latest running pod for that deployment, try again!")
+                      growl.error("Could not find latest running pod for that deployment, try again!");
                     });
+                };
+
+                $scope.getContainersOfSelectedDeploymentWithGroup = function () {
+                    $scope.hideStatusPerGroupModal();
+                    apolloApiService.latestCreatedPodWithGroup($scope.selectedDeployment.environmentId,
+                      $scope.selectedDeployment.serviceId, $scope.selectedDeployment.groupName).then(function (latestPodResponse) {
+                          $scope.selectedDeploymentLatestPod = latestPodResponse.data;
+                          apolloApiService.podContainers($scope.selectedDeployment.environmentId,
+                              latestPodResponse.data).then(function (containersResponse) {
+                                  $scope.selectedDeploymentContainers = containersResponse.data;
+                          }, function (containerError) {
+                              growl.error("Could not fetch the containers of the latest running pod, try again!");
+                          });
+
+                  }, function(error) {
+                      growl.error("Could not find latest running pod for that deployment, try again!");
+                    });
+                };
+
+                $scope.hideStatusPerGroupModal = function () {
+                    $('#status-per-group').modal('hide');
                 };
 
                 $scope.startLogsWebsocket = function (containerName) {
@@ -133,8 +154,37 @@ angular.module('apollo')
                 });
 
                 function refreshDeployments() {
-                    apolloApiService.getRunningAndJustFinishedDeployments().then(function(response) {
+
+                    $scope.runningAndJustFinishedDeployments = null;
+
+                    apolloApiService.getRunningAndJustFinishedDeployments().then(function (response) {
                         $scope.runningAndJustFinishedDeployments = response.data;
+
+                        var unitedDeployments = [];
+
+                        $scope.runningAndJustFinishedDeployments.forEach(function (deployment) {
+                            if (deployment.groupName === null) {
+                                deployment.nestedDeployments = [];
+                                unitedDeployments.push(deployment);
+                            } else {
+                                var first = true;
+                                unitedDeployments.forEach(function (existingDeployment) {
+                                    if (existingDeployment.environmentId === deployment.environmentId &&
+                                        existingDeployment.serviceId === deployment.serviceId &&
+                                        existingDeployment.deployableVersionId === deployment.deployableVersionId) {
+
+                                        first = false;
+                                        existingDeployment.nestedDeployments.push(deployment);
+                                    }
+                                });
+                                if (first) {
+                                    deployment.nestedDeployments = [deployment];
+                                    unitedDeployments.push(deployment);
+                                }
+                            }
+                        });
+
+                        $scope.runningAndJustFinishedDeployments = unitedDeployments;
                     });
                 }
 
@@ -144,4 +194,5 @@ angular.module('apollo')
                 $scope.$on('$destroy', function () {
                     $interval.cancel(interval);
                 });
+
             }]);

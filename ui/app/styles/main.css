@@ -82,6 +82,15 @@ text-decoration: none;
 background-color: #eee;
 }
 
+.apollo-pic-container {
+    height: 100px;
+    overflow-y: auto;
+}
+
+.apollo-table {
+    margin-bottom: 2px;
+}
+
 .apollo-flow-button {
 
   margin: 10px 10px 10px 10px;

@@ -217,7 +217,7 @@ public class KubernetesHandlerTest {
         //         .getDeployableVersionId()).getGitCommitSha();
 
         return "{\"" + String.valueOf(deployment.getServiceId()) + "\":\"" + commitShaFromDeployableVersion + "\",\"" +
-                String.valueOf(finishedDeploymentForEnvTest.getService().getId()) + "\":{\"" + String.valueOf(group.getId()) + "\":\"unknown\"}}";
+                String.valueOf(finishedDeploymentForEnvTest.getService().getId()) + "\":{}}";
 
         // TODO: Should be this when we can test with real env and not mocks.
         // return "{\"" + String.valueOf(deployment.getServiceId()) + "\":\"" + commitShaFromDeployableVersion + "\",\"" +
