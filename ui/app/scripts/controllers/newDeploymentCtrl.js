@@ -262,11 +262,11 @@ angular.module('apollo')
         }
 
         function validateGroups() {
-            return !($scope.selectedGroups === null || $scope.selectedGroups.length === 0);
+            return true;
         }
 
         function getDeployableVersionFromCommit(sha) {
-            return $scope.allDeployableVersions.filter(function(a){return a.gitCommitSha === sha})[0].id
+            return $scope.allDeployableVersions.filter(function(a){return a.gitCommitSha === sha})[0].id;
         }
 
         // Data fetching
