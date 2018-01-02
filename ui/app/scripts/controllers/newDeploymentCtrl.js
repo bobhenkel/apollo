@@ -216,6 +216,7 @@ angular.module('apollo')
 		    else {
 		        $scope.selectedGroups.push(group);
 		    }
+		    updateGroupsNames();
         };
 
         $scope.selectAllGroups = function() {
@@ -223,6 +224,10 @@ angular.module('apollo')
             angular.forEach($scope.possibleGroups, function(group) {
                 $scope.selectedGroups.push(group);
             });
+            updateGroupsNames();
+        };
+
+        var updateGroupsNames = function() {
             $scope.groupNames = $scope.selectedGroups.map(function (group) { return group.name; }).join(', ');
         };
 
