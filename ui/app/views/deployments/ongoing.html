@@ -51,9 +51,9 @@
                                     <i class="fa fa-undo"></i>
                                 </button>
                                 <button type="button" class="btn btn-success btn-circle" uib-tooltip="Status Per Group"
+                                        ng-if="deployment.nestedDeployments.length !== 0"
                                         ng-click="setSelectedDeployment(deployment)"
-                                        data-toggle="modal" data-target="#status-per-group"
-                                        ng-disabled="deployment.nestedDeployments.length == 0">
+                                        data-toggle="modal" data-target="#status-per-group">
                                     <i class="fa fa-eye"></i>
                                 </button>
                             </td>
