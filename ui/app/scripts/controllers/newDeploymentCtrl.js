@@ -47,20 +47,23 @@ angular.module('apollo')
             $scope.environmentSelected = environmentSelected;
         };
 
-
         $scope.setSelectedService = function (serviceSelected) {
-            // If we already pre-fetched the data since we have it in the localstorage, no need to do so again
-            if ($scope.serviceSelected !== serviceSelected) {
-                $scope.serviceSelected = serviceSelected;
-                if (typeof(serviceSelected) !== 'undefined' && serviceSelected.isPartOfGroup) {
-                    deploymentSteps = ["choose-environment", "choose-service", "choose-groups", "choose-version", "confirmation"];
-                    loadGroups($scope.environmentSelected.id, serviceSelected.id);
-                } else if (typeof(serviceSelected) !== 'undefined' && !serviceSelected.isPartOfGroup) {
-                    deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
-                    loadGroups($scope.environmentSelected.id, serviceSelected.id);
-                }
-                if (serviceSelected !== undefined) {
+            if (serviceSelected !== undefined) {
+
+                if ($scope.serviceSelected !== serviceSelected) {
                     loadDeployableVersions(serviceSelected.id);
+                }
+
+                $scope.serviceSelected = serviceSelected;
+
+                if (serviceSelected.isPartOfGroup) {
+                    deploymentSteps = ["choose-environment", "choose-service", "choose-groups", "choose-version", "confirmation"];
+                } else {
+                    deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
+                }
+
+                if ($scope.environmentSelected !== undefined) {
+                    loadGroups($scope.environmentSelected.id, $scope.serviceSelected.id);
                 }
             }
         };
