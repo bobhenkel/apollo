@@ -1,6 +1,6 @@
 package io.logz.apollo.dao;
 
-import io.logz.apollo.auth.User;
+import io.logz.apollo.models.User;
 
 import java.util.List;
 

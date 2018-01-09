@@ -1,7 +1,7 @@
 package io.logz.apollo.deployment;
 
 import io.logz.apollo.LockService;
-import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.controllers.DeploymentController;

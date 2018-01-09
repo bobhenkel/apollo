@@ -17,6 +17,9 @@ import java.sql.SQLException;
 public class StandaloneApollo {
 
     private static StandaloneApollo instance;
+    private static String hostname = "localhost";
+    private static String protocol = "http";
+
     private final ApolloApplication apolloApplication;
     private final KubernetesMonitor kubernetesMonitor;
 
@@ -61,7 +64,7 @@ public class StandaloneApollo {
     }
 
     public ApolloTestClient createTestClient() {
-        return new ApolloTestClient(apolloConfiguration);
+        return new ApolloTestClient(hostname, apolloConfiguration.getApiPort(), protocol);
     }
 
     public <T> T getInstance(Class<T> clazz) {
@@ -70,7 +73,7 @@ public class StandaloneApollo {
 
     public ApolloTestAdminClient createTestAdminClient() {
         UserDao userDao = getInstance(UserDao.class);
-        return new ApolloTestAdminClient(apolloConfiguration, userDao);
+        return new ApolloTestAdminClient(hostname, apolloConfiguration.getApiPort(), protocol, userDao);
     }
 
 }

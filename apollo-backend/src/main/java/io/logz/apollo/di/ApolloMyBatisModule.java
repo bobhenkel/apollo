@@ -12,7 +12,6 @@ import io.logz.apollo.dao.NotificationDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.database.DataSourceFactory;
-import io.logz.apollo.notifications.Notification;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.flywaydb.core.Flyway;
 import org.mybatis.guice.MyBatisModule;

@@ -1,17 +1,23 @@
-package io.logz.apollo.notifications;
+package io.logz.apollo.models;
 
-import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
+/**
+ * Created by roiravhon on 1/10/17.
+ */
+public class DeploymentPermission {
 
-public class Notification {
+    public enum PermissionType {
+        ALLOW,
+        DENY
+    }
 
     private int id;
     private String name;
     private Integer serviceId;
     private Integer environmentId;
-    private NotificationType type;
-    private String notificationJsonConfiguration;
+    private PermissionType permissionType;
 
-    public Notification() {
+    public DeploymentPermission() {
+
     }
 
     public int getId() {
@@ -46,19 +52,11 @@ public class Notification {
         this.environmentId = environmentId;
     }
 
-    public NotificationType getType() {
-        return type;
+    public PermissionType getPermissionType() {
+        return permissionType;
     }
 
-    public void setType(NotificationType type) {
-        this.type = type;
-    }
-
-    public String getNotificationJsonConfiguration() {
-        return notificationJsonConfiguration;
-    }
-
-    public void setNotificationJsonConfiguration(String notificationJsonConfiguration) {
-        this.notificationJsonConfiguration = notificationJsonConfiguration;
+    public void setPermissionType(PermissionType permissionType) {
+        this.permissionType = permissionType;
     }
 }

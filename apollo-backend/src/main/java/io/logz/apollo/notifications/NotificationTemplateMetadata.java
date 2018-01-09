@@ -1,5 +1,7 @@
 package io.logz.apollo.notifications;
 
+import io.logz.apollo.models.Notification;
+
 import java.util.Date;
 
 public class NotificationTemplateMetadata {
@@ -11,12 +13,12 @@ public class NotificationTemplateMetadata {
     private final String environmentName;
     private final String userEmail;
     private int deploymentId;
-    private ApolloNotifications.NotificationType type;
+    private Notification.NotificationType type;
     private String notificationJsonConfiguration;
 
     NotificationTemplateMetadata(Date lastUpdate, String status, String serviceName,
                                  String environmentName, String userEmail, int deploymentId, String groupName,
-                                 ApolloNotifications.NotificationType type, String notificationJsonConfiguration) {
+                                 Notification.NotificationType type, String notificationJsonConfiguration) {
         this.lastUpdate = lastUpdate;
         this.status = status;
         this.serviceName = serviceName;
@@ -54,7 +56,7 @@ public class NotificationTemplateMetadata {
 
     public String getGroupName() { return groupName; }
 
-    public ApolloNotifications.NotificationType getType() {
+    public Notification.NotificationType getType() {
         return type;
     }
 

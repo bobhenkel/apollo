@@ -5,6 +5,7 @@ import io.logz.apollo.dao.NotificationDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
+import io.logz.apollo.models.Notification;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.notifications.senders.NotificationSender;
 import io.logz.apollo.notifications.senders.SlackSender;
@@ -40,10 +41,6 @@ public class ApolloNotifications {
 
     private final BlockingQueue<NotificationTemplateMetadata> queue;
     private final ExecutorService executor;
-
-    public enum NotificationType {
-        SLACK
-    }
 
     @Inject
     public ApolloNotifications(ServiceDao serviceDao, EnvironmentDao environmentDao, NotificationDao notificationDao) {

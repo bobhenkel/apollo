@@ -2,7 +2,7 @@ package io.logz.apollo.rest;
 
 import com.google.inject.Injector;
 import io.logz.apollo.auth.PasswordManager;
-import io.logz.apollo.auth.User;
+import io.logz.apollo.models.User;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.UserDao;

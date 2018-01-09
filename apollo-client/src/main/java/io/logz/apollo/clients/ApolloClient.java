@@ -1,9 +1,8 @@
 package io.logz.apollo.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.logz.apollo.auth.User;
-import io.logz.apollo.blockers.BlockerDefinition;
-import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.models.User;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.helpers.Common;
@@ -13,8 +12,8 @@ import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.Group;
-import io.logz.apollo.notifications.Notification;
-import io.logz.apollo.deployment.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.Notification;
+import io.logz.apollo.models.DeploymenGroupsResponseObject;
 import java.io.IOException;
 import java.util.List;
 
@@ -26,9 +25,9 @@ public class ApolloClient {
     private final GenericApolloClient genericApolloClient;
     private final User user;
 
-    public ApolloClient(User user, String plainPassword, ApolloConfiguration apolloConfiguration) {
+    public ApolloClient(User user, String plainPassword, String hostname, int port, String protocol) {
         this.user = user;
-        genericApolloClient = new GenericApolloClient(user.getUserEmail(), plainPassword, apolloConfiguration);
+        genericApolloClient = new GenericApolloClient(user.getUserEmail(), plainPassword, hostname, port, protocol);
     }
 
     public void login() throws IOException, ApolloCouldNotLoginException {

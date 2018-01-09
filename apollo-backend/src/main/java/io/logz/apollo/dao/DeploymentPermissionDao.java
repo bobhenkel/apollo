@@ -1,6 +1,6 @@
 package io.logz.apollo.dao;
 
-import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.models.DeploymentPermission;
 
 import java.util.List;
 

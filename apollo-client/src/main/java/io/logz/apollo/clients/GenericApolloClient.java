@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.exceptions.ApolloBlockedException;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
@@ -36,7 +35,9 @@ public class GenericApolloClient {
     private final OkHttpClient client;
     private final String userName;
     private final String plainPassword;
-    private final ApolloConfiguration apolloConfiguration;
+    private final String hostname;
+    private final int port;
+    private final String protocol;
     private final ObjectMapper mapper;
     private String token;
 
@@ -47,7 +48,7 @@ public class GenericApolloClient {
         DELETE
     }
 
-    GenericApolloClient(String userName, String plainPassword, ApolloConfiguration apolloConfiguration) {
+    GenericApolloClient(String userName, String plainPassword, String hostname, int port, String protocol) {
 
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
@@ -57,7 +58,9 @@ public class GenericApolloClient {
 
         this.userName = userName;
         this.plainPassword = plainPassword;
-        this.apolloConfiguration = apolloConfiguration;
+        this.hostname = hostname;
+        this.port = port;
+        this.protocol = protocol;
         this.mapper = new ObjectMapper();
     }
 
@@ -184,7 +187,7 @@ public class GenericApolloClient {
 
     private String getFullUrlWithToken(String url) {
         String tokenPostfix = StringUtils.isNotBlank(token) ? "?_token=" + token : "";
-        return "http://localhost:" + apolloConfiguration.getApiPort() + url + tokenPostfix;
+        return protocol + "://" + hostname + ":" + port + url + tokenPostfix;
     }
 
     private String generateLoginJson() {

@@ -1,8 +1,7 @@
 package io.logz.apollo;
 
-import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.controllers.DeploymentGroupsController;
-import io.logz.apollo.deployment.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.DeploymentPermission;
+import io.logz.apollo.models.DeploymenGroupsResponseObject;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.kubernetes.ApolloToKubernetesStore;
 import io.logz.apollo.clients.ApolloTestClient;

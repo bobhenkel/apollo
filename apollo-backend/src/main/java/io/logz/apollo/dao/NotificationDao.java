@@ -1,6 +1,6 @@
 package io.logz.apollo.dao;
 
-import io.logz.apollo.notifications.Notification;
+import io.logz.apollo.models.Notification;
 
 import java.util.List;
 

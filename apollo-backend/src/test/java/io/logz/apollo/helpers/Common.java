@@ -1,8 +1,8 @@
 package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
-import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;

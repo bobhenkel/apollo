@@ -1,6 +1,6 @@
 package io.logz.apollo.helpers;
 
-import io.logz.apollo.auth.User;
+import io.logz.apollo.models.User;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.dao.DeploymentDao;
 import io.logz.apollo.dao.EnvironmentDao;
