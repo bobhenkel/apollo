@@ -1,5 +1,7 @@
 package io.logz.apollo.auth;
 
+import io.logz.apollo.models.DeploymentPermission;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

@@ -1,7 +1,7 @@
 package io.logz.apollo.controllers;
 
 import com.google.common.collect.ImmutableMap;
-import io.logz.apollo.blockers.BlockerDefinition;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.blockers.BlockerService;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.BlockerDefinitionDao;

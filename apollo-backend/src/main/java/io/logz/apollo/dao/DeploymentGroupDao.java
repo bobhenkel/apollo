@@ -1,6 +1,6 @@
 package io.logz.apollo.dao;
 
-import io.logz.apollo.auth.DeploymentGroup;
+import io.logz.apollo.models.DeploymentGroup;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

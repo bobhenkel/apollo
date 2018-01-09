@@ -1,26 +1,20 @@
 package io.logz.apollo;
 
-import io.logz.apollo.blockers.BlockerDefinition;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloBlockedException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
-import io.logz.apollo.helpers.StandaloneApollo;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
-import io.logz.apollo.scm.GithubConnector;
 import org.junit.Test;
 
-import javax.script.ScriptException;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitBlocker;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

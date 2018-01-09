@@ -1,6 +1,6 @@
 package io.logz.apollo.dao;
 
-import io.logz.apollo.blockers.BlockerDefinition;
+import io.logz.apollo.models.BlockerDefinition;
 
 import java.util.List;
 

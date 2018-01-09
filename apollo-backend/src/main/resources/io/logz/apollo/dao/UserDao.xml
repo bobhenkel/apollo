@@ -5,13 +5,13 @@
 
 <mapper namespace="io.logz.apollo.dao.UserDao">
 
-    <select id="getUser" resultType="io.logz.apollo.auth.User">
+    <select id="getUser" resultType="io.logz.apollo.models.User">
         SELECT *
         FROM users
         WHERE user_email = #{userEmail}
     </select>
 
-    <select id="getAllUsers" resultType="io.logz.apollo.auth.User">
+    <select id="getAllUsers" resultType="io.logz.apollo.models.User">
         SELECT first_name, last_name, user_email, is_admin
         FROM users
     </select>

@@ -1,4 +1,4 @@
-package io.logz.apollo.auth;
+package io.logz.apollo.models;
 
 /**
  * Created by roiravhon on 11/20/16.

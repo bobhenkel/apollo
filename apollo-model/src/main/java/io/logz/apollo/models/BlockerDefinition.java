@@ -1,4 +1,4 @@
-package io.logz.apollo.blockers;
+package io.logz.apollo.models;
 
 import java.util.Date;
 

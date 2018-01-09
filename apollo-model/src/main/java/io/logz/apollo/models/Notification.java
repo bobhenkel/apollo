@@ -1,23 +1,18 @@
-package io.logz.apollo.auth;
+package io.logz.apollo.models;
 
-/**
- * Created by roiravhon on 1/10/17.
- */
-public class DeploymentPermission {
-
-    public enum PermissionType {
-        ALLOW,
-        DENY
-    }
+public class Notification {
 
     private int id;
     private String name;
     private Integer serviceId;
     private Integer environmentId;
-    private PermissionType permissionType;
+    private NotificationType type;
+    private String notificationJsonConfiguration;
+    public enum NotificationType {
+        SLACK
+    }
 
-    public DeploymentPermission() {
-
+    public Notification() {
     }
 
     public int getId() {
@@ -52,11 +47,19 @@ public class DeploymentPermission {
         this.environmentId = environmentId;
     }
 
-    public PermissionType getPermissionType() {
-        return permissionType;
+    public NotificationType getType() {
+        return type;
     }
 
-    public void setPermissionType(PermissionType permissionType) {
-        this.permissionType = permissionType;
+    public void setType(NotificationType type) {
+        this.type = type;
+    }
+
+    public String getNotificationJsonConfiguration() {
+        return notificationJsonConfiguration;
+    }
+
+    public void setNotificationJsonConfiguration(String notificationJsonConfiguration) {
+        this.notificationJsonConfiguration = notificationJsonConfiguration;
     }
 }

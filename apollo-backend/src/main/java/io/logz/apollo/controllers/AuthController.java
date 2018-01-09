@@ -1,9 +1,9 @@
 package io.logz.apollo.controllers;
 
-import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PasswordManager;
-import io.logz.apollo.auth.User;
+import io.logz.apollo.models.User;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.DeploymentGroupDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;

@@ -1,4 +1,4 @@
-package io.logz.apollo.deployment;
+package io.logz.apollo.models;
 
 import io.logz.apollo.models.Deployment;
 

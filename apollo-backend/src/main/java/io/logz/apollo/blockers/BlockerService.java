@@ -1,8 +1,7 @@
 package io.logz.apollo.blockers;
 
 import io.logz.apollo.dao.BlockerDefinitionDao;
-import io.logz.apollo.dao.DeployableVersionDao;
-import io.logz.apollo.models.DeployableVersion;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.models.Deployment;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;

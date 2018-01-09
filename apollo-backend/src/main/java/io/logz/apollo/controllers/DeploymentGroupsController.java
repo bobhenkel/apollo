@@ -2,7 +2,7 @@ package io.logz.apollo.controllers;
 
 import com.google.common.base.Splitter;
 import io.logz.apollo.deployment.DeploymentHandler;
-import io.logz.apollo.deployment.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.DeploymenGroupsResponseObject;
 import io.logz.apollo.excpetions.ApolloDeploymentException;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Group;

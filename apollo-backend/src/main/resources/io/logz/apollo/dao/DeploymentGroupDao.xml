@@ -4,13 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="io.logz.apollo.dao.DeploymentGroupDao">
-    <select id="getDeploymentGroup" resultType="io.logz.apollo.auth.DeploymentGroup">
+    <select id="getDeploymentGroup" resultType="io.logz.apollo.models.DeploymentGroup">
         SELECT *
         FROM deployment_groups
         WHERE id = #{id}
     </select>
 
-    <select id="getAllDeploymentGroups" resultType="io.logz.apollo.auth.DeploymentGroup">
+    <select id="getAllDeploymentGroups" resultType="io.logz.apollo.models.DeploymentGroup">
         SELECT *
         FROM deployment_groups
     </select>

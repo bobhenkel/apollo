@@ -1,11 +1,10 @@
 package io.logz.apollo.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentPermission;
-import io.logz.apollo.auth.User;
-import io.logz.apollo.blockers.BlockerDefinition;
-import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentPermission;
+import io.logz.apollo.models.User;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.exceptions.ApolloCouldNotSignupException;
@@ -24,8 +23,8 @@ public class ApolloAdminClient {
 
     private final GenericApolloClient genericApolloClient;
 
-    public ApolloAdminClient(User adminUser, String plainAdminPassword, ApolloConfiguration apolloConfiguration) {
-        genericApolloClient = new GenericApolloClient(adminUser.getUserEmail(), plainAdminPassword, apolloConfiguration);
+    public ApolloAdminClient(User adminUser, String plainAdminPassword, String hostname, int port, String protocol) {
+        genericApolloClient = new GenericApolloClient(adminUser.getUserEmail(), plainAdminPassword, hostname, port, protocol);
     }
 
     public void login() throws IOException, ApolloCouldNotLoginException {

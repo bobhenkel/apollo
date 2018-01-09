@@ -1,10 +1,10 @@
 package io.logz.apollo.helpers;
 
-import io.logz.apollo.auth.DeploymentGroup;
-import io.logz.apollo.auth.DeploymentPermission;
+import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PasswordManager;
-import io.logz.apollo.auth.User;
-import io.logz.apollo.blockers.BlockerDefinition;
+import io.logz.apollo.models.User;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloClientException;
@@ -13,10 +13,8 @@ import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.Group;
-import io.logz.apollo.notifications.ApolloNotifications;
-import io.logz.apollo.notifications.ApolloNotifications.NotificationType;
-import io.logz.apollo.notifications.Notification;
-import org.rapidoid.serialize.Ser;
+import io.logz.apollo.models.Notification.NotificationType;
+import io.logz.apollo.models.Notification;
 
 import javax.script.ScriptException;
 import java.io.IOException;
