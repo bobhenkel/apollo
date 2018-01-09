@@ -2,13 +2,7 @@ package io.logz.apollo.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import io.logz.apollo.exceptions.ApolloBlockedException;
-import io.logz.apollo.exceptions.ApolloClientException;
-import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
-import io.logz.apollo.exceptions.ApolloNotAuthenticatedException;
-import io.logz.apollo.exceptions.ApolloNotAuthorizedException;
+import io.logz.apollo.exceptions.*;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
 import okhttp3.MediaType;
@@ -16,9 +10,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -29,7 +21,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class GenericApolloClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericApolloClient.class);
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private final OkHttpClient client;
@@ -196,8 +187,7 @@ public class GenericApolloClient {
 
     private String getTokenFromResponse(RestResponse restResponse) throws ApolloClientException {
         try {
-            JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
-            return jsonObject.get("token").getAsString();
+            return mapper.readTree(restResponse.getBody()).get("token").asText();
         } catch (Exception e) {
             throw new ApolloClientException("Could not get token from response!", e);
         }
@@ -205,8 +195,7 @@ public class GenericApolloClient {
 
     private boolean isLoginSuccessful(RestResponse restResponse) throws ApolloClientException {
         try {
-            JsonObject jsonObject = new JsonParser().parse(restResponse.getBody()).getAsJsonObject();
-            return jsonObject.get("success").getAsBoolean();
+            return mapper.readTree(restResponse.getBody()).get("success").asBoolean();
         } catch (Exception e) {
             throw new ApolloClientException("Could not determine if login succeeded", e);
         }

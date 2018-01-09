@@ -1,10 +1,13 @@
 package io.logz.apollo.helpers;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Common {
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static String generateJson(String... keyValuePairs ) {
 
@@ -26,7 +29,10 @@ public class Common {
             throw new RuntimeException("Got un-even number of arguments!");
         }
 
-        Gson gson = new Gson();
-        return gson.toJson(jsonMap);
+        try {
+            return mapper.writeValueAsString(jsonMap);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
