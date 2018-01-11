@@ -5,6 +5,7 @@ import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.GroupDao;
 import io.logz.apollo.dao.ServiceDao;
 import io.logz.apollo.excpetions.ApolloNotFoundException;
+import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Group;
 import org.rapidoid.annotation.Controller;
@@ -73,15 +74,9 @@ public class ScalingController {
         }
 
         group.setScalingFactor(scalingFactor);
-        groupDao.updateScalingFactor(group);
+        group.setScalingStatus(Deployment.DeploymentStatus.PENDING);
+        groupDao.updateGroup(group);
 
-        Environment environment = environmentDao.getEnvironment(group.getEnvironmentId());
-        KubernetesHandler kubernetesHandler = kubernetesHandlerStore.getOrCreateKubernetesHandler(environment);
-        try {
-            kubernetesHandler.setScalingFactor(serviceDao.getService(group.getServiceId()), group.getName(), scalingFactor);
-            assignJsonResponseToReq(req, HttpStatus.OK, group);
-        } catch (ApolloNotFoundException e) {
-            assignJsonResponseToReq(req, HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        assignJsonResponseToReq(req, HttpStatus.OK, group);
     }
 }

@@ -1,5 +1,6 @@
 package io.logz.apollo.dao;
 
+import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Group;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,9 +11,11 @@ public interface GroupDao {
     Group getGroupByName(String name);
     List<Group> getAllGroups();
     List<Group> getGroupsPerServiceAndEnvironment(@Param("serviceId") int serviceId, @Param("environmentId") int environmentId);
+    List<Group> getAllRunningScalingOperations();
     int getScalingFactor(int id);
     void addGroup(Group group);
     void updateGroup(Group group);
+    void updateGroupScalingStatus(@Param("id") int id, @Param("scalingStatus") Deployment.DeploymentStatus scalingStatus);
     void deleteGroup(int id);
     void updateScalingFactor(Group group);
 }

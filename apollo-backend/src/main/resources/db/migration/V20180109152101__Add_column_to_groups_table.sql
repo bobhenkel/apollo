@@ -1,0 +1,1 @@
+ALTER TABLE groups ADD scaling_status varchar(1000) DEFAULT 'DONE';

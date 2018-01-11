@@ -34,6 +34,12 @@
         WHERE id=#{id}
     </select>
 
+    <select id="getAllRunningScalingOperations" resultType="io.logz.apollo.models.Group">
+        SELECT *
+        FROM groups
+        WHERE scaling_status NOT IN ("DONE", "CANCELED")
+    </select>
+
     <insert id="addGroup">
         INSERT INTO groups (name, service_id, environment_id, scaling_factor, json_params)
         VALUES (#{name}, #{serviceId}, #{environmentId}, #{scalingFactor}, #{jsonParams})
@@ -45,6 +51,7 @@
         service_id=#{serviceId},
         environment_id=#{environmentId},
         scaling_factor=#{scalingFactor},
+        scaling_status=#{scalingStatus},
         json_params=#{jsonParams}
         WHERE id=#{id}
     </update>
@@ -52,6 +59,12 @@
     <update id="updateScalingFactor">
         UPDATE groups SET
         scaling_factor=#{scalingFactor}
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateGroupScalingStatus">
+        UPDATE groups SET
+        scaling_status=#{scalingStatus}
         WHERE id=#{id}
     </update>
 
