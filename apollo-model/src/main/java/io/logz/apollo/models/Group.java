@@ -6,6 +6,7 @@ public class Group {
     private int serviceId;
     private int environmentId;
     private int scalingFactor;
+    private Deployment.DeploymentStatus scalingStatus;
     private String jsonParams;
 
     public Group() {
@@ -50,6 +51,14 @@ public class Group {
 
     public void setScalingFactor(int scalingFactor) {
         this.scalingFactor = scalingFactor;
+    }
+
+    public Deployment.DeploymentStatus getScalingStatus() {
+        return scalingStatus;
+    }
+
+    public void setScalingStatus(Deployment.DeploymentStatus scalingStatus) {
+        this.scalingStatus = scalingStatus;
     }
 
     public String getJsonParams() {

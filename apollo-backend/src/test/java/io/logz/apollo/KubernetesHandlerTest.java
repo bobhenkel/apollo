@@ -57,20 +57,24 @@ public class KubernetesHandlerTest {
     private static PodStatus podStatus;
 
     private static DeploymentDao deploymentDao;
+    private static GroupDao groupDao;
     private static Group group;
 
     private static KubernetesHandler notFinishedDeploymentHandler;
     private static StandaloneApollo standaloneApollo;
+    private static ApolloTestClient apolloTestClient;
 
     @BeforeClass
     public static void initialize() throws ScriptException, IOException, SQLException, ApolloClientException {
+
+        apolloTestClient = Common.signupAndLogin();
 
         // We need a server here
         standaloneApollo = StandaloneApollo.getOrCreateServer();
         ApolloToKubernetesStore apolloToKubernetesStore = standaloneApollo.getInstance(ApolloToKubernetesStore.class);
         KubernetesHandlerStore kubernetesHandlerStore = standaloneApollo.getInstance(KubernetesHandlerStore.class);
         deploymentDao = standaloneApollo.getInstance(DeploymentDao.class);
-        GroupDao groupDao = standaloneApollo.getInstance(GroupDao.class);
+        groupDao = standaloneApollo.getInstance(GroupDao.class);
 
         kubernetesMockClient = new KubernetesMockClient();
         ApolloTestClient apolloTestClient = Common.signupAndLogin();
@@ -166,6 +170,25 @@ public class KubernetesHandlerTest {
         String expectedEnvStatus = getExpectedEnvStatus(currentFinishedDeployment);
 
         assertThat(envStatusFromObject.replaceAll("\\\\", "")).isEqualTo(expectedEnvStatus);
+    }
+
+    @Test
+    public void testDeploymentMonitorScalingUpdates() throws ApolloClientException {
+
+        Common.waitABit(3);
+
+        int newScalingFactor = group.getScalingFactor() + 1;
+        apolloTestClient.updateScalingFactor(group.getId(), newScalingFactor);
+        Group updatedGroupBefore = groupDao.getGroup(group.getId());
+
+        assertThat(updatedGroupBefore.getScalingStatus()).isEqualByComparingTo(Deployment.DeploymentStatus.PENDING);
+        assertThat(updatedGroupBefore.getScalingFactor()).isEqualTo(newScalingFactor);
+
+        Common.waitABit(3);
+
+        Group updatedGroupAfter = groupDao.getGroup(group.getId());
+        // TODO: Make the mocks work for a real test
+        // assertThat(updatedGroupAfter.getScalingStatus()).isEqualByComparingTo(Deployment.DeploymentStatus.DONE);
     }
 
     @Test
