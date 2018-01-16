@@ -68,7 +68,7 @@ public class KubernetesMonitor {
             }
 
             logger.info("Starting kubernetes monitor thread");
-            int monitorThreadFrequency = apolloConfiguration.getMonitorThreadFrequencySeconds();
+            int monitorThreadFrequency = apolloConfiguration.getKubernetes().getMonitoringFrequencySeconds();
             scheduledExecutorService.scheduleAtFixedRate(this::monitor, 0, monitorThreadFrequency, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("Could not start kubernetes monitor thread! Bailing..", e);

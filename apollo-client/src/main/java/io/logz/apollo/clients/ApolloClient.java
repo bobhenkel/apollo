@@ -3,6 +3,7 @@ package io.logz.apollo.clients;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.logz.apollo.models.User;
 import io.logz.apollo.models.BlockerDefinition;
+
 import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.helpers.Common;
@@ -17,9 +18,6 @@ import io.logz.apollo.models.DeploymenGroupsResponseObject;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Created by roiravhon on 11/24/16.
- */
 public class ApolloClient {
 
     private final GenericApolloClient genericApolloClient;

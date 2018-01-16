@@ -12,14 +12,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 
+
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by roiravhon on 11/24/16.
- */
-public class GenericApolloClient {
+class GenericApolloClient {
 
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -40,7 +38,6 @@ public class GenericApolloClient {
     }
 
     GenericApolloClient(String userName, String plainPassword, String hostname, int port, String protocol) {
-
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)

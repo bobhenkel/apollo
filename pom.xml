@@ -102,6 +102,11 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.7</version>
             </dependency>
+            <dependency>
+                <groupId>org.conf4j</groupId>
+                <artifactId>conf4j-consul</artifactId>
+                <version>2017.10.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

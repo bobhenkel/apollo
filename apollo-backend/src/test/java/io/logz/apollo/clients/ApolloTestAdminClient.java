@@ -5,10 +5,8 @@ import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
 
-/**
- * Created by roiravhon on 11/28/16.
- */
 public class ApolloTestAdminClient extends ApolloAdminClient {
+
     public ApolloTestAdminClient(String hostname, int port, String protocol, UserDao userDao) {
         super(createAndRegisterAdminUserInDb(userDao), Common.DEFAULT_PASSWORD, hostname, port, protocol);
     }
@@ -19,4 +17,5 @@ public class ApolloTestAdminClient extends ApolloAdminClient {
         userDao.addUser(user);
         return user;
     }
+
 }
