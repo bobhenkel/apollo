@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.models.User;
 import io.logz.apollo.common.HttpStatus;
+import io.logz.apollo.configuration.ApiConfiguration;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import io.logz.apollo.dao.UserDao;
 import org.rapidoid.integrate.GuiceBeans;
@@ -45,10 +46,11 @@ public class RestServer {
         registerLoginProvider();
         registerRolesProvider();
 
+        ApiConfiguration apiConfiguration = configuration.getApi();
         String[] args = new String[] {
-                "secret=" + configuration.getSecret(),
-                "on.address=" + configuration.getApiListen(),
-                "on.port=" + configuration.getApiPort()
+                "secret=" + apiConfiguration.getSecret(),
+                "on.address=" + apiConfiguration.getListen(),
+                "on.port=" + apiConfiguration.getPort()
         };
 
         // Initialize the REST API server

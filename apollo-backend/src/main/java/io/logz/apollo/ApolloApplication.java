@@ -4,8 +4,10 @@ import com.google.inject.Injector;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.configuration.ApolloConfigurationProviderBuilder;
 import io.logz.apollo.di.ApolloModule;
 import io.logz.apollo.di.ApolloMyBatisModule;
+import org.conf4j.core.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,19 +15,17 @@ import java.util.concurrent.CountDownLatch;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * Created by roiravhon on 11/20/16.
- */
 public class ApolloApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(ApolloApplication.class);
 
-    private final ApolloConfiguration configuration;
+    
+    private final ConfigurationProvider<ApolloConfiguration> configurationProvider;
     private LifecycleManager lifecycleManager;
     private Injector injector;
 
-    public ApolloApplication(ApolloConfiguration configuration) {
-        this.configuration = requireNonNull(configuration);
+    public ApolloApplication(ConfigurationProvider<ApolloConfiguration> configurationProvider) {
+        this.configurationProvider = requireNonNull(configurationProvider);
     }
 
     public void start() {
@@ -33,8 +33,8 @@ public class ApolloApplication {
             logger.info("Starting apollo..");
 
             injector = LifecycleInjector.builder().withModules(
-                    new ApolloModule(configuration),
-                    new ApolloMyBatisModule(configuration)
+                    new ApolloModule(configurationProvider.get()),
+                    new ApolloMyBatisModule(configurationProvider.get().getDatabase())
             ).build().createInjector();
 
             lifecycleManager = injector.getInstance(LifecycleManager.class);
@@ -47,8 +47,14 @@ public class ApolloApplication {
     }
 
     public void shutdown() {
-        logger.info("Cleaning up..");
-        if (lifecycleManager != null) lifecycleManager.close();
+        try {
+            logger.info("Cleaning up..");
+            if (lifecycleManager != null) lifecycleManager.close();
+            if (configurationProvider != null) configurationProvider.close();
+        } catch (Exception e) {
+            logger.warn("Unknown exception thrown while shutting down apollo", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public Injector getInjector() {
@@ -56,8 +62,8 @@ public class ApolloApplication {
     }
 
     public static void main(String[] args) {
-        ApolloConfiguration configuration = ApolloConfiguration.parseConfigurationFromResources();
-        ApolloApplication application = new ApolloApplication(configuration);
+        ConfigurationProvider<ApolloConfiguration> configurationProvider = ApolloConfigurationProviderBuilder.build();
+        ApolloApplication application = new ApolloApplication(configurationProvider);
 
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(application::shutdown));

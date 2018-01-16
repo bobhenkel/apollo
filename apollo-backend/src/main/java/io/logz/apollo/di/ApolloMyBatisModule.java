@@ -1,6 +1,6 @@
 package io.logz.apollo.di;
 
-import io.logz.apollo.configuration.ApolloConfiguration;
+import io.logz.apollo.configuration.DatabaseConfiguration;
 import io.logz.apollo.dao.BlockerDefinitionDao;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.dao.DeploymentDao;
@@ -26,8 +26,8 @@ public class ApolloMyBatisModule extends MyBatisModule {
 
     private final DataSource dataSource;
 
-    public ApolloMyBatisModule(ApolloConfiguration configuration) {
-        this.dataSource = createDatasource(configuration);
+    public ApolloMyBatisModule(DatabaseConfiguration configuration) {
+        this.dataSource = DataSourceFactory.create(configuration);
     }
 
     @Override
@@ -58,15 +58,6 @@ public class ApolloMyBatisModule extends MyBatisModule {
         bind(SqlSessionFactoryProvider.class);
 
         mapUnderscoreToCamelCase(true);
-    }
-
-    private DataSource createDatasource(ApolloConfiguration configuration) {
-        String host = configuration.getDbHost();
-        int port = configuration.getDbPort();
-        String user = configuration.getDbUser();
-        String password = configuration.getDbPassword();
-        String schema = configuration.getDbSchema();
-        return DataSourceFactory.create(host, port, user, password, schema);
     }
 
     private void migrateDatabase(DataSource dataSource) {

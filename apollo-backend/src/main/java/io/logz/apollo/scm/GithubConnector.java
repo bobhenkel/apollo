@@ -11,15 +11,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Created by roiravhon on 2/20/17.
- */
 @Singleton
 public class GithubConnector {
 
@@ -33,10 +29,10 @@ public class GithubConnector {
             logger.info("Initializing Github Connector");
 
             // If no user or oauth was provided, attempt to go anonymous
-            if (StringUtils.isEmpty(apolloConfiguration.getGithubLogin()) || StringUtils.isEmpty(apolloConfiguration.getGithubOauthToken())) {
+            if (StringUtils.isEmpty(apolloConfiguration.getScm().getGithubLogin()) || StringUtils.isEmpty(apolloConfiguration.getScm().getGithubOauthToken())) {
                 gitHub = GitHub.connectAnonymously();
             } else {
-                gitHub = GitHub.connect(apolloConfiguration.getGithubLogin(), apolloConfiguration.getGithubOauthToken());
+                gitHub = GitHub.connect(apolloConfiguration.getScm().getGithubLogin(), apolloConfiguration.getScm().getGithubOauthToken());
             }
         } catch (IOException e) {
             throw new RuntimeException("Could not open connection to Github!", e);

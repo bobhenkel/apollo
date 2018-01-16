@@ -24,11 +24,6 @@ import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 import java.util.Arrays;
 
-import static java.util.Objects.requireNonNull;
-
-/**
- * Created by roiravhon on 5/23/17.
- */
 @Singleton
 public class WebSocketServer {
 
@@ -46,13 +41,13 @@ public class WebSocketServer {
 
     private Server createWebsocketServer(ApolloConfiguration configuration, AuthenticationFilter authenticationFilter) {
         try {
-            Server server = new Server(configuration.getWsPort());
+            Server server = new Server(configuration.getWebsocket().getPort());
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
             context.addFilter(new FilterHolder(authenticationFilter), "/exec/*", null);
             server.setHandler(context);
 
             ServerContainer wsContainer = WebSocketServerContainerInitializer.configureContext(context);
-            wsContainer.setDefaultMaxSessionIdleTimeout(configuration.getWsIdleTimeoutSeconds() * 1000);
+            wsContainer.setDefaultMaxSessionIdleTimeout(configuration.getWebsocket().getIdleTimeoutSeconds() * 1000);
             wsContainer.addEndpoint(createEndpointConfig(ContainerExecEndpoint.class));
             wsContainer.addEndpoint(createEndpointConfig(ContainerLogsEndpoint.class));
 

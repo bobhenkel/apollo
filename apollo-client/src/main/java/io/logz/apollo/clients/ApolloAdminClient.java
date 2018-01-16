@@ -16,9 +16,6 @@ import io.logz.apollo.helpers.RestResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Created by roiravhon on 11/24/16.
- */
 public class ApolloAdminClient {
 
     private final GenericApolloClient genericApolloClient;
