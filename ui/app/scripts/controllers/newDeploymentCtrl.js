@@ -42,29 +42,28 @@ angular.module('apollo')
 
 		$scope.currentStep = deploymentSteps[0];
 
+		// Class variables
+        var loadedGroupsEnvironmentId;
+        var loadedGroupsServiceId;
+
         // Scope setters
         $scope.setSelectedEnvironment = function (environmentSelected) {
             $scope.environmentSelected = environmentSelected;
         };
 
         $scope.setSelectedService = function (serviceSelected) {
-            if (serviceSelected !== undefined) {
-
-                if ($scope.serviceSelected !== serviceSelected) {
-                    loadDeployableVersions(serviceSelected.id);
-                }
-
+            if ($scope.serviceSelected !== serviceSelected) {
                 $scope.serviceSelected = serviceSelected;
+                loadDeployableVersions(serviceSelected.id);
+            }
 
-                if (serviceSelected.isPartOfGroup) {
-                    deploymentSteps = ["choose-environment", "choose-service", "choose-groups", "choose-version", "confirmation"];
-                } else {
-                    deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
-                }
-
+            if (serviceSelected !== undefined && serviceSelected.isPartOfGroup) {
+                deploymentSteps = ["choose-environment", "choose-service", "choose-groups", "choose-version", "confirmation"];
                 if ($scope.environmentSelected !== undefined) {
                     loadGroups($scope.environmentSelected.id, $scope.serviceSelected.id);
                 }
+            } else {
+                deploymentSteps = ["choose-environment", "choose-service", "choose-version", "confirmation"];
             }
         };
 
@@ -305,9 +304,13 @@ angular.module('apollo')
         }
 
         function loadGroups(environmentId, serviceId) {
-            apolloApiService.getGroupsPerServiceAndEnvironment(environmentId, serviceId).then(function (response) {
-               $scope.possibleGroups = response.data;
-            });
+		    if (environmentId !== loadedGroupsEnvironmentId || serviceId !== loadedGroupsServiceId) {
+		        loadedGroupsEnvironmentId = environmentId;
+		        loadedGroupsServiceId = serviceId;
+                apolloApiService.getGroupsPerServiceAndEnvironment(environmentId, serviceId).then(function (response) {
+                    $scope.possibleGroups = response.data;
+                });
+            }
         }
 
         hotkeys.bindTo($scope)

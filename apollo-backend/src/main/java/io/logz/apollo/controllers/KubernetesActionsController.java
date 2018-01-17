@@ -3,6 +3,7 @@ package io.logz.apollo.controllers;
 import io.logz.apollo.common.ControllerCommon;
 import io.logz.apollo.common.HttpStatus;
 import io.logz.apollo.dao.EnvironmentDao;
+import io.logz.apollo.excpetions.ApolloKubernetesException;
 import io.logz.apollo.kubernetes.KubernetesHandlerStore;
 import io.logz.apollo.models.Environment;
 import org.rapidoid.annotation.Controller;
@@ -39,7 +40,12 @@ public class KubernetesActionsController {
             return;
         }
 
-        kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).restartPod(podName);
+        try {
+            kubernetesHandlerStore.getOrCreateKubernetesHandler(environment).restartPod(podName);
+        } catch (ApolloKubernetesException e) {
+            ControllerCommon.assignJsonResponseToReq(req, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return;
+        }
         ControllerCommon.assignJsonResponseToReq(req, HttpStatus.OK, "Ok");
     }
 }
