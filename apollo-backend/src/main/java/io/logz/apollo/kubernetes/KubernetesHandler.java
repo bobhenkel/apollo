@@ -8,8 +8,11 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.logz.apollo.common.HttpStatus;
+import io.logz.apollo.excpetions.ApolloKubernetesException;
 import io.logz.apollo.excpetions.ApolloNotFoundException;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Environment;
@@ -199,14 +202,20 @@ public class KubernetesHandler {
         return kubernetesDeploymentStatus;
     }
 
-    public void restartPod(String podName) {
-
+    public void restartPod(String podName) throws ApolloKubernetesException {
         // Deleting a pod, which created with a deployment is basically restarting since the replica set will create a new one immediately
-        kubernetesClient
-                .pods()
-                .inNamespace(environment.getKubernetesNamespace())
-                .withName(podName)
-                .delete();
+        try {
+            kubernetesClient
+                    .pods()
+                    .inNamespace(environment.getKubernetesNamespace())
+                    .withName(podName)
+                    .delete();
+        } catch (KubernetesClientException e) {
+            // Async deletion throws KubernetesClientException with code 202, but it's working and actually deleting the pod
+            if (e.getCode() != HttpStatus.ACCEPTED) {
+                throw new ApolloKubernetesException();
+            }
+        }
     }
 
     public ExecWatch getExecWatch(String podName, String containerName, String... command) {
