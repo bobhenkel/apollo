@@ -20,4 +20,14 @@
         INSERT INTO users
         VALUES (#{userEmail}, #{firstName}, #{lastName}, #{hashedPassword}, #{isAdmin})
     </insert>
+
+    <insert id="updateUser">
+        UPDATE users SET
+        user_email=#{userEmail},
+        first_name=#{firstName},
+        last_name=#{lastName},
+        hashed_password=#{hashedPassword},
+        is_admin=#{isAdmin}
+        WHERE user_email=#{userEmail}
+    </insert>
 </mapper>
