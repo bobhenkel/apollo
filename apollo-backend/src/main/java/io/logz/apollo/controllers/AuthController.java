@@ -11,6 +11,7 @@ import io.logz.apollo.dao.UserDao;
 import org.rapidoid.annotation.Controller;
 import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
+import org.rapidoid.annotation.PUT;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.Administrator;
 import org.rapidoid.security.annotation.LoggedIn;
@@ -53,6 +54,11 @@ public class AuthController {
                 .collect(Collectors.toList());
     }
 
+    @LoggedIn
+    @GET("/user/{email}")
+    public User getUser(String email) { return userDao.getUser(email); }
+
+
     @Administrator
     @POST("/signup")
     public User addUser(String userEmail, String firstName, String lastName, String password) {
@@ -66,6 +72,20 @@ public class AuthController {
         userDao.addUser(newUser);
 
         return newUser;
+    }
+
+    @Administrator
+    @PUT("/user")
+    public User updateUser(String userEmail, String firstName, String lastName, String password, Boolean isAdmin) {
+        User user = getUser(userEmail);
+        user.setUserEmail(userEmail);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setHashedPassword(PasswordManager.encryptPassword(password));
+        user.setAdmin(isAdmin);
+        userDao.updateUser(user);
+
+        return user;
     }
 
     @Administrator

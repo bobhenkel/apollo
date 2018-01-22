@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    image: mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    networks:
+      apollonet:
+        aliases:
+          - db.local
+
+  apollo:
+    image: registry.internal.logz.io:5000/apollo:e4b1c1b19532be6dc7013cd4903e4a605a952edb
+    ports:
+      - "8081:8081"
+      - "30001:80"
+    restart: always
+    environment:
+      APOLLO_CONFIG_FILENAME: /root/apollo.conf
+    volumes:
+      - ./apollo.conf:/root/apollo.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      apollonet:
+        aliases:
+          - apollo.local
+
+networks:
+  apollonet:

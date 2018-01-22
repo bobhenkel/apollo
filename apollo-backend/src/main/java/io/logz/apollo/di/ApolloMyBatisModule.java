@@ -24,16 +24,23 @@ import javax.sql.DataSource;
 
 public class ApolloMyBatisModule extends MyBatisModule {
 
-    private final DataSource dataSource;
+    private static final String JDBC_URL_FORMAT = "jdbc:mysql://%s:%s/%s?createDatabaseIfNotExist=true";
+
+    private final DatabaseConfiguration configuration;
+
+    private DataSource dataSource;
 
     public ApolloMyBatisModule(DatabaseConfiguration configuration) {
-        this.dataSource = DataSourceFactory.create(configuration);
+        this.configuration = configuration;
     }
 
     @Override
     protected void initialize() {
+        // make sure database schema exists
+        migrateDatabase();
+        // create the data source and bind it
+        createDataSource();
         init();
-        migrateDatabase(dataSource);
 
         addMapperClass(DeployableVersionDao.class);
         addMapperClass(DeploymentDao.class);
@@ -45,6 +52,10 @@ public class ApolloMyBatisModule extends MyBatisModule {
         addMapperClass(GroupDao.class);
         addMapperClass(BlockerDefinitionDao.class);
         addMapperClass(NotificationDao.class);
+    }
+
+    private void createDataSource() {
+        this.dataSource = DataSourceFactory.create(configuration);
     }
 
     private void init() {
@@ -60,9 +71,12 @@ public class ApolloMyBatisModule extends MyBatisModule {
         mapUnderscoreToCamelCase(true);
     }
 
-    private void migrateDatabase(DataSource dataSource) {
+    private void migrateDatabase() {
+        String jdbcUrl = String.format(JDBC_URL_FORMAT, configuration.getHost(), configuration.getPort(),
+                configuration.getSchema());
+
         Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        flyway.setDataSource(jdbcUrl, configuration.getUser(), configuration.getPassword());
         flyway.migrate();
     }
 
