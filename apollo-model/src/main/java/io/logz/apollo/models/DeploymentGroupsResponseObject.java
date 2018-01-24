@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DeploymenGroupsResponseObject {
+public class DeploymentGroupsResponseObject {
 
     private final static String GROUP = "group";
     private final static String REASON = "reason";
@@ -14,7 +14,7 @@ public class DeploymenGroupsResponseObject {
     private List<Map<String, Object>> successful;
     private List<Map<String, Object>> unsuccessful;
 
-    public DeploymenGroupsResponseObject() {
+    public DeploymentGroupsResponseObject() {
         successful = new ArrayList<>();
         unsuccessful = new ArrayList<>();
     }

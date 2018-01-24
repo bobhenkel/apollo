@@ -20,8 +20,8 @@ public class ApolloAdminClient {
 
     private final GenericApolloClient genericApolloClient;
 
-    public ApolloAdminClient(User adminUser, String plainAdminPassword, String hostname, int port, String protocol) {
-        genericApolloClient = new GenericApolloClient(adminUser.getUserEmail(), plainAdminPassword, hostname, port, protocol);
+    public ApolloAdminClient(String userName, String plainAdminPassword, String hostname, int port, String protocol) {
+        genericApolloClient = new GenericApolloClient(userName, plainAdminPassword, hostname, port, protocol);
     }
 
     public void login() throws IOException, ApolloCouldNotLoginException {

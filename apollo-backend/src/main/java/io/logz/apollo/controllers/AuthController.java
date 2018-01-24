@@ -31,8 +31,6 @@ import static java.util.Objects.requireNonNull;
 @Controller
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
     private final DeploymentPermissionDao deploymentPermissionDao;
     private final DeploymentGroupDao deploymentGroupDao;
     private final UserDao userDao;
@@ -47,7 +45,7 @@ public class AuthController {
     }
 
     @LoggedIn
-    @GET("/user")
+    @GET("/users")
     public List<User> getAllUsers() {
         return userDao.getAllUsers().stream()
                 .map(this::maskPassword)
@@ -55,9 +53,8 @@ public class AuthController {
     }
 
     @LoggedIn
-    @GET("/user/{email}")
-    public User getUser(String email) { return userDao.getUser(email); }
-
+    @GET("/users/{email}")
+    public User getUser(String email) { return maskPassword(userDao.getUser(email)); }
 
     @Administrator
     @POST("/signup")
@@ -75,7 +72,7 @@ public class AuthController {
     }
 
     @Administrator
-    @PUT("/user")
+    @PUT("/users")
     public User updateUser(String userEmail, String firstName, String lastName, String password, Boolean isAdmin) {
         User user = getUser(userEmail);
         user.setUserEmail(userEmail);

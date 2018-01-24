@@ -48,16 +48,18 @@ public class AuthTest {
         ApolloTestClient apolloTestClient = standaloneApollo.createTestClient();
 
         // Check that user that is not authenticated cannot sign up
-        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD)).isInstanceOf(ApolloNotAuthorizedException.class);
+        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getTestUser(), Common.DEFAULT_PASSWORD))
+                .isInstanceOf(ApolloNotAuthorizedException.class);
 
         // Login admin
         apolloTestAdminClient.login();
 
         // Signup the user
-        apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
+        apolloTestAdminClient.signup(apolloTestClient.getTestUser(), Common.DEFAULT_PASSWORD);
 
         // Make sure we cant signup again
-        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD)).isInstanceOf(ApolloCouldNotSignupException.class);
+        assertThatThrownBy(() -> apolloTestAdminClient.signup(apolloTestClient.getTestUser(), Common.DEFAULT_PASSWORD))
+                .isInstanceOf(ApolloCouldNotSignupException.class);
     }
 
     @Test
@@ -71,7 +73,7 @@ public class AuthTest {
 
         // Login admin and signup user
         apolloTestAdminClient.login();
-        apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
+        apolloTestAdminClient.signup(apolloTestClient.getTestUser(), Common.DEFAULT_PASSWORD);
 
         // Login the new user
         apolloTestClient.login();
@@ -86,14 +88,14 @@ public class AuthTest {
         List<User> allUsers = apolloTestClient.getAllUsers();
 
         // Find our user in the list
-        Optional<User> userFromApi = allUsers.stream().filter(user -> user.getUserEmail().equals(apolloTestClient.getClientUser().getUserEmail())).findFirst();
+        Optional<User> userFromApi = allUsers.stream().filter(user -> user.getUserEmail().equals(apolloTestClient.getTestUser().getUserEmail())).findFirst();
 
         boolean userFound = false;
         if (userFromApi.isPresent()) {
 
-            if (userFromApi.get().getFirstName().equals(apolloTestClient.getClientUser().getFirstName()) &&
-                userFromApi.get().getLastName().equals(apolloTestClient.getClientUser().getLastName()) &&
-                userFromApi.get().isAdmin() == apolloTestClient.getClientUser().isAdmin() &&
+            if (userFromApi.get().getFirstName().equals(apolloTestClient.getTestUser().getFirstName()) &&
+                userFromApi.get().getLastName().equals(apolloTestClient.getTestUser().getLastName()) &&
+                userFromApi.get().isAdmin() == apolloTestClient.getTestUser().isAdmin() &&
                 userFromApi.get().getHashedPassword().contains("*")) {
 
                 userFound = true;

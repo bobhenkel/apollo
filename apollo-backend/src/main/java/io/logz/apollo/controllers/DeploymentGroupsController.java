@@ -2,7 +2,7 @@ package io.logz.apollo.controllers;
 
 import com.google.common.base.Splitter;
 import io.logz.apollo.deployment.DeploymentHandler;
-import io.logz.apollo.models.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.DeploymentGroupsResponseObject;
 import io.logz.apollo.excpetions.ApolloDeploymentException;
 import io.logz.apollo.models.Deployment;
 import io.logz.apollo.models.Group;
@@ -36,7 +36,7 @@ public class DeploymentGroupsController {
     @POST("/deployment-groups")
     public void addDeployment(int environmentId, int serviceId, int deployableVersionId, String groupIdsCsv, Req req) throws NumberFormatException {
 
-        DeploymenGroupsResponseObject responseObject = new DeploymenGroupsResponseObject();
+        DeploymentGroupsResponseObject responseObject = new DeploymentGroupsResponseObject();
 
         Iterable<String> groupIds = Splitter.on(GROUP_IDS_DELIMITER).omitEmptyStrings().trimResults().split(groupIdsCsv);
 
