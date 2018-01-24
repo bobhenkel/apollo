@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.logz.apollo.exceptions.*;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
+import io.logz.apollo.models.User;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -93,6 +94,8 @@ class GenericApolloClient {
         Response response = client.newCall(request).execute();
         return new RestResponse(response.code(), response.body().string());
     }
+
+    String getUserName() { return userName; }
 
     <T> T getResult(String url, TypeReference<T> responseType) throws ApolloClientException {
         return runAndGetResult(url, Optional.empty(), responseType, HTTP_METHOD.GET);

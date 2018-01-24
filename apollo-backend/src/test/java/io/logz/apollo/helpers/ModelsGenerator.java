@@ -265,10 +265,6 @@ public class ModelsGenerator {
         return createUser(false);
     }
 
-    public static User createAdminUser() {
-        return createUser(true);
-    }
-
     private static User createUser(boolean admin) {
 
         User testUser = new User();
@@ -299,6 +295,6 @@ public class ModelsGenerator {
         newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
         apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getTestUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }

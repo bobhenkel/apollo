@@ -1,7 +1,7 @@
 package io.logz.apollo;
 
 import io.logz.apollo.models.DeploymentPermission;
-import io.logz.apollo.models.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.DeploymentGroupsResponseObject;
 import io.logz.apollo.helpers.ModelsGenerator;
 import io.logz.apollo.kubernetes.ApolloToKubernetesStore;
 import io.logz.apollo.clients.ApolloTestClient;
@@ -81,7 +81,7 @@ public class DeploymentGroupsTest {
         Deployment deployment = ModelsGenerator.createDeployment(service, environment, deployableVersion);
 
         // Create expected response object
-        DeploymenGroupsResponseObject expectedResponse = new DeploymenGroupsResponseObject();
+        DeploymentGroupsResponseObject expectedResponse = new DeploymentGroupsResponseObject();
         expectedResponse.addSuccessfulGroup(goodGroup1.getId(), deployment);
         expectedResponse.addSuccessfulGroup(goodGroup2.getId(), deployment);
         expectedResponse.addUnsuccessfulGroup(0, "Non existing group.");
@@ -92,7 +92,7 @@ public class DeploymentGroupsTest {
         ModelsGenerator.createAndSubmitPermissions(apolloTestClient, Optional.of(environment), Optional.empty(), DeploymentPermission.PermissionType.ALLOW);
 
         // Get results
-        DeploymenGroupsResponseObject result = apolloTestClient.addDeployment(deployment, groupIdsCsv);
+        DeploymentGroupsResponseObject result = apolloTestClient.addDeployment(deployment, groupIdsCsv);
 
         assertThat(result.getUnsuccessful()).isEqualTo(expectedResponse.getUnsuccessful());
         assertThat(result.getSuccessful().get(0).get(GROUP_STRING))

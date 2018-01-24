@@ -14,30 +14,24 @@ import io.logz.apollo.models.KubernetesDeploymentStatus;
 import io.logz.apollo.models.Service;
 import io.logz.apollo.models.Group;
 import io.logz.apollo.models.Notification;
-import io.logz.apollo.models.DeploymenGroupsResponseObject;
+import io.logz.apollo.models.DeploymentGroupsResponseObject;
 import java.io.IOException;
 import java.util.List;
 
 public class ApolloClient {
 
     private final GenericApolloClient genericApolloClient;
-    private final User user;
 
-    public ApolloClient(User user, String plainPassword, String hostname, int port, String protocol) {
-        this.user = user;
-        genericApolloClient = new GenericApolloClient(user.getUserEmail(), plainPassword, hostname, port, protocol);
+    public ApolloClient(String userName, String plainPassword, String hostname, int port, String protocol) {
+        genericApolloClient = new GenericApolloClient(userName, plainPassword, hostname, port, protocol);
     }
 
     public void login() throws IOException, ApolloCouldNotLoginException {
         genericApolloClient.login();
     }
 
-    public User getClientUser() {
-        return user;
-    }
-
     public List<User> getAllUsers() throws ApolloClientException {
-        return genericApolloClient.getResult("/user", new TypeReference<List<User>>(){});
+        return genericApolloClient.getResult("/users", new TypeReference<List<User>>(){});
     }
 
     public Environment addEnvironment(Environment environment) throws ApolloClientException {
@@ -105,13 +99,13 @@ public class ApolloClient {
         return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
     }
 
-    public DeploymenGroupsResponseObject addDeployment(Deployment deployment, String groupIdsCsv) throws ApolloClientException {
+    public DeploymentGroupsResponseObject addDeployment(Deployment deployment, String groupIdsCsv) throws ApolloClientException {
         String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
                 "serviceId", String.valueOf(deployment.getServiceId()),
                 "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
                 "groupIdsCsv", groupIdsCsv);
 
-        return genericApolloClient.postAndGetResult("/deployment-groups", requestBody, new TypeReference<DeploymenGroupsResponseObject>() {});
+        return genericApolloClient.postAndGetResult("/deployment-groups", requestBody, new TypeReference<DeploymentGroupsResponseObject>() {});
     }
 
     public Deployment getDeployment(int id) throws ApolloClientException {

@@ -9,11 +9,9 @@ import io.logz.apollo.configuration.DatabaseConfiguration;
 import io.logz.apollo.configuration.KubernetesConfiguration;
 import io.logz.apollo.configuration.ScmConfiguration;
 import io.logz.apollo.configuration.WebsocketConfiguration;
-import io.logz.apollo.dao.UserDao;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import org.apache.commons.lang3.StringUtils;
 import org.conf4j.core.ConfigurationProvider;
-import org.jetbrains.annotations.NotNull;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -76,7 +74,7 @@ public class StandaloneApollo {
     }
 
     public ApolloTestClient createTestClient() {
-        return new ApolloTestClient(hostname, apolloConfiguration.getApi().getPort(), protocol);
+        return new ApolloTestClient(ModelsGenerator.createRegularUser(), hostname, apolloConfiguration.getApi().getPort(), protocol);
     }
 
     public <T> T getInstance(Class<T> clazz) {
@@ -84,8 +82,7 @@ public class StandaloneApollo {
     }
 
     public ApolloTestAdminClient createTestAdminClient() {
-        UserDao userDao = getInstance(UserDao.class);
-        return new ApolloTestAdminClient(hostname, apolloConfiguration.getApi().getPort(), protocol, userDao);
+        return new ApolloTestAdminClient(hostname, apolloConfiguration.getApi().getPort(), protocol);
     }
 
     private <T> ConfigurationProvider<T> createConfigurationProvider(T configuration) {

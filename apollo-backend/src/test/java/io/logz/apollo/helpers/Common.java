@@ -1,6 +1,7 @@
 package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
+import io.logz.apollo.exceptions.ApolloClientException;
 import io.logz.apollo.models.DeploymentGroup;
 import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.clients.ApolloTestAdminClient;
@@ -23,6 +24,8 @@ import java.util.UUID;
 public class Common {
 
     public static final String DEFAULT_PASSWORD = "123456";
+    public static final String DEFAULT_ADMIN_USERNAME = "apollo@admin";
+    public static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
     public static String randomStr(int size) {
         return UUID.randomUUID().toString().substring(0, size);
@@ -72,7 +75,7 @@ public class Common {
 
             // Create and signup user
             ApolloTestClient apolloTestClient = StandaloneApollo.getOrCreateServer().createTestClient();
-            apolloTestAdminClient.signup(apolloTestClient.getClientUser(), Common.DEFAULT_PASSWORD);
+            apolloTestAdminClient.signup(apolloTestClient.getTestUser(), Common.DEFAULT_PASSWORD);
 
             // Login the new user
             apolloTestClient.login();
@@ -84,7 +87,7 @@ public class Common {
         }
     }
 
-    public static ApolloTestAdminClient getAndLoginApolloTestAdminClient() throws ScriptException, IOException, SQLException, ApolloCouldNotLoginException {
+    public static ApolloTestAdminClient getAndLoginApolloTestAdminClient() throws ScriptException, IOException, SQLException, ApolloClientException {
         ApolloTestAdminClient apolloTestAdminClient = StandaloneApollo.getOrCreateServer().createTestAdminClient();
         apolloTestAdminClient.login();
         return apolloTestAdminClient;
@@ -109,6 +112,6 @@ public class Common {
         newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
         apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getClientUser().getUserEmail(), newDeploymentGroup.getId());
+        apolloTestAdminClient.addUserToGroup(apolloTestClient.getTestUser().getUserEmail(), newDeploymentGroup.getId());
     }
 }
