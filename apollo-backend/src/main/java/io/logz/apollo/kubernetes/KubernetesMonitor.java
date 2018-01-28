@@ -56,7 +56,7 @@ public class KubernetesMonitor {
         this.groupDao = requireNonNull(groupDao);
 
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("kubernetes-monitor-%d").build();
-        scheduledExecutorService = Executors.newScheduledThreadPool(1, namedThreadFactory);
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
     }
 
     @PostConstruct
@@ -69,7 +69,7 @@ public class KubernetesMonitor {
 
             logger.info("Starting kubernetes monitor thread");
             int monitorThreadFrequency = apolloConfiguration.getKubernetes().getMonitoringFrequencySeconds();
-            scheduledExecutorService.scheduleAtFixedRate(this::monitor, 0, monitorThreadFrequency, TimeUnit.SECONDS);
+            scheduledExecutorService.scheduleWithFixedDelay(this::monitor, 0, monitorThreadFrequency, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("Could not start kubernetes monitor thread! Bailing..", e);
         }
@@ -85,6 +85,8 @@ public class KubernetesMonitor {
             scheduledExecutorService.awaitTermination(TIMEOUT_TERMINATION, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error("Got interrupt while waiting for ordinarily termination of the monitoring thread, force close.");
+            Thread.currentThread().interrupt();
+        } finally {
             scheduledExecutorService.shutdownNow();
         }
     }

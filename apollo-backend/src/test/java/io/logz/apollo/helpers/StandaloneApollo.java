@@ -10,6 +10,7 @@ import io.logz.apollo.configuration.KubernetesConfiguration;
 import io.logz.apollo.configuration.ScmConfiguration;
 import io.logz.apollo.configuration.WebsocketConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
+import io.logz.apollo.kubernetes.KubernetesHealth;
 import org.apache.commons.lang3.StringUtils;
 import org.conf4j.core.ConfigurationProvider;
 
@@ -27,11 +28,13 @@ public class StandaloneApollo {
 
     private final ApolloApplication apolloApplication;
     private final KubernetesMonitor kubernetesMonitor;
+    private final KubernetesHealth kubernetesHealth;
 
     private ApolloConfiguration apolloConfiguration;
 
     private StandaloneApollo() throws ScriptException, SQLException, IOException {
         System.setProperty(KubernetesMonitor.LOCAL_RUN_PROPERTY, "true");
+        System.setProperty(KubernetesHealth.LOCAL_RUN_PROPERTY, "true");
 
         // Start DB and match configuration
         ApolloMySQL apolloMySQL = new ApolloMySQL();
@@ -46,7 +49,7 @@ public class StandaloneApollo {
         apolloConfiguration = new ApolloConfiguration(
                 new ApiConfiguration(Common.getAvailablePort(), "0.0.0.0", "secret"),
                 databaseConfiguration,
-                new KubernetesConfiguration(5),
+                new KubernetesConfiguration(1, 1),
                 new ScmConfiguration(StringUtils.EMPTY, StringUtils.EMPTY),
                 new WebsocketConfiguration(Common.getAvailablePort(), 5)
         );
@@ -55,8 +58,9 @@ public class StandaloneApollo {
         apolloApplication = new ApolloApplication(createConfigurationProvider(apolloConfiguration));
         apolloApplication.start();
 
-        // Get Kubernetes monitor, the monitor is stopped by default in tests because usually will want to inject mock first
+        // Get Kubernetes monitor and health, they are stopped by default in tests because usually will want to inject mock first
         kubernetesMonitor = apolloApplication.getInjector().getInstance(KubernetesMonitor.class);
+        kubernetesHealth = apolloApplication.getInjector().getInstance(KubernetesHealth.class);
         Runtime.getRuntime().addShutdownHook(new Thread(apolloApplication::shutdown));
     }
 
@@ -71,6 +75,16 @@ public class StandaloneApollo {
     public void startKubernetesMonitor() {
         System.setProperty(KubernetesMonitor.LOCAL_RUN_PROPERTY, "false");
         kubernetesMonitor.start();
+    }
+
+    public void startKubernetesHealth() {
+        System.setProperty(KubernetesHealth.LOCAL_RUN_PROPERTY, "false");
+        kubernetesHealth.start();
+    }
+
+    public void stopKubernetesHealth() {
+        kubernetesHealth.stop();
+        System.setProperty(KubernetesHealth.LOCAL_RUN_PROPERTY, "true");
     }
 
     public ApolloTestClient createTestClient() {
