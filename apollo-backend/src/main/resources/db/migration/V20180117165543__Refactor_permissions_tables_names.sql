@@ -1,0 +1,3 @@
+ALTER TABLE deployment_user_groups RENAME TO user_deployment_roles;
+ALTER TABLE deployment_groups RENAME TO deployment_roles;
+ALTER TABLE deployment_group_permissions RENAME TO deployment_role_permissions;

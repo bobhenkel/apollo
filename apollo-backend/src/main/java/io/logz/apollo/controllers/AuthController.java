@@ -1,11 +1,11 @@
 package io.logz.apollo.controllers;
 
-import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.dao.DeploymentRoleDao;
 import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PasswordManager;
+import io.logz.apollo.models.DeploymentRole;
 import io.logz.apollo.models.User;
 import io.logz.apollo.common.HttpStatus;
-import io.logz.apollo.dao.DeploymentGroupDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.UserDao;
 import org.rapidoid.annotation.Controller;
@@ -15,8 +15,6 @@ import org.rapidoid.annotation.PUT;
 import org.rapidoid.http.Req;
 import org.rapidoid.security.annotation.Administrator;
 import org.rapidoid.security.annotation.LoggedIn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -32,15 +30,15 @@ import static java.util.Objects.requireNonNull;
 public class AuthController {
 
     private final DeploymentPermissionDao deploymentPermissionDao;
-    private final DeploymentGroupDao deploymentGroupDao;
+    private final DeploymentRoleDao deploymentRoleDao;
     private final UserDao userDao;
 
     @Inject
     public AuthController(DeploymentPermissionDao deploymentPermissionDao,
-                          DeploymentGroupDao deploymentGroupDao,
+                          DeploymentRoleDao deploymentRoleDao,
                           UserDao userDao) {
         this.deploymentPermissionDao = requireNonNull(deploymentPermissionDao);
-        this.deploymentGroupDao = requireNonNull(deploymentGroupDao);
+        this.deploymentRoleDao = requireNonNull(deploymentRoleDao);
         this.userDao = requireNonNull(userDao);
     }
 
@@ -86,25 +84,25 @@ public class AuthController {
     }
 
     @Administrator
-    @GET("/deployment-group")
-    public List<DeploymentGroup> getAllDeploymentGroups(Req req) {
-        return deploymentGroupDao.getAllDeploymentGroups();
+    @GET("/deployment-roles")
+    public List<DeploymentRole> getAllDeploymentRoles(Req req) {
+        return deploymentRoleDao.getAllDeploymentRoles();
     }
 
     @Administrator
-    @GET("/deployment-group/{id}")
-    public DeploymentGroup getDeploymentGroup(int id, Req req) {
-        return deploymentGroupDao.getDeploymentGroup(id);
+    @GET("/deployment-roles/{id}")
+    public DeploymentRole getDeploymentRole(int id, Req req) {
+        return deploymentRoleDao.getDeploymentRole(id);
     }
 
     @Administrator
-    @POST("/deployment-group")
-    public void addDeploymentGroup(String name, Req req) {
-        DeploymentGroup newDeploymentGroup = new DeploymentGroup();
-        newDeploymentGroup.setName(name);
+    @POST("/deployment-roles")
+    public void addDeploymentRole(String name, Req req) {
+        DeploymentRole newDeploymentRole = new DeploymentRole();
+        newDeploymentRole.setName(name);
 
-        deploymentGroupDao.addDeploymentGroup(newDeploymentGroup);
-        assignJsonResponseToReq(req, HttpStatus.CREATED, newDeploymentGroup);
+        deploymentRoleDao.addDeploymentRole(newDeploymentRole);
+        assignJsonResponseToReq(req, HttpStatus.CREATED, newDeploymentRole);
     }
 
     @Administrator
@@ -145,16 +143,16 @@ public class AuthController {
     }
 
     @Administrator
-    @POST("/notify-user-to-deployment-group")
-    public void addUserToDeploymentGroup(String userEmail, int deploymentGroupId, Req req) {
-        deploymentGroupDao.addUserToDeploymentGroup(userEmail, deploymentGroupId);
+    @POST("/deployment-roles/add-user")
+    public void addUserToDeploymentRole(String userEmail, int deploymentRoleId, Req req) {
+        deploymentRoleDao.addUserToDeploymentRole(userEmail, deploymentRoleId);
         assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
     }
 
     @Administrator
-    @POST("/notify-deployment-permission-to-deployment-group")
-    public void addDeploymentPermissionToDeploymentGroup(int deploymentGroupId, int deploymentPermissionId, Req req) {
-        deploymentGroupDao.addDeploymentPermissionToDeploymentGroup(deploymentGroupId, deploymentPermissionId);
+    @POST("/deployment-roles/add-deployment-permission")
+    public void addDeploymentPermissionToDeploymentRole(int deploymentRoleId, int deploymentPermissionId, Req req) {
+        deploymentRoleDao.addDeploymentPermissionToDeploymentRole(deploymentRoleId, deploymentPermissionId);
         assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
     }
 

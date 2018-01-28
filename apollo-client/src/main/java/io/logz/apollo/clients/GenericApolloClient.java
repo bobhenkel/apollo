@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.logz.apollo.exceptions.*;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.RestResponse;
-import io.logz.apollo.models.User;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

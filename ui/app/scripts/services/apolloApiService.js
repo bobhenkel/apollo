@@ -10,7 +10,7 @@ angular
 function ApiService($q, $http){
 
     var getAllUsers = function() {
-        return $http.get(CONFIG.appUrl + 'user/');
+        return $http.get(CONFIG.appUrl + 'users/');
     };
 
     var getAllEnvironments = function() {

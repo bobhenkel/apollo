@@ -1,6 +1,6 @@
 package io.logz.apollo.helpers;
 
-import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentRole;
 import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PasswordManager;
 import io.logz.apollo.models.User;
@@ -177,11 +177,11 @@ public class ModelsGenerator {
         return testDeployment;
     }
 
-    public static DeploymentGroup createDeploymentGroup() {
-        DeploymentGroup testDeploymentGroup = new DeploymentGroup();
-        testDeploymentGroup.setName("DeploymentGroup " + Common.randomStr(10));
+    public static DeploymentRole createDeploymentRole() {
+        DeploymentRole testDeploymentRole = new DeploymentRole();
+        testDeploymentRole.setName("DeploymentRole " + Common.randomStr(10));
 
-        return testDeploymentGroup;
+        return testDeploymentRole;
     }
 
     public static DeploymentPermission createAllowDeploymentPermission(Optional<Environment> relatedEnvironment, Optional<Service> relatedService) {
@@ -265,6 +265,10 @@ public class ModelsGenerator {
         return createUser(false);
     }
 
+    public static User createAdminUser() {
+        return createUser(true);
+    }
+
     private static User createUser(boolean admin) {
 
         User testUser = new User();
@@ -279,10 +283,10 @@ public class ModelsGenerator {
 
     public static void createAndSubmitPermissions(ApolloTestClient apolloTestClient, Optional<Environment> testEnvironment,
                                                   Optional<Service> testService, DeploymentPermission.PermissionType permissionType) throws ScriptException, IOException, SQLException, ApolloClientException {
-        // Associate user with group, and permission to the first env
+        // Associate user with role, and permission to the first env
         ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
-        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
-        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
+        DeploymentRole newDeploymentRole = ModelsGenerator.createDeploymentRole();
+        newDeploymentRole.setId(apolloTestAdminClient.addDeploymentRole(newDeploymentRole).getId());
 
         DeploymentPermission newDeploymentPermission;
 
@@ -294,7 +298,7 @@ public class ModelsGenerator {
 
         newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
-        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getTestUser().getUserEmail(), newDeploymentGroup.getId());
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentRole(newDeploymentRole.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToRole(apolloTestClient.getTestUser().getUserEmail(), newDeploymentRole.getId());
     }
 }
