@@ -1,6 +1,5 @@
 package io.logz.apollo.clients;
 
-import io.logz.apollo.models.User;
 import io.logz.apollo.helpers.Common;
 
 public class ApolloTestAdminClient extends ApolloAdminClient {

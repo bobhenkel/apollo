@@ -3,14 +3,10 @@ package io.logz.apollo.models;
 /**
  * Created by roiravhon on 1/10/17.
  */
-public class DeploymentGroup {
+public class DeploymentRole {
 
     private int id;
     private String name;
-
-    public DeploymentGroup() {
-
-    }
 
     public int getId() {
         return id;

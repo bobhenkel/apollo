@@ -8,7 +8,6 @@ import org.conf4j.core.source.ClasspathConfigurationSource;
 import org.conf4j.core.source.ConfigurationSource;
 import org.conf4j.core.source.FilesystemConfigurationSource;
 
-
 public class ApolloConfigurationProviderBuilder {
 
     private static final String ROOT_PATH = "apollo";

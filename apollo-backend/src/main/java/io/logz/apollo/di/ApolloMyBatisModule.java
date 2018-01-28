@@ -4,7 +4,7 @@ import io.logz.apollo.configuration.DatabaseConfiguration;
 import io.logz.apollo.dao.BlockerDefinitionDao;
 import io.logz.apollo.dao.DeployableVersionDao;
 import io.logz.apollo.dao.DeploymentDao;
-import io.logz.apollo.dao.DeploymentGroupDao;
+import io.logz.apollo.dao.DeploymentRoleDao;
 import io.logz.apollo.dao.DeploymentPermissionDao;
 import io.logz.apollo.dao.EnvironmentDao;
 import io.logz.apollo.dao.GroupDao;
@@ -44,7 +44,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
 
         addMapperClass(DeployableVersionDao.class);
         addMapperClass(DeploymentDao.class);
-        addMapperClass(DeploymentGroupDao.class);
+        addMapperClass(DeploymentRoleDao.class);
         addMapperClass(DeploymentPermissionDao.class);
         addMapperClass(EnvironmentDao.class);
         addMapperClass(ServiceDao.class);
@@ -76,6 +76,7 @@ public class ApolloMyBatisModule extends MyBatisModule {
                 configuration.getSchema());
 
         Flyway flyway = new Flyway();
+        flyway.setOutOfOrder(true);
         flyway.setDataSource(jdbcUrl, configuration.getUser(), configuration.getPassword());
         flyway.migrate();
     }

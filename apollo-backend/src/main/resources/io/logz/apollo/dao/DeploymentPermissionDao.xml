@@ -18,9 +18,9 @@
     <select id="getPermissionsByUser" resultType="io.logz.apollo.models.DeploymentPermission">
         SELECT perm.*
         FROM deployment_permissions as perm
-        JOIN deployment_group_permissions as group_perm ON perm.id = group_perm.deployment_permission_id
-        JOIN deployment_user_groups as user_group ON group_perm.deployment_group_id = user_group.deployment_group_id
-        JOIN users as usr ON user_group.user_email = usr.user_email
+        JOIN deployment_role_permissions as role_perm ON perm.id = role_perm.deployment_permission_id
+        JOIN user_deployment_roles as user_role ON role_perm.deployment_role_id = user_role.deployment_role_id
+        JOIN users as usr ON user_role.user_email = usr.user_email
         WHERE usr.user_email = #{userEmail}
     </select>
 

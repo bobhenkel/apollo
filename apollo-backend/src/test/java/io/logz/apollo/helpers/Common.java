@@ -2,11 +2,10 @@ package io.logz.apollo.helpers;
 
 import com.google.gson.Gson;
 import io.logz.apollo.exceptions.ApolloClientException;
-import io.logz.apollo.models.DeploymentGroup;
+import io.logz.apollo.models.DeploymentRole;
 import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
-import io.logz.apollo.exceptions.ApolloCouldNotLoginException;
 import io.logz.apollo.models.Environment;
 
 import javax.script.ScriptException;
@@ -105,13 +104,13 @@ public class Common {
 
         ApolloTestAdminClient apolloTestAdminClient = Common.getAndLoginApolloTestAdminClient();
 
-        DeploymentGroup newDeploymentGroup = ModelsGenerator.createDeploymentGroup();
-        newDeploymentGroup.setId(apolloTestAdminClient.addDeploymentGroup(newDeploymentGroup).getId());
+        DeploymentRole newDeploymentRole = ModelsGenerator.createDeploymentRole();
+        newDeploymentRole.setId(apolloTestAdminClient.addDeploymentRole(newDeploymentRole).getId());
 
         DeploymentPermission newDeploymentPermission = ModelsGenerator.createAllowDeploymentPermission(Optional.of(environment), Optional.empty());
         newDeploymentPermission.setId(apolloTestAdminClient.addDeploymentPermission(newDeploymentPermission).getId());
 
-        apolloTestAdminClient.addDeploymentPermissionToDeploymentGroup(newDeploymentGroup.getId(), newDeploymentPermission.getId());
-        apolloTestAdminClient.addUserToGroup(apolloTestClient.getTestUser().getUserEmail(), newDeploymentGroup.getId());
+        apolloTestAdminClient.addDeploymentPermissionToDeploymentRole(newDeploymentRole.getId(), newDeploymentPermission.getId());
+        apolloTestAdminClient.addUserToRole(apolloTestClient.getTestUser().getUserEmail(), newDeploymentRole.getId());
     }
 }

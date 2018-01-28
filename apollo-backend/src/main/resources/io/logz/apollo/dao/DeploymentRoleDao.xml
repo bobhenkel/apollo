@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.logz.apollo.dao.DeploymentRoleDao">
+    <select id="getDeploymentRole" resultType="io.logz.apollo.models.DeploymentRole">
+        SELECT *
+        FROM deployment_roles
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllDeploymentRoles" resultType="io.logz.apollo.models.DeploymentRole">
+        SELECT *
+        FROM deployment_roles
+    </select>
+
+    <insert id="addDeploymentRole" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO deployment_roles (name)
+        VALUES (#{name})
+    </insert>
+
+    <insert id="addUserToDeploymentRole">
+        INSERT INTO user_deployment_roles (user_email, deployment_role_id)
+        VALUES (#{userEmail}, #{deploymentRoleId})
+    </insert>
+
+    <insert id="addDeploymentPermissionToDeploymentRole">
+        INSERT INTO deployment_role_permissions (deployment_role_id, deployment_permission_id)
+        VALUES (#{deploymentRoleId}, #{deploymentPermissionId})
+    </insert>
+</mapper>
