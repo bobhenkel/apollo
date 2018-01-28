@@ -17,6 +17,7 @@ import io.logz.apollo.models.Notification;
 import io.logz.apollo.models.DeploymentGroupsResponseObject;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class ApolloClient {
 
@@ -201,5 +202,9 @@ public class ApolloClient {
 
     public List<KubernetesDeploymentStatus> getCurrentServiceStatus(int serviceId) throws ApolloClientException {
         return genericApolloClient.getResult("/status/service/" + serviceId, new TypeReference<List<KubernetesDeploymentStatus>>() {});
+    }
+
+    public Map<Integer, Boolean> getHealth() throws ApolloClientException {
+        return genericApolloClient.getResult("/health", new TypeReference<Map<Integer, Boolean>>() {});
     }
 }

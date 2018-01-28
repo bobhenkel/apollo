@@ -436,4 +436,19 @@ public class KubernetesHandler {
                 .findFirst()
                 .orElse(null);
     }
+
+    public Boolean isEnvironmentHealthy() {
+        try {
+            kubernetesClient
+                    .extensions()
+                    .deployments()
+                    .inNamespace(environment.getKubernetesNamespace())
+                    .list();
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
