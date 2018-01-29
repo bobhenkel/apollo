@@ -116,7 +116,7 @@ public class SlackSender implements NotificationSender{
 
     private void updateSlackBodyTemplate(Optional<String> groupName) {
         slackBodyTemplate = "{\n" +
-                "\t\"icon_url\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Putin-pictogram.svg/2000px-Putin-pictogram.svg.png\",\n" +
+                "\t\"icon_url\": \"https://i.imgur.com/FMVZ9id.png\",\n" +
                 "    \"username\": \"Apollo\",\n" +
                 "    \"channel\": \"{{ channel }}\",\n" +
                 "    \"attachments\": [\n" +
@@ -124,7 +124,6 @@ public class SlackSender implements NotificationSender{
                 "            \"fallback\": \"Apollo deployment of {{ service-name }}@{{ environment }} is {{ phase }}\",\n" +
                 "            \"color\": \"#36a64f\",\n" +
                 "            \"title\": \"Apollo Deployments\",\n" +
-                "            \"title_link\": \"https://apollo.internal.logz.io/#/deployments/ongoing\",\n" +
                 "            \"text\": \"Deployment id {{deployment-id}} finished at {{time}}\",\n" +
                 "            \"fields\": [\n" +
                 "                {\n" +
