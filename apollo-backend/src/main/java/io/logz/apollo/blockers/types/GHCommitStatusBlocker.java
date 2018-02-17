@@ -23,6 +23,6 @@ public class GHCommitStatusBlocker implements BlockerFunction{
 
         String repoName = GithubConnector.getRepoNameFromRepositoryUrl(deployableVersion.getGithubRepositoryUrl());
 
-        return blockerInjectableCommons.getGithubConnector().isCommitStatusOK(repoName, deployableVersion.getGitCommitSha());
+        return !blockerInjectableCommons.getGithubConnector().isCommitStatusOK(repoName, deployableVersion.getGitCommitSha());
     }
 }

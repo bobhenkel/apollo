@@ -14,7 +14,7 @@ public interface BlockerDefinitionDao {
     void addBlockerDefinition(BlockerDefinition blockerDefinition);
     void updateBlockerDefinition(BlockerDefinition blockerDefinition);
     void deleteBlockerDefinition(int id);
-    List<Integer> getOverrideBlockersIdsByUserEmail(String userEmail);
+    List<Integer> getOverrideBlockersIdsByUser(String userEmail);
     void addUserToBlockerOverride(@Param("userEmail") String userEmail, @Param("blockerId") int blockerId);
     void deleteUserToBlockerOverride(@Param("userEmail") String userEmail, @Param("blockerId") int blockerId);
 }

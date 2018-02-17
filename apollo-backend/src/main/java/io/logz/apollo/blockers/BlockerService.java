@@ -72,7 +72,7 @@ public class BlockerService {
     }
 
     private boolean isUserAllowedToOverride(Deployment deployment, Blocker blocker) {
-        return blockerInjectableCommons.getBlockerDefinitionDao().getOverrideBlockersIdsByUserEmail(deployment.getUserEmail())
+        return blockerInjectableCommons.getBlockerDefinitionDao().getOverrideBlockersIdsByUser(deployment.getUserEmail())
                 .stream().anyMatch(id -> id == blocker.getId());
     }
 
