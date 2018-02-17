@@ -114,6 +114,20 @@ public class ApolloAdminClient {
         return genericApolloClient.putAndGetResult("/blocker-definition/" + blockerDefinition.getId(), requestBody, new TypeReference<BlockerDefinition>() {});
     }
 
+    public void overrideBlockerByUser(User user, BlockerDefinition blockerDefinition) throws ApolloClientException {
+        String requestBody = Common.generateJson("userEmail", user.getUserEmail(),
+                "blockerId", String.valueOf(blockerDefinition.getId()));
+
+        genericApolloClient.postAndGetResult("/blocker-definition/override/user", requestBody, new TypeReference<Object>() {});
+    }
+
+    public void deleteBlockerByUser(User user, BlockerDefinition blockerDefinition) throws ApolloClientException {
+        String requestBody = Common.generateJson("userEmail", user.getUserEmail(),
+                "blockerId", String.valueOf(blockerDefinition.getId()));
+
+        genericApolloClient.postAndGetResult("/blocker-definition/override/user", requestBody, new TypeReference<Object>() {});
+    }
+
     private String generateSignupJson(User user, String plainPassword) {
         return Common.generateJson( "firstName", user.getFirstName(),
                                     "lastName", user.getLastName(),

@@ -66,6 +66,15 @@ public class ModelsGenerator {
         return testDeployableVersion;
     }
 
+    public static DeployableVersion createDeployableVersion(Service relatedService, String repositoryUrl, String commitSha) {
+        DeployableVersion testDeployableVersion = new DeployableVersion();
+        testDeployableVersion.setGitCommitSha(commitSha);
+        testDeployableVersion.setGithubRepositoryUrl(repositoryUrl);
+        testDeployableVersion.setServiceId(relatedService.getId());
+
+        return testDeployableVersion;
+    }
+
     public static DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient) throws ApolloClientException {
 
         // Needed for FK
@@ -82,6 +91,15 @@ public class ModelsGenerator {
 
         // Add deployable version
         DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(service);
+        testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
+
+        return testDeployableVersion;
+    }
+
+    public static DeployableVersion createAndSubmitDeployableVersion(ApolloTestClient apolloTestClient, Service service, String repositoryUrl, String commitSha) throws ApolloClientException {
+
+        // Add deployable version
+        DeployableVersion testDeployableVersion = ModelsGenerator.createDeployableVersion(service, repositoryUrl, commitSha);
         testDeployableVersion.setId(apolloTestClient.addDeployableVersion(testDeployableVersion).getId());
 
         return testDeployableVersion;

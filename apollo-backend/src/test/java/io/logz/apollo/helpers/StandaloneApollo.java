@@ -11,6 +11,7 @@ import io.logz.apollo.configuration.ScmConfiguration;
 import io.logz.apollo.configuration.WebsocketConfiguration;
 import io.logz.apollo.kubernetes.KubernetesMonitor;
 import io.logz.apollo.kubernetes.KubernetesHealth;
+import io.logz.apollo.scm.GithubConnector;
 import org.apache.commons.lang3.StringUtils;
 import org.conf4j.core.ConfigurationProvider;
 
@@ -29,6 +30,7 @@ public class StandaloneApollo {
     private final ApolloApplication apolloApplication;
     private final KubernetesMonitor kubernetesMonitor;
     private final KubernetesHealth kubernetesHealth;
+    private final GithubConnector githubConnector;
 
     private ApolloConfiguration apolloConfiguration;
 
@@ -62,6 +64,8 @@ public class StandaloneApollo {
         kubernetesMonitor = apolloApplication.getInjector().getInstance(KubernetesMonitor.class);
         kubernetesHealth = apolloApplication.getInjector().getInstance(KubernetesHealth.class);
         Runtime.getRuntime().addShutdownHook(new Thread(apolloApplication::shutdown));
+
+        githubConnector = new GithubConnector(apolloConfiguration);
     }
 
     public static StandaloneApollo getOrCreateServer() throws ScriptException, IOException, SQLException {
@@ -70,6 +74,10 @@ public class StandaloneApollo {
         }
 
         return instance;
+    }
+
+    public GithubConnector getGithubConnector() {
+        return githubConnector;
     }
 
     public void startKubernetesMonitor() {

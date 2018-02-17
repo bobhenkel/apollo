@@ -112,6 +112,10 @@ class GenericApolloClient {
         return runAndGetResult(url, Optional.of(body), responseType, HTTP_METHOD.PUT);
     }
 
+    <T> T deleteAndGetResult(String url, String body, TypeReference<T> responseType) throws ApolloClientException {
+        return runAndGetResult(url, Optional.of(body), responseType, HTTP_METHOD.DELETE);
+    }
+
     private <T> T runAndGetResult(String url, Optional<String> body, TypeReference<T> responseType, HTTP_METHOD httpMethod) throws ApolloClientException {
         try {
             RestResponse restResponse;
