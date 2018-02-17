@@ -1,11 +1,11 @@
 package io.logz.apollo;
 
-import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.clients.ApolloTestAdminClient;
 import io.logz.apollo.clients.ApolloTestClient;
 import io.logz.apollo.exceptions.ApolloBlockedException;
 import io.logz.apollo.helpers.Common;
 import io.logz.apollo.helpers.ModelsGenerator;
+import io.logz.apollo.models.BlockerDefinition;
 import io.logz.apollo.models.DeployableVersion;
 import io.logz.apollo.models.Environment;
 import io.logz.apollo.models.Service;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.logz.apollo.helpers.ModelsGenerator.createAndSubmitBlocker;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -176,6 +177,11 @@ public class BlockerTest {
         blocker.setBlockerJsonConfiguration(getConcurrencyBlockerJsonConfiguration(1, excludedService));
         apolloTestAdminClient.updateBlocker(blocker);
         ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, serviceB ,deployableVersionB);
+    }
+
+    @Test
+    public void testGHCommitStatusBlocker() throws Exception {
+        assertThat("test").isEqualTo("");
     }
 
     private String getTimeBasedBlockerJsonConfiguration(int dayOfWeek, LocalTime startDate, LocalTime endDate) {

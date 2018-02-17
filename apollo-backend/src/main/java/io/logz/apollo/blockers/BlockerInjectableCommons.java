@@ -17,12 +17,14 @@ import static java.util.Objects.requireNonNull;
 public class BlockerInjectableCommons {
 
     private final GithubConnector githubConnector;
+    private final BlockerDefinitionDao blockerDefinitionDao;
     private final DeployableVersionDao deployableVersionDao;
     private final DeploymentDao deploymentDao;
 
     @Inject
-    public BlockerInjectableCommons(GithubConnector githubConnector, DeployableVersionDao deployableVersionDao, DeploymentDao deploymentDao) {
+    public BlockerInjectableCommons(GithubConnector githubConnector, BlockerDefinitionDao blockerDefinitionDao, DeployableVersionDao deployableVersionDao, DeploymentDao deploymentDao) {
         this.githubConnector = requireNonNull(githubConnector);
+        this.blockerDefinitionDao = requireNonNull(blockerDefinitionDao);
         this.deployableVersionDao = requireNonNull(deployableVersionDao);
         this.deploymentDao = requireNonNull(deploymentDao);
     }
@@ -30,6 +32,8 @@ public class BlockerInjectableCommons {
     public GithubConnector getGithubConnector() {
         return githubConnector;
     }
+
+    public BlockerDefinitionDao getBlockerDefinitionDao() { return blockerDefinitionDao; }
 
     public DeployableVersionDao getDeployableVersionDao() { return deployableVersionDao; }
 

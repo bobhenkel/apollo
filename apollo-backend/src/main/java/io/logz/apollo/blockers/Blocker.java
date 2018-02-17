@@ -5,13 +5,15 @@ package io.logz.apollo.blockers;
  */
 public class Blocker {
 
+    private final Integer id;
     private final String name;
     private final Integer serviceId;
     private final Integer environmentId;
     private final Boolean isActive;
     private final BlockerFunction blockerFunction;
 
-    public Blocker(String name, Integer serviceId, Integer environmentId, Boolean isActive, BlockerFunction blockerFunction) {
+    public Blocker(Integer id, String name, Integer serviceId, Integer environmentId, Boolean isActive, BlockerFunction blockerFunction) {
+        this.id = id;
         this.name = name;
         this.serviceId = serviceId;
         this.environmentId = environmentId;
@@ -19,9 +21,9 @@ public class Blocker {
         this.blockerFunction = blockerFunction;
     }
 
-    public String getName() {
-        return name;
-    }
+    public int getId() { return id; }
+
+    public String getName() { return name; }
 
     public Integer getServiceId() {
         return serviceId;
