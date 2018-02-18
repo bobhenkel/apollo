@@ -9,7 +9,7 @@ import io.logz.apollo.scm.GithubConnector;
 import java.io.IOException;
 
 @BlockerType(name = "githubCommitStatus")
-public class GHCommitStatusBlocker implements BlockerFunction{
+public class GHCommitStatusBlocker implements BlockerFunction {
 
     @Override
     public void init(String jsonConfiguration) throws IOException {

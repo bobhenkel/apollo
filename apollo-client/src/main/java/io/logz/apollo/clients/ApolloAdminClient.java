@@ -125,7 +125,7 @@ public class ApolloAdminClient {
         String requestBody = Common.generateJson("userEmail", user.getUserEmail(),
                 "blockerId", String.valueOf(blockerDefinition.getId()));
 
-        genericApolloClient.postAndGetResult("/blocker-definition/override/user", requestBody, new TypeReference<Object>() {});
+        genericApolloClient.deleteAndGetResult("/blocker-definition/override/user", requestBody, new TypeReference<Object>() {});
     }
 
     private String generateSignupJson(User user, String plainPassword) {
