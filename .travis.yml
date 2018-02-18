@@ -4,8 +4,8 @@ jdk:
 
 env:
   global:
-    - secure: xxx
-    - secure: xxx
+    - secure: 1jqRKUqtqSq4kZsH7PNzLAmExxWInZq3DHLbNuCXsYlWA2MguKbPjRlQtduDL7IQY+dWijwgqToql5SCHALubn75gfmElhX6h2p6qB7Ss9aPIW8AMw9BTMCS3kLHkKrr2F0ZjzDzQG/16o/2/PboN6vxRb/5uqQKQL9Vmf9e6IgBxWWslDEAYS4xAMxhzlEFWJtdbFMUUcfdOBtq97vt54T77ZLz0Jul9LKlb7y+++doRKR3Uhx0eb5lKDL3hYKH4GNaQXt7iEou7ub5HPeXO93zpkHsorlfLXC20t+jH3Ze2w9Sdvl1qStHg0oaGKC2aoOLuJcQSH5UFcJmbu9CnuHL296REAFNpp8N3wuQJpK/0V1o1MN+tChtKPNO1kdmzZCh9FkmLM7uCFJDLBKwNnpAx86jjDQNYmN/fBMZvvAavuPhhffiJmBvtos2DccEu8bEMSXuxD7Wfz2bmoRVCEeFVcgc+jxlO1BlfDWdsbPHPSIPQGkHiSQMwHWDxtafUaXirL93Qm5QTVgawDNGZGXtT0OXvXpXJXeVDifzuiTCrWY+uwAS3cxMOfV/XEmO+1u6HKMVpbdkGlYvfCEuOBvcHSyneipwXXDaZaxC0Nv5+Lpl/jjGy5AaDXbBcBWQ5tIWOCLX5sqbpLxwj/23f/TFq3ymafpUU7gm5qG/4XI=
+    - secure: 0yBUkgr4iktpZwQdI/gZEKvbe+kJIM412e9JGvOtgkIhtKIpZd/qr+BkQ30jdIgaIwmpbMEL483bXi7cvcxw8Ko+C+CoIC1WO8MAHJjxo6li1HdIg5mKzRT3aolO2ezMU4oAUJNuWvIzHmc6WgPHu8Xf5cKeUhu5UZKc9MzTsPlORIByU7gpY9Q1W7DELE8gzBsF4ThOqkSUtu+2fBfWzjuDwxq0UaDQ+kY8EPC+zYQ9tUyylujZFkDzQRJTLYr5a0Fb+yTkAMKQU1IcmK8nj5XhqhP5Yzqfci53HxlQXX8AkQuFeF6b1T7P7G8sTGKw8iPp4J0tNr2b23C4SZeL7VS2Rr7jUQ49E1F3rOPtTtFkNVa/+Zl4/bZPYuilC0BlNJ3YftmdojLpx4Amw4xb0gKYUCZbteZ2TDZgDGLDCBOgUOPQUQjIaVo5paooF7iJHjFjjGDgYX68hbTgB03eXZssL1Zuvde+c1Gsf8Tb5LZGAVfVn8J6G6cHaym/PZi+4eP6kiTFT1MNp4u0YjF/fimhvu8QkVkmBqz31rubv6ZfiKcvJdVYBxeYaEPzGXKYejibjCliBKI5aR8xkvzcM+YRD7HYH2KNjFeNw7j5jPA6NA8ciqaT0DSP6RfOvlmd7oC8dB6u0cT5BcNl1SOhbw+q8B9/j/PypUzaGa1DbD8=
 
 sudo: required
 
@@ -21,13 +21,12 @@ install: ./mvnw install -DskipTests -Dgpg.skip
 script:
   - ./mvnw test && ./ui/build.sh
 
-# Temporally disabled
-#after_success:
-#    Using the variable $TRAVIS_BRANCH and $TRAVIS_PULL_REQUEST in conjunction to determine the current branch ..
-#  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-#
-#  - if [ "$BRANCH" == "master" ]; then
-#    docker build -t logzio/apollo:$TRAVIS_COMMIT .;
-#    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-#    docker push logzio/apollo:$TRAVIS_COMMIT;
-#    fi
+after_success:
+    Using the variable $TRAVIS_BRANCH and $TRAVIS_PULL_REQUEST in conjunction to determine the current branch ..
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+
+  - if [ "$BRANCH" == "master" ]; then
+    docker build -t logzio/apollo:$TRAVIS_COMMIT .;
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push logzio/apollo:$TRAVIS_COMMIT;
+    fi
