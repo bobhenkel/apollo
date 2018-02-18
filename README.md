@@ -9,7 +9,7 @@ Apollo can integrate with any existing building process you might have in place.
 Apollo also provides restricted access on top of Kubernetes.
 Each user has fine-grained permissions, to ensure safe deployments.
 
-Please refer to the `Wiki` for more extensive documentation.
+Please refer to the[Wiki](https://github.com/logzio/apollo/wiki)for more extensive documentation.
 
 ### Main Features
 - Deploy a combination of a Kubernetes deployments and services into a designated Kubernetes cluster and namespace. 
