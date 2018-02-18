@@ -178,12 +178,7 @@ public class BlockerTest {
         apolloTestAdminClient.updateBlocker(blocker);
         ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, serviceB ,deployableVersionB);
     }
-
-    @Test
-    public void testGHCommitStatusBlocker() throws Exception {
-        assertThat("test").isEqualTo("");
-    }
-
+    
     private String getTimeBasedBlockerJsonConfiguration(int dayOfWeek, LocalTime startDate, LocalTime endDate) {
 
         return "{\n" +
