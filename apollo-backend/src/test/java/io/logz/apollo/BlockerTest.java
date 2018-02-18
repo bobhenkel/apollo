@@ -192,7 +192,7 @@ public class BlockerTest {
 
         DeployableVersion failedDeployableVersion = ModelsGenerator.createAndSubmitDeployableVersion(apolloTestClient, service,
                 APOLLO_REPO_URL, APOLLO_FAILED_STATUS_CHECKS_COMMIT);
-
+        
         BlockerDefinition blocker = createAndSubmitBlocker(apolloTestAdminClient, "githubCommitStatus",null, environment, service);
 
         assertThatThrownBy(() -> ModelsGenerator.createAndSubmitDeployment(apolloTestClient, environment, service ,failedDeployableVersion)).isInstanceOf(ApolloBlockedException.class);
