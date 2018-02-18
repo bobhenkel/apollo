@@ -62,12 +62,18 @@ public class BlockerService {
                 if (blocker.getBlockerFunction().shouldBlock(blockerInjectableCommons, deployment)) {
                     logger.info("Blocking deployment for service {}, in environment {}, with deployable version of {} from {} due to {} blocker",
                             deployment.getServiceId(), deployment.getEnvironmentId(), deployment.getDeployableVersionId(), deployment.getUserEmail(), blocker.getName());
+
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private boolean isUserAllowedToOverride(Deployment deployment, Blocker blocker) {
+        return blockerInjectableCommons.getBlockerDefinitionDao().getOverrideBlockersIdsByUser(deployment.getUserEmail())
+                .stream().anyMatch(id -> id == blocker.getId());
     }
 
     private List<Blocker> getBlockers() {
@@ -90,7 +96,7 @@ public class BlockerService {
         try {
             BlockerFunction blockerFunction = getBlockerTypeBinding(blockerDefinition.getBlockerTypeName()).get().newInstance();
             blockerFunction.init(blockerDefinition.getBlockerJsonConfiguration());
-            return Optional.of(new Blocker(blockerDefinition.getName(), blockerDefinition.getServiceId(),
+            return Optional.of(new Blocker(blockerDefinition.getId(), blockerDefinition.getName(), blockerDefinition.getServiceId(),
                     blockerDefinition.getEnvironmentId(), blockerDefinition.getActive(), blockerFunction));
 
         } catch (InstantiationException | IllegalAccessException e) {
@@ -105,6 +111,10 @@ public class BlockerService {
     @SuppressWarnings("RedundantIfStatement")
     private boolean isBlockerInScope(Blocker blocker, Deployment deployment) {
         if (!blocker.getActive()) {
+            return false;
+        }
+
+        if (isUserAllowedToOverride(deployment, blocker)) {
             return false;
         }
 

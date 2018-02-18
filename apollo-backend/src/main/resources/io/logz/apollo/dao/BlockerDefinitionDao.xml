@@ -10,6 +10,12 @@
         WHERE id = #{id}
     </select>
 
+    <select id="getOverrideBlockersIdsByUser" resultType="Integer">
+        SELECT blocker_id
+        FROM users_blockers_override
+        WHERE user_email = #{userEmail}
+    </select>
+
     <select id="getAllBlockerDefinitions" resultType="io.logz.apollo.models.BlockerDefinition">
         SELECT *
         FROM blocker_definition
@@ -18,6 +24,11 @@
     <insert id="addBlockerDefinition" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO blocker_definition (name, service_id, environment_id, is_active, blocker_type_name, blocker_json_configuration)
         VALUES (#{name}, #{serviceId}, #{environmentId}, #{isActive}, #{blockerTypeName}, #{blockerJsonConfiguration})
+    </insert>
+
+    <insert id="addUserToBlockerOverride">
+        INSERT INTO users_blockers_override (user_email, blocker_id)
+        VALUES (#{userEmail}, #{blockerId})
     </insert>
 
     <update id="updateBlockerDefinition">
@@ -35,5 +46,11 @@
     <delete id="deleteBlockerDefinition">
         DELETE FROM blocker_definition
         WHERE id=#{id}
+    </delete>
+
+    <delete id="deleteUserToBlockerOverride">
+        DELETE FROM users_blockers_override
+        WHERE user_email=#{userEmail}
+        AND blocker_id=#{blockerId}
     </delete>
 </mapper>

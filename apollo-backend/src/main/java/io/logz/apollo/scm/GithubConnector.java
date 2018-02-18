@@ -3,6 +3,7 @@ package io.logz.apollo.scm;
 import io.logz.apollo.configuration.ApolloConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHCommitState;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class GithubConnector {
             }
 
             CommitDetails commitDetails = new CommitDetails(sha, commit.getHtmlUrl().toString(),
-                    commit.getCommitShortInfo().getMessage(), commit.getCommitDate(),
+                    commit.getCommitShortInfo().getMessage(), commit.getCommitDate(), commit.getLastStatus(),
                     author.getAvatarUrl(), committerName);
             return Optional.of(commitDetails);
         } catch (IOException e) {
@@ -67,6 +68,16 @@ public class GithubConnector {
             logger.warn("Could not get latest commit on branch from Github!", e);
             return Optional.empty();
         }
+    }
+
+    public boolean isCommitStatusOK(String githubRepo, String sha) {
+        Optional<CommitDetails> commit = getCommitDetails(githubRepo, sha);
+
+        if (commit.isPresent()) {
+            return commit.get().getCommitStatus().getState() == GHCommitState.SUCCESS;
+        }
+
+        return false;
     }
 
     public boolean isCommitInBranchHistory(String githubRepo, String branch, String sha) {

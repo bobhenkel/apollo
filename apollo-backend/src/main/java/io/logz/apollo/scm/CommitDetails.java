@@ -1,5 +1,7 @@
 package io.logz.apollo.scm;
 
+import org.kohsuke.github.GHCommitStatus;
+
 import java.util.Date;
 
 /**
@@ -11,14 +13,16 @@ public class CommitDetails {
     private final String commitUrl;
     private final String commitMessage;
     private final Date commitDate;
+    private final GHCommitStatus commitStatus;
     private final String committerAvatarUrl;
     private final String committerName;
 
-    public CommitDetails(String sha, String commitUrl, String commitMessage, Date commitDate, String committerAvatarUrl, String committerName) {
+    public CommitDetails(String sha, String commitUrl, String commitMessage, Date commitDate, GHCommitStatus commitStatus, String committerAvatarUrl, String committerName) {
         this.sha = sha;
         this.commitUrl = commitUrl;
         this.commitMessage = commitMessage;
         this.commitDate = commitDate;
+        this.commitStatus = commitStatus;
         this.committerAvatarUrl = committerAvatarUrl;
         this.committerName = committerName;
     }
@@ -38,6 +42,8 @@ public class CommitDetails {
     public Date getCommitDate() {
         return commitDate;
     }
+
+    public GHCommitStatus getCommitStatus() { return commitStatus; }
 
     public String getCommitterAvatarUrl() {
         return committerAvatarUrl;

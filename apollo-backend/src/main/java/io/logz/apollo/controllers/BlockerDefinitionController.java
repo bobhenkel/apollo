@@ -123,4 +123,18 @@ public class BlockerDefinitionController {
         blockerDefinitionDao.deleteBlockerDefinition(id);
         assignJsonResponseToReq(req, HttpStatus.OK, "deleted");
     }
+
+    @Administrator
+    @POST("/blocker-definition/override/user")
+    public void addBlockerDefinitionUserOverride(String userEmail, int blockerId, Req req) {
+        blockerDefinitionDao.addUserToBlockerOverride(userEmail, blockerId);
+        assignJsonResponseToReq(req, HttpStatus.CREATED, "ok");
+    }
+
+    @Administrator
+    @DELETE("/blocker-definition/override/user")
+    public void deleteBlockerDefinitionUserOverride(String userEmail, int blockerId, Req req) {
+        blockerDefinitionDao.deleteUserToBlockerOverride(userEmail, blockerId);
+        assignJsonResponseToReq(req, HttpStatus.OK, "deleted");
+    }
 }
