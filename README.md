@@ -4,11 +4,9 @@
 
 ### What is Apollo?
 Apollo is a simple, lightweight, Continuous Deployment (CD) solution on top of Kubernetes.
-
 Apollo can integrate with any existing building process you might have in place. All you need to do is notify it of a ready artifact, and that's it.
 
 Apollo also provides restricted access on top of Kubernetes.
-
 Each user has fine-grained permissions, to ensure safe deployments.
 
 Please refer to the `Wiki` for more extensive documentation.
