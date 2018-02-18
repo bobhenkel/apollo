@@ -1,6 +1,7 @@
 package io.logz.apollo.deployment;
 
 import io.logz.apollo.LockService;
+import io.logz.apollo.blockers.Blocker;
 import io.logz.apollo.models.DeploymentPermission;
 import io.logz.apollo.auth.PermissionsValidator;
 import io.logz.apollo.blockers.BlockerService;
@@ -133,9 +134,10 @@ public class DeploymentHandler {
             }
 
             logger.info("Checking for blockers");
-            if (blockerService.shouldBlock(newDeployment)) {
-                logger.info("Deployment is blocked!");
-                throw new ApolloDeploymentTooManyRequestsException("There is a blocker currently blocking this deployment");
+            Optional<Blocker> blocker = blockerService.shouldBlock(newDeployment);
+            if (blocker.isPresent()) {
+                logger.info("Deployment is blocked by {}", blocker.get().getName());
+                throw new ApolloDeploymentTooManyRequestsException("Deployment is currently blocked by " + blocker.get().getName());
             }
 
             logger.info("All checks passed. Running deployment");
