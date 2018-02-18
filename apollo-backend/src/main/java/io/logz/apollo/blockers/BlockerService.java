@@ -56,19 +56,19 @@ public class BlockerService {
         return foundClass;
     }
 
-    public boolean shouldBlock(Deployment deployment) {
+    public Optional<Blocker> shouldBlock(Deployment deployment) {
         for (Blocker blocker : getBlockers()) {
             if (isBlockerInScope(blocker, deployment)) {
                 if (blocker.getBlockerFunction().shouldBlock(blockerInjectableCommons, deployment)) {
                     logger.info("Blocking deployment for service {}, in environment {}, with deployable version of {} from {} due to {} blocker",
                             deployment.getServiceId(), deployment.getEnvironmentId(), deployment.getDeployableVersionId(), deployment.getUserEmail(), blocker.getName());
 
-                    return true;
+                    return Optional.of(blocker);
                 }
             }
         }
 
-        return false;
+        return Optional.empty();
     }
 
     private boolean isUserAllowedToOverride(Deployment deployment, Blocker blocker) {
