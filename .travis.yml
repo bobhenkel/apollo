@@ -4,8 +4,9 @@ jdk:
 
 env:
   global:
-    - secure: 1jqRKUqtqSq4kZsH7PNzLAmExxWInZq3DHLbNuCXsYlWA2MguKbPjRlQtduDL7IQY+dWijwgqToql5SCHALubn75gfmElhX6h2p6qB7Ss9aPIW8AMw9BTMCS3kLHkKrr2F0ZjzDzQG/16o/2/PboN6vxRb/5uqQKQL9Vmf9e6IgBxWWslDEAYS4xAMxhzlEFWJtdbFMUUcfdOBtq97vt54T77ZLz0Jul9LKlb7y+++doRKR3Uhx0eb5lKDL3hYKH4GNaQXt7iEou7ub5HPeXO93zpkHsorlfLXC20t+jH3Ze2w9Sdvl1qStHg0oaGKC2aoOLuJcQSH5UFcJmbu9CnuHL296REAFNpp8N3wuQJpK/0V1o1MN+tChtKPNO1kdmzZCh9FkmLM7uCFJDLBKwNnpAx86jjDQNYmN/fBMZvvAavuPhhffiJmBvtos2DccEu8bEMSXuxD7Wfz2bmoRVCEeFVcgc+jxlO1BlfDWdsbPHPSIPQGkHiSQMwHWDxtafUaXirL93Qm5QTVgawDNGZGXtT0OXvXpXJXeVDifzuiTCrWY+uwAS3cxMOfV/XEmO+1u6HKMVpbdkGlYvfCEuOBvcHSyneipwXXDaZaxC0Nv5+Lpl/jjGy5AaDXbBcBWQ5tIWOCLX5sqbpLxwj/23f/TFq3ymafpUU7gm5qG/4XI=
-    - secure: 0yBUkgr4iktpZwQdI/gZEKvbe+kJIM412e9JGvOtgkIhtKIpZd/qr+BkQ30jdIgaIwmpbMEL483bXi7cvcxw8Ko+C+CoIC1WO8MAHJjxo6li1HdIg5mKzRT3aolO2ezMU4oAUJNuWvIzHmc6WgPHu8Xf5cKeUhu5UZKc9MzTsPlORIByU7gpY9Q1W7DELE8gzBsF4ThOqkSUtu+2fBfWzjuDwxq0UaDQ+kY8EPC+zYQ9tUyylujZFkDzQRJTLYr5a0Fb+yTkAMKQU1IcmK8nj5XhqhP5Yzqfci53HxlQXX8AkQuFeF6b1T7P7G8sTGKw8iPp4J0tNr2b23C4SZeL7VS2Rr7jUQ49E1F3rOPtTtFkNVa/+Zl4/bZPYuilC0BlNJ3YftmdojLpx4Amw4xb0gKYUCZbteZ2TDZgDGLDCBOgUOPQUQjIaVo5paooF7iJHjFjjGDgYX68hbTgB03eXZssL1Zuvde+c1Gsf8Tb5LZGAVfVn8J6G6cHaym/PZi+4eP6kiTFT1MNp4u0YjF/fimhvu8QkVkmBqz31rubv6ZfiKcvJdVYBxeYaEPzGXKYejibjCliBKI5aR8xkvzcM+YRD7HYH2KNjFeNw7j5jPA6NA8ciqaT0DSP6RfOvlmd7oC8dB6u0cT5BcNl1SOhbw+q8B9/j/PypUzaGa1DbD8=
+    - secure: V43x7qLAIR04tiDBA7Y2v4RVjbj7ATIm9+ilXjRdaBPpjigRZ5dYQqmGOTs5aIR1JhDiU/dF9uIObzo82epQAnSlOUz138S6AAyTvq3H6vfwPUz6jcNxYlP36rdmRNJa9aXjlNKB8zxmAhOwl0c4S+YYad2LyAanDq6PEMa2vlEqIWDpiJ5YIVjH1UeY6cSpofSc4rTUTJBE6zoNIic9gWTEBRNKuvNCn0ojVlVBJjHnwAVskqot5d8e9EDvp/d3CDfZm2ZhBUzXakvHueQWbXMuysrSapsWlZsgVyXhc2N21zRjZZ8EFp8Pomz7PWYrbOcaAM49jKRgYPFHX/6uVAhoUNhUoEWAA2I7RXSc8gIXSRHI3zZQtIU8QwrvUaacNY0N3ffe2kRWnwhSK+CKqeBx2HuIw/Jv7qHI1Gg6u4907HCut/gt6t0nB7rJ30DxdQ5naTPVzy/oKQiSYLRrBgJHR+yLcs7qj9BCrMarCsR5ev4OCNCdlJuebrda8v8wEcrjlWRHLHlt+DhkGrcIbty1kaSBYC3/OAAmR5Y4yfOyadhEdkLZFQXet9xFlTaV4VD/4X6iwQ8SmS/rb09NWfFiy50KseaywJy/r+1VlefdpSPAi/nrbG6BZeYQkjh0L95opgFYs5rFBNcdhlpRcsv1DyvVmcmTijwy2c4j1JQ=
+    - secure: bSkR/FIHTu4SWd8ay1sKX4EKFjcwz+kVYNir/JPKaMEYPlvsypxFRcLvpipUHW+bEaPudQhNuHKcoPiqMFc79/XVVeMmSy4IIJQ8oEAWZd/W0P8JO9pi2yRfUs0yZWxLwX0Fus5wULVbNjakNgpp5rB4dOggwnM08dy3A4oGKFZitSIRBqnrAqmkWCebTDjP+6NruFl5yXXXd7/7WoL0d66DrS+bhDajNtsicjFmHU5zEIFOdmAnF+O6h1+0EKa8E8qMibWkTz2AmY7iXwwxzvstsoVzM67oEBdy/ur8yJLbkmgERdO17nHxKSXhx7Z1IBCNyPlORYweULm1qRO1sF9EQOWIEmRemlBZD3GctdHcX+ck/XBK1/WQ9Twb4Np5n0++hyul9xZtTDVxKmjjPLj8FL+BHQj42rZNxpu7eDmZEJx1VMX2lHTYwCDTGl+cMCO1yXQUYepk5WivcE5lDpq+cqg4x1qM6TmCyyT/BAjqqk0SHujxk4Jf8dhwqP8bwrvqqv8id4hHKD15kA1ulF2m6tsTirNN/LqmwYTzTPfM+1iZqyRYfoQCMLQzOd7giegkJIIE4UWHxnn3B1bVVlywXuqN9zOtg+KlWqfh/WWctuYrluyMclA19KXFxLqcKic/DoPLQ2RRTMgdlpzNwB87w5xi4p6GsS7wBR8XXPY=
+    - BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
 
 sudo: required
 
@@ -22,8 +23,8 @@ script:
   - ./mvnw test && ./ui/build.sh
 
 after_success:
-    # Using the variable $TRAVIS_BRANCH and $TRAVIS_PULL_REQUEST in conjunction to determine the current branch ..
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-  - if [ "$BRANCH" == "master" ]; then docker build -t logzio/apollo:$TRAVIS_COMMIT .; docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"; docker push logzio/apollo:$TRAVIS_COMMIT; fi
-
-
+  - if [ "$BRANCH" == "master" ]; then
+    docker build -t apollologzio/test:$TRAVIS_COMMIT .;
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push apollologzio/test:$TRAVIS_COMMIT;
+    fi
