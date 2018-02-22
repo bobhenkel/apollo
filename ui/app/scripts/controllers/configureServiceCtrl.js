@@ -18,6 +18,7 @@ angular.module('apollo')
 
             $scope.setSelectedService = function (selectedService) {
                 $scope.selectedService = selectedService;
+                $scope.buttonDisabled = false;
             };
 
             $scope.newService = function () {
