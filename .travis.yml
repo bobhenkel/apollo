@@ -28,4 +28,5 @@ after_success:
     docker tag logzio/apollo:$TRAVIS_COMMIT logzio/apollo:latest
     docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
     docker push logzio/apollo:$TRAVIS_COMMIT;
+    docker push logzio/apollo:latest;
     fi
