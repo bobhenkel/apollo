@@ -155,8 +155,6 @@ angular.module('apollo')
 
                 function refreshDeployments() {
 
-                    $scope.runningAndJustFinishedDeployments = null;
-
                     apolloApiService.getRunningAndJustFinishedDeployments().then(function (response) {
                         $scope.runningAndJustFinishedDeployments = response.data;
 
