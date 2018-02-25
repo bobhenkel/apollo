@@ -167,7 +167,7 @@ function ApiService($q, $http){
             name: name,
             deploymentYaml: deploymentYaml,
             serviceYaml: serviceYaml,
-            isPartOfGroup: isPartOfGroup
+            isPartOfGroup: !!isPartOfGroup
         });
     };
 
