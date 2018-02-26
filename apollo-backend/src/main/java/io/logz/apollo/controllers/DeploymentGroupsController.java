@@ -34,7 +34,7 @@ public class DeploymentGroupsController {
 
     @LoggedIn
     @POST("/deployment-groups")
-    public void addDeployment(int environmentId, int serviceId, int deployableVersionId, String groupIdsCsv, Req req) throws NumberFormatException {
+    public void addDeployment(int environmentId, int serviceId, int deployableVersionId, String groupIdsCsv, String deploymentMessage, Req req) throws NumberFormatException {
 
         DeploymentGroupsResponseObject responseObject = new DeploymentGroupsResponseObject();
 
@@ -60,7 +60,8 @@ public class DeploymentGroupsController {
             }
 
             try {
-                Deployment deployment = deploymentHandler.addDeployment(environmentId, serviceId, deployableVersionId, Optional.of(group), req);
+                Deployment deployment = deploymentHandler.addDeployment(environmentId, serviceId, deployableVersionId,
+                        deploymentMessage, Optional.of(group), req);
                 responseObject.addSuccessfulGroup(groupId, deployment);
             } catch (ApolloDeploymentException e) {
                 responseObject.addUnsuccessfulGroup(groupId, e.getMessage());

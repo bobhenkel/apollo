@@ -56,11 +56,11 @@ public class DeploymentHandler {
         this.blockerService = requireNonNull(blockerService);
     }
 
-    public Deployment addDeployment(int environmentId, int serviceId, int deployableVersionId, Req req) throws ApolloDeploymentException {
-        return addDeployment(environmentId, serviceId, deployableVersionId, Optional.empty(), req);
+    public Deployment addDeployment(int environmentId, int serviceId, int deployableVersionId, String deploymentMessage, Req req) throws ApolloDeploymentException {
+        return addDeployment(environmentId, serviceId, deployableVersionId, deploymentMessage, Optional.empty(), req);
     }
 
-    public Deployment addDeployment(int environmentId, int serviceId, int deployableVersionId, Optional<Group> group, Req req) throws ApolloDeploymentException {
+    public Deployment addDeployment(int environmentId, int serviceId, int deployableVersionId, String deploymentMessage, Optional<Group> group, Req req) throws ApolloDeploymentException {
         // Get the username from the token
         String userEmail = req.token().get("_user").toString();
         String sourceVersion = null;
@@ -128,6 +128,7 @@ public class DeploymentHandler {
             newDeployment.setUserEmail(userEmail);
             newDeployment.setStatus(Deployment.DeploymentStatus.PENDING);
             newDeployment.setSourceVersion(sourceVersion);
+            newDeployment.setDeploymentMessage(deploymentMessage);
             if (group.isPresent()) {
                 newDeployment.setGroupName(group.get().getName());
                 newDeployment.setDeploymentParams(group.get().getJsonParams());
