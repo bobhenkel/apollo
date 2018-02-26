@@ -20,11 +20,22 @@ Please refer to the[Wiki](https://github.com/logzio/apollo/wiki)for more extensi
 - Full RESTful API and Java client to automate whatever you need, or deploy automatically.
 - Once initially deployed, you can deploy future versions of Apollo, using Apollo!
 
+#### Deployment
 ![Apollo Deployment](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-deploy.gif)
+
+#### Getting logs of a running pod
 ![Apollo Logs](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-logs.gif)
+
+#### Exec into a running pod
 ![Apollo Shell](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-shell.gif)
+
+#### See ongoing deployments
 ![Apollo Ongoing Deployments](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-ongoing.png)
+
+#### Get full deployment history
 ![Apollo Deployments History](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-history.png)
+
+#### Set up deployment blockers
 ![Apollo Deployments Blockers](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-blockers.png)
 
 ### Run it
