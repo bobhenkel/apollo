@@ -20,6 +20,12 @@ Please refer to the[Wiki](https://github.com/logzio/apollo/wiki)for more extensi
 - Full RESTful API and Java client to automate whatever you need, or deploy automatically.
 - Once initially deployed, you can deploy future versions of Apollo, using Apollo!
 
+![Apollo Deployment](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-deploy.gif)
+![Apollo Logs](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-logs.gif)
+![Apollo Shell](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-shell.gif)
+![Apollo Ongoing Deployments](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-ongoing.png)
+![Apollo Deployments History](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-history.png)
+![Apollo Deployments Blockers](https://raw.githubusercontent.com/logzio/apollo/master/examples/pictures/apollo-blockers.png)
 
 ### Run it
 Apollo requires a HOCON format configuration file to get all of its resources. Configurations can be supplied as a Filesystem path or as a Consul Key.
