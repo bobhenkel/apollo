@@ -80,7 +80,7 @@
         status=#{status},
         source_version=#{sourceVersion},
         group_name=#{groupName},
-        deployment_params=#{deploymentParams}
+        deployment_params=#{deploymentParams},
         deployment_message=#{deploymentMessage}
         WHERE id=#{id}
     </update>
