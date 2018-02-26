@@ -35,6 +35,7 @@ public class DeploymentTest {
         assertThat(returnedDeployment.getDeployableVersionId()).isEqualTo(testDeployment.getDeployableVersionId());
         assertThat(returnedDeployment.getUserEmail()).isEqualTo(apolloTestClient.getTestUser().getUserEmail());
         assertThat(returnedDeployment.getStatus()).isEqualTo(Deployment.DeploymentStatus.PENDING);
+        assertThat(returnedDeployment.getDeploymentMessage()).isNotBlank();
     }
 
     @Test

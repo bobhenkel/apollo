@@ -81,19 +81,22 @@ function ApiService($q, $http){
         return $http.get(CONFIG.appUrl + 'latest-deployments/');
     };
 
-    var createNewDeployment = function(deployableVersionId, deployedService, deployedEnvironment) {
+    var createNewDeployment = function(deployableVersionId, deployedService, deployedEnvironment, deploymentMessage) {
         return $http.post(CONFIG.appUrl + "deployment/", {
             serviceId: deployedService,
             environmentId: deployedEnvironment,
-            deployableVersionId: deployableVersionId
+            deployableVersionId: deployableVersionId,
+            deploymentMessage: deploymentMessage
         });
     };
 
-    var createNewDeploymentWithGroup = function(deployableVersionId, deployedService, deployedEnvironment, groupIdsCsv) {
+    var createNewDeploymentWithGroup = function(deployableVersionId, deployedService, deployedEnvironment,
+                                                deploymentMessage, groupIdsCsv) {
         return $http.post(CONFIG.appUrl + "deployment-groups/", {
             serviceId: deployedService,
             environmentId: deployedEnvironment,
             deployableVersionId: deployableVersionId,
+            deploymentMessage: deploymentMessage,
             groupIdsCsv: groupIdsCsv
         });
     };

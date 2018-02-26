@@ -44,7 +44,8 @@ public class ApolloClient {
         String requestBody = Common.generateJson("name", environment.getName(), "geoRegion", environment.getGeoRegion(),
                 "availability", environment.getAvailability(), "kubernetesMaster", environment.getKubernetesMaster(),
                 "kubernetesToken", environment.getKubernetesToken(), "kubernetesNamespace", environment.getKubernetesNamespace(),
-                "servicePortCoefficient", String.valueOf(environment.getServicePortCoefficient()));
+                "servicePortCoefficient", String.valueOf(environment.getServicePortCoefficient()),
+                "requireDeploymentMessage", String.valueOf(environment.getRequireDeploymentMessage()));
 
         return genericApolloClient.postAndGetResult("/environment", requestBody, new TypeReference<Environment>(){});
     }
@@ -100,7 +101,8 @@ public class ApolloClient {
     public Deployment addDeployment(Deployment deployment) throws ApolloClientException {
         String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
                 "serviceId", String.valueOf(deployment.getServiceId()),
-                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()));
+                "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
+                "deploymentMessage", deployment.getDeploymentMessage());
 
         return genericApolloClient.postAndGetResult("/deployment", requestBody, new TypeReference<Deployment>() {});
     }
@@ -109,7 +111,8 @@ public class ApolloClient {
         String requestBody = Common.generateJson("environmentId", String.valueOf(deployment.getEnvironmentId()),
                 "serviceId", String.valueOf(deployment.getServiceId()),
                 "deployableVersionId", String.valueOf(deployment.getDeployableVersionId()),
-                "groupIdsCsv", groupIdsCsv);
+                "groupIdsCsv", groupIdsCsv,
+                "deploymentMessage", deployment.getDeploymentMessage());
 
         return genericApolloClient.postAndGetResult("/deployment-groups", requestBody, new TypeReference<DeploymentGroupsResponseObject>() {});
     }

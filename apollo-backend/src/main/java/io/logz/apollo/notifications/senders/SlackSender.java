@@ -40,7 +40,8 @@ public class SlackSender implements NotificationSender{
     @Override
     public boolean send(NotificationTemplateMetadata notificationTemplateMetadata) {
 
-        updateSlackBodyTemplate(Optional.ofNullable(notificationTemplateMetadata.getGroupName()));
+        updateSlackBodyTemplate(Optional.ofNullable(notificationTemplateMetadata.getGroupName()),
+                Optional.ofNullable(notificationTemplateMetadata.getDeploymentMessage()));
 
         HashMap<String, Object> params = new HashMap<>();
 
@@ -51,6 +52,7 @@ public class SlackSender implements NotificationSender{
         params.put("username", notificationTemplateMetadata.getUserEmail());
         params.put("deployment-id", notificationTemplateMetadata.getDeploymentId());
         params.put("group-name", notificationTemplateMetadata.getGroupName());
+        params.put("deployment-message", notificationTemplateMetadata.getDeploymentMessage());
         params.put("channel", slackSenderConfiguration.getChannel());
 
         String body = generateRequestBody(slackBodyTemplate, params);
@@ -114,7 +116,7 @@ public class SlackSender implements NotificationSender{
         }
     }
 
-    private void updateSlackBodyTemplate(Optional<String> groupName) {
+    private void updateSlackBodyTemplate(Optional<String> groupName, Optional<String> deploymentMessage) {
         slackBodyTemplate = "{\n" +
                 "\t\"icon_url\": \"https://i.imgur.com/FMVZ9id.png\",\n" +
                 "    \"username\": \"Apollo\",\n" +
@@ -150,6 +152,14 @@ public class SlackSender implements NotificationSender{
                     "                   \"title\": \"Group\",\n" +
                     "                   \"value\": \"{{group-name}}\",\n" +
                     "                   \"short\": true\n" +
+                    "               }\n";
+        }
+
+        if (deploymentMessage.isPresent()) {
+            slackBodyTemplate +=   ", {\n" +
+                    "                   \"title\": \"Reason\",\n" +
+                    "                   \"value\": \"{{deployment-message}}\",\n" +
+                    "                   \"short\": false\n" +
                     "               }\n";
         }
 

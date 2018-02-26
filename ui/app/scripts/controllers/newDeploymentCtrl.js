@@ -40,6 +40,9 @@ angular.module('apollo')
 		$scope.versionSelected = null;
 		$scope.showNextStep = true;
 
+		// Angular can't ng-model to a variable which is not an object :(
+		$scope.deploymentMessage = {};
+
 		$scope.currentStep = deploymentSteps[0];
 
 		// Class variables
@@ -117,7 +120,7 @@ angular.module('apollo')
             // Valid groups deployment
             if ($scope.selectedGroups.length > 0 && $scope.serviceSelected.isPartOfGroup) {
                 apolloApiService.createNewDeploymentWithGroup(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
-                    $scope.serviceSelected.id, $scope.environmentSelected.id, $scope.selectedGroups.map(function (group) { return group.id; }).join(','))
+                    $scope.serviceSelected.id, $scope.environmentSelected.id, $scope.deploymentMessage.text, $scope.selectedGroups.map(function (group) { return group.id; }).join(','))
                     .then(function (response) {
 
                     // Wait a bit to let the deployment be in the DB
@@ -154,7 +157,7 @@ angular.module('apollo')
             // No-groups deployment
             else {
                 apolloApiService.createNewDeployment(getDeployableVersionFromCommit($scope.versionSelected.gitCommitSha),
-                    $scope.serviceSelected.id, $scope.environmentSelected.id).then(function (response) {
+                    $scope.serviceSelected.id, $scope.environmentSelected.id, $scope.deploymentMessage.text).then(function (response) {
 
                     // Wait a bit to let the deployment be in the DB
                     setTimeout(function () {

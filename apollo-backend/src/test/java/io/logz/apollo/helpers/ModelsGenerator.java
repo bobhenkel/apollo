@@ -38,6 +38,7 @@ public class ModelsGenerator {
         testEnvironment.setKubernetesToken("AaBbCc" + Common.randomStr(10));
         testEnvironment.setKubernetesNamespace("namespace-" + Common.randomStr(5));
         testEnvironment.setServicePortCoefficient(0);
+        testEnvironment.setRequireDeploymentMessage(false);
 
         return testEnvironment;
     }
@@ -157,6 +158,7 @@ public class ModelsGenerator {
         testDeployment.setLastUpdate(new Date());
         testDeployment.setUserEmail("user-" + Common.randomStr(5));
         testDeployment.setGroupName(groupName);
+        testDeployment.setDeploymentMessage("message-" + Common.randomStr(5));
         return testDeployment;
     }
 

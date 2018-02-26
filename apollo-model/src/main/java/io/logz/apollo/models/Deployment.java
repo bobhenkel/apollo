@@ -28,6 +28,7 @@ public class Deployment {
     private String envStatus;
     private String groupName;
     private String deploymentParams;
+    private String deploymentMessage;
 
     public Deployment() {
     }
@@ -119,4 +120,12 @@ public class Deployment {
     public String getDeploymentParams() { return deploymentParams; }
 
     public void setDeploymentParams(String deploymentParams) { this.deploymentParams = deploymentParams; }
+
+    public String getDeploymentMessage() {
+        return deploymentMessage;
+    }
+
+    public void setDeploymentMessage(String deploymentMessage) {
+        this.deploymentMessage = deploymentMessage;
+    }
 }

@@ -13,6 +13,7 @@ public class Environment {
     private String kubernetesToken;
     private String kubernetesNamespace;
     private int servicePortCoefficient;
+    private Boolean requireDeploymentMessage;
 
     public Environment() {
 
@@ -80,5 +81,13 @@ public class Environment {
 
     public void setServicePortCoefficient(int servicePortCoefficient) {
         this.servicePortCoefficient = servicePortCoefficient;
+    }
+
+    public Boolean getRequireDeploymentMessage() {
+        return requireDeploymentMessage;
+    }
+
+    public void setRequireDeploymentMessage(Boolean requireDeploymentMessage) {
+        this.requireDeploymentMessage = requireDeploymentMessage;
     }
 }

@@ -81,9 +81,9 @@ public class DeploymentController {
 
     @LoggedIn
     @POST("/deployment")
-    public void addDeployment(int environmentId, int serviceId, int deployableVersionId, Req req) {
+    public void addDeployment(int environmentId, int serviceId, int deployableVersionId, String deploymentMessage, Req req) {
         try {
-            Deployment deployment = deploymentHandler.addDeployment(environmentId, serviceId, deployableVersionId, req);
+            Deployment deployment = deploymentHandler.addDeployment(environmentId, serviceId, deployableVersionId, deploymentMessage, req);
             assignJsonResponseToReq(req, HttpStatus.CREATED, deployment);
         } catch (ApolloDeploymentBlockedException e) {
             assignJsonResponseToReq(req, HttpStatus.FORBIDDEN, e.getMessage());

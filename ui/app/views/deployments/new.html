@@ -183,10 +183,19 @@
                         <div class="modal-body">
                             Confirm here will actually deploy you commit. <br>
                             You will be able to revert, but just be sure. <br>
+                            <div ng-if="environmentSelected.requireDeploymentMessage">
+                                <br>
+                                This environment also requires a deployment message! <br>
+                                Please supply that below<br>
+                                <input class="form-control" type="text" ng-model="deploymentMessage.text"
+                                       name="name" placeholder="Your deployment message/ reason / motivational speech"
+                                       autofocus required>
+                            </div>
+                            <br>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="deploy()">Just deploy already!</button>
+                            <button ng-disabled="environmentSelected.requireDeploymentMessage && deploymentMessage.text === undefined" type="button" class="btn btn-primary" data-dismiss="modal" ng-click="deploy()">Just deploy already!</button>
                         </div>
                     </div>
                 </div>
