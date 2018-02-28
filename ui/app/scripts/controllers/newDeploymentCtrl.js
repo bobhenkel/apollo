@@ -72,6 +72,7 @@ angular.module('apollo')
 
         $scope.setSelectedVersion = function (versionSelected) {
             $scope.versionSelected = versionSelected;
+            $scope.deploymentMessage.text = versionSelected.commitMessage && versionSelected.commitMessage.split('\n')[0]
         };
 
         // Visual change the next step
